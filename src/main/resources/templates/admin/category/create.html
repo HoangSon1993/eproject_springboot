@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Create Category</title>
+    <style th:replace="/admin/common/head_tag"></style>
+</head>
+<body>
+    <div th:replace="/admin/common/content_first"></div>
+
+    <div class="container">
+        <form th:action="@{/admin/category/create}"
+              method="post"
+              th:object="${new_category}" class="col-md-4">
+            <div class="form-group">
+                <label for="categoryName">Category</label>
+                <input type="text"
+                       id="categoryName"
+                       name="categoryName"
+                       placeholder="Category"
+                       class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <input type="hidden"
+                       name="status"
+                       value="0"/>
+                <input class="form-control form-check-label"
+                       type="checkbox"
+                       name="status"
+                       th:checked="*{status==1}"
+                       th:value="1"
+                       onchange="document.querySelector('input[name=\'status\'][type=\'hidden\']').value = this.checked ? 1 : 0"/>
+            </div>
+            <div>
+                <input type="submit" value="Save" class="btn btn-primary">
+            </div>
+        </form>
+    </div>
+    <div th:replace="/admin/common/content_footer"></div>
+    <script>
+        window.onload = () => {
+            var lschk = document.querySelectorAll("input[type=checkbox]");
+            for(var i = 0; i < lschk.length; i++){
+                var item = lschk[i];
+                item.removeAttribute("checked");
+            }
+        }
+    </script>
+</body>
+</html>

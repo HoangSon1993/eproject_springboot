@@ -19,7 +19,7 @@ public class Category {
     String categoryId;
     @Column(length = 100)
     String categoryName;
-    String status;
+    Integer status;
     LocalDate createdDate;
     LocalDate updatedDate;
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
