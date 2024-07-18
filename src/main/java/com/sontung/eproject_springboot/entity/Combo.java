@@ -26,6 +26,8 @@ public class Combo {
     BigDecimal finalAmount;
     LocalDate createdDate;
     LocalDate updatedDate;
+    LocalDate startDate;
+    LocalDate endDate;
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<ComboDetail> comboDetails;
 }
