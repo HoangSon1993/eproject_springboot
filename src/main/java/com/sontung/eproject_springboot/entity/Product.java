@@ -22,7 +22,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.UUID)
     String productId;
     @Column(length = 100)
-    String product_name;
+    String productName;
     @Lob
     String description;
     BigDecimal price;

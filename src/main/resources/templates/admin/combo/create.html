@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Combo Management</title>
+    <style th:replace="/admin/common/head_tag"></style>
+    <style>
+        /* CSS to style selected options */
+        .selected-option {
+            background-color: lightgreen;
+            color: green;
+            font-weight: bold;
+        }
+        /* Add a checkmark icon */
+        .selected-option::after {
+            content: '✔';
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="/admin/common/content_first"></div>
+<div class="container">
+    <h3 style="text-align: center">Create new combo</h3>
+    <hr/>
+    <form th:action="@{/admin/combo-detail/createConfirm}" method="post" id="comboForm">
+        <div class="form-group col-md-4">
+            <label for="comboName" class="form-label">Combo Name</label>
+            <input type="text" class="form-control" id="comboName" name="comboName">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" name="startDate">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" name="endDate">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="productId" class="form-label">Choose products</label>
+            <select id="productId" onchange="addProductToTable()" class="form-control">
+                <option value="">Select products</option>
+                <option th:each="item : ${products}"
+                        th:value="${item.productId}"
+                        th:text="${item.productName}"
+                        th:data-price="${item.price}">
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <table class="table table-light">
+                <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody id="productTableBody">
+                <!-- Rows will be added here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!--        <input type="hidden" name="comboId" th:value="${newComboId}">-->
+        <input type="hidden" id="productsJson" name="productsJson">
+        <div class="form-group col-md-4">
+            <label for="finalAmount" class="form-label">Amount</label>
+            <input type="number" name="finalAmount" class="form-control" id="finalAmount">
+        </div>
+        <input type="submit" value="Submit" class="btn btn-success">
+    </form>
+</div>
+<div th:replace="/admin/common/content_footer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Function to add selected product to the table
+        window.addProductToTable = function() {
+            const select = document.getElementById('productId');
+            const productId = select.value;
+            const productName = select.options[select.selectedIndex].text;
+            const productPrice = select.options[select.selectedIndex].getAttribute('data-price');
+            if (!productId) {
+                return;
+            }
+            const tableBody = document.getElementById('productTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                    <td>${productName}</td>
+                    <td>${productPrice}</td>
+                    <td><input type="number" name="quantity" class="quantity-input" data-id="${productId}" value="1"></td>
+                    <td>${productPrice}</td>
+                `;
+            tableBody.appendChild(newRow);
+
+            // Save the product to localStorage
+            // const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
+            // addedProducts.push({ productId, productName, uniquePrice: productPrice, quantity: 1 });
+            // localStorage.setItem('addedProducts', JSON.stringify(addedProducts));
+            // Save the product to localStorage
+            updateLocalStorage();
+            // Add event listener for the new quantity input
+            addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+
+            // Disable the selected option
+            const selectedOption = select.options[select.selectedIndex];
+            selectedOption.disabled = true;
+            selectedOption.classList.add('selected-option');
+            select.value = ""; // Reset the select input to default
+
+        }
+
+        // Function to initialize the table from localStorage
+        function initializeTable() {
+            const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
+            const tableBody = document.getElementById('productTableBody');
+            addedProducts.forEach(product => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                       <td>${product.productName}</td>
+                        <td>${product.uniquePrice}</td>
+                        <td><input type="number" name="quantity" class="quantity-input" data-id="${product.productId}" value="${product.quantity}"></td>
+                        <td>${product.uniquePrice * product.quantity}</td>
+                    `;
+                tableBody.appendChild(newRow);
+                addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+
+                // Disable the corresponding option in the select input
+                const select = document.getElementById('productId');
+                const optionToDisable = Array.from(select.options).find(option => option.value == product.productId);
+                if (optionToDisable) {
+                    optionToDisable.disabled = true;
+                    optionToDisable.classList.add('selected-option');
+                }
+            });
+        }
+
+        // Function to update localStorage with current table data
+        function updateLocalStorage() {
+            const tableRows = document.querySelectorAll('#productTableBody tr');
+            const addedProducts = [];
+
+            tableRows.forEach(row => {
+                const productId = row.querySelector('.quantity-input').getAttribute('data-id');
+                const productName = row.querySelector('td:nth-child(1)').textContent;
+                const productPrice = row.querySelector('td:nth-child(2)').textContent;
+                const quantity = row.querySelector('.quantity-input').value;
+
+                addedProducts.push({
+                    productId,
+                    productName,
+                    uniquePrice: productPrice,
+                    quantity: parseInt(quantity, 10)
+                });
+            });
+
+            localStorage.setItem('addedProducts', JSON.stringify(addedProducts));
+        }
+
+        // Function to add a change listener to a quantity input
+        function addQuantityChangeListener(inputElement) {
+            inputElement.addEventListener('change', updateLocalStorage);
+        }
+
+        // Call initializeTable when the page loads
+        initializeTable();
+    });
+
+    //Submit from localstorage to action create
+    document.getElementById('comboForm').addEventListener('submit', function(event){
+        event.preventDefault();
+        var addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
+        if (addedProducts.length === 0) {
+            alert('Please add at least one product to the combo.');
+            return;
+        }
+        var productsJsonInput = document.getElementById('productsJson');
+        productsJsonInput.value = JSON.stringify(addedProducts);
+        console.log(productsJsonInput.value);
+
+        // Xóa dữ liệu addedProducts khỏi localStorage
+        localStorage.removeItem('addedProducts');
+        this.submit();
+    });
+
+    // Xóa localStorage khi người dùng đóng hoặc điều hướng khỏi trang
+    window.addEventListener('beforeunload', function() {
+        localStorage.removeItem('addedProducts');
+    });
+
+</script>
+</body>
+</html>
