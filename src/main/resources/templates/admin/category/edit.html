@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -8,7 +8,7 @@
     <title>Edit Category</title>
 </head>
 <body>
-    <div th:replace="/admin/common/content_first"></div>
+    <div th:replace="~{/admin/common/content_first}"></div>
     <div>
         <form th:action="@{/admin/category/edit(id=${update_category.getCategoryId()})}"
               method="post"
@@ -42,6 +42,6 @@
         </form>
     </div>
 
-    <div th:replace="/admin/common/content_footer"></div>
+    <div th:replace="~{/admin/common/content_footer}"></div>
 </body>
 </html>

@@ -1,7 +1,6 @@
 package com.sontung.eproject_springboot.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,6 +20,7 @@ public class Combo {
     String comboId;
     @Column(length = 100)
     String comboName;
+    String image;
     Integer status;
     BigDecimal totalAmount;
     BigDecimal finalAmount;

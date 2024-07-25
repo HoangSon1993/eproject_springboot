@@ -138,7 +138,7 @@ public class ProductController {
             ).findFirst();
             categoryOptional.ifPresent(product::setCategory);
 
-            product.setProduct_name(productDetails.getProduct_name());
+            product.setProductName(productDetails.getProductName());
             product.setDescription(productDetails.getDescription());
             product.setPrice(productDetails.getPrice());
             product.setStatus(productDetails.getStatus());
