@@ -1,10 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Combo Management</title>
+    <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
-
+    <div th:replace="~{/admin/common/content_first}"></div>
+    <div class="container">
+        <a th:href="@{/admin/combo/create}" class="btn btn-outline-primary mt-2 mb-2">Create</a>
+        <table class="table table-light">
+            <thead class="table-dark">
+                <tr>
+                    <th>Combo Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                    <th>Final Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item: ${combos}">
+                    <td th:text="${item.comboName}"></td>
+                    <td th:text="${item.startDate}"></td>
+                    <td th:text="${item.endDate}"></td>
+                    <td th:text="${item.status}?'Active':'Inactive'"></td>
+                    <td th:text="${item.totalAmount}"></td>
+                    <td th:text="${item.finalAmount}"></td>
+                    <td class="text-center d-flex align-items-center">
+                        <a th:href="@{/admin/combo/detail(comboId=${item.comboId})}" class="btn btn-info mr-2">Detail</a>
+                        <form th:action="@{/admin/combo/delete(comboId=${item.comboId})}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this item?')">
+<!--                            <input type="submit" value="Remove" class="btn btn-danger">-->
+                             <button class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="~{/admin/common/content_footer}"></div>
 </body>
 </html>
