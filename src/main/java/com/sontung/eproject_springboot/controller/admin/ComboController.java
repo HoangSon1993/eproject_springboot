@@ -3,6 +3,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
 import com.sontung.eproject_springboot.entity.Combo;
+import com.sontung.eproject_springboot.entity.ComboDetail;
 import com.sontung.eproject_springboot.service.ComboDetailService;
 import com.sontung.eproject_springboot.service.ComboService;
 import org.springframework.beans.factory.annotation.Autowired;

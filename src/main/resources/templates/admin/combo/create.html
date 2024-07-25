@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Combo Management</title>
-    <style th:replace="/admin/common/head_tag"></style>
+    <style th:replace="~{/admin/common/head_tag}"></style>
     <style>
         /* CSS to style selected options */
         .selected-option {
@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-<div th:replace="/admin/common/content_first"></div>
+<div th:replace="~{/admin/common/content_first}"></div>
 <div class="container">
     <h3 style="text-align: center">Create new combo</h3>
     <hr/>
@@ -65,7 +65,6 @@
             </table>
         </div>
 
-        <!--        <input type="hidden" name="comboId" th:value="${newComboId}">-->
         <input type="hidden" id="productsJson" name="productsJson">
         <div class="form-group col-md-4">
             <label for="finalAmount" class="form-label">Amount</label>
@@ -74,8 +73,7 @@
         <input type="submit" value="Submit" class="btn btn-success">
     </form>
 </div>
-<div th:replace="/admin/common/content_footer"></div>
-
+<div th:replace="~{/admin/common/content_footer}"></div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Function to add selected product to the table
