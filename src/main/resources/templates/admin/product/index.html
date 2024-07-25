@@ -42,7 +42,7 @@
             <td class="text-left">
                 <img style="object-fit: cover;width: 320px; height: 240px" th:src="@{${s3BucketUrl} + ${item.image}}" th:alt="${item.image}">
             </td>
-            <td th:text="${item.product_name}" class="text-left"></td>
+            <td th:text="${item.productName}" class="text-left"></td>
             <td th:text="${item.price}" class="text-left"></td>
             <td th:text="${item.category.categoryName}" class="text-left"></td>
             <td th:text="${item.status==1}?'Active':'Inactive'"

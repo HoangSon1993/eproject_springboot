@@ -15,7 +15,7 @@
     <form class="col-md-6 mx-auto" action="/admin/product/create" method="POST" th:object="${product}" enctype="multipart/form-data">
         <div class="form-group">
             <label for="product_name">Name</label>
-            <input class="form-control" type="text" name="product_name" th:field="*{product_name}" id="product_name"
+            <input class="form-control" type="text" name="product_name" th:field="*{productName}" id="product_name"
             placeholder="Product name">
         </div>
         <div class="form-group">

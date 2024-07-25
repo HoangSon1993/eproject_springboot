@@ -1,6 +1,7 @@
 package com.sontung.eproject_springboot.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 @Service
+@PropertySource("classpath:aws-credentials.properties")
 public class S3Service {
     @Value("${aws.s3.bucket}")
     private String buketName;

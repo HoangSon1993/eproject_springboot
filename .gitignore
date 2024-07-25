@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### AWS Config
+/src/main/resources/aws-credentials.properties
