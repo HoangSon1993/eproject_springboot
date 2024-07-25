@@ -34,3 +34,6 @@ build/
 
 ### AWS Config
 /src/main/resources/aws-credentials.properties
+
+### Database Config
+/src/main/resources/database.properties
