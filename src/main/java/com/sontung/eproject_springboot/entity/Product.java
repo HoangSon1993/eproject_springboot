@@ -44,4 +44,23 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<InvoiceDetail> invoiceDetails;
 
+    @PrePersist
+    protected void onCreate(){
+        var date = LocalDate.now();
+        if (createdDate == null) {
+            createdDate = date;
+        }
+        if (updatedDate == null) {
+            updatedDate = date;
+        }
+        if (status == null) {
+            status = 1; // Đặt giá trị mặc định cho status
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate(){
+        updatedDate = LocalDate.now();
+    }
+
 }

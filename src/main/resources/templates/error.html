@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vn" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Error page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7da;
+            color: #721c24;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            display: inline-block;
+            background-color: #f5c6cb;
+            border: 1px solid #f5c6cb;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .message {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Error Occurred</h1>
+        <div class="message">
+            <p th:if="${error}" th:text="${error}"></p>
+            <p th:unless="${error}">An unexpected error occurred. Please try again later.</p>
+        </div>
+    </div>
+</body>
+</html>
