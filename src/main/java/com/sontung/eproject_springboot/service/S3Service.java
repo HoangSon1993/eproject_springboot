@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.service;
 
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -12,11 +13,15 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
 @PropertySource("classpath:aws-credentials.properties")
@@ -30,31 +35,33 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
-    public void uploadFile(MultipartFile file) throws IOException,
+    public void uploadFile(MultipartFile file, String uniqueFilename) throws IOException,
             AwsServiceException,
             SdkClientException,
             S3Exception {
-        Path tempFile = Files.createTempFile(file.getOriginalFilename(), ".tmp");
-        Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+        // Resize Image before uploadting.
+        Path tempFile = Files.createTempFile("resized-", "." + getFileExtension(file)); // create file tmp.
+        resizeImage(file, tempFile); // Call function resize image.
 
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(buketName)
-                            .key(file.getOriginalFilename())
+                            .key(uniqueFilename)
                             .contentType("image/jpg")
                             .build()
                     , tempFile
             );
         } finally {
-            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempFile); // Delete file tmp
         }
 
     }
 
     public void deleteFile(String image) throws AwsServiceException,
-    SdkClientException,
-    S3Exception{
+            SdkClientException,
+            S3Exception {
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(buketName)
                 .key(image)
@@ -70,10 +77,60 @@ public class S3Service {
                     .key(fileName)
                     .build();
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(newFileContent, newFileContent.available()));
-        }catch (SdkClientException e) {
+        } catch (SdkClientException e) {
             throw new Exception("SDK Client Exception: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new Exception("IOException: " + e.getMessage(), e);
         }
     }
+
+    // =====  Private Function =====
+
+    /**
+     * Resize Image with library Thumbnails
+     **/
+    private void resizeImage(MultipartFile file, Path outputPath) throws IOException {
+        try (InputStream inputStream = file.getInputStream()) {
+            BufferedImage image = ImageIO.read(inputStream);
+
+            if (image == null) {
+                throw new IOException("Unable to read image from the provided file.");
+            }
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            if (width > 2048 || height > 2048) {
+                Thumbnails.of(image)
+                        .size(2048, 2048)
+                        .keepAspectRatio(true)
+                        .outputFormat(getFileExtension(file))
+                        .toFile(outputPath.toFile());
+            } else {
+                Files.copy(file.getInputStream(), outputPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+    //   ===== End Private Function =====
+
+    /**
+     * get file extention
+     * Used in ProductController
+     **/
+    public String getFileExtension(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+        }
+        return "jpg"; // Mặc định là jpg nếu không tìm thấy đuôi file
+    }
+    /**
+     * Generate Name file
+     * Used in ProductController
+     **/
+    public String generateUniqueFilename(MultipartFile file) {
+        String extension = getFileExtension(file);
+        return UUID.randomUUID().toString() + "." + extension;
+    }
+
 }

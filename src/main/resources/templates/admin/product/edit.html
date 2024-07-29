@@ -10,55 +10,62 @@
 <body>
 <div th:replace="~{/admin/common/content_first}"></div>
 <div class="container">
-<!--    <a th:href="@{/admin/product/create}" class="btn btn-outline-primary mb-2 mt-4">Create</a>-->
-    <h1 class="text-center">Edit Product</h1>
-    <form class="col-md-6 mx-auto" th:action="@{/admin/product/edit/{id}(id=${product.productId})}" method="POST" th:object="${product}" enctype="multipart/form-data">
-<!--        Dùng trường ẩn để gửi data-->
-        <input type="hidden" th:field="*{productId}" />
-        <input type="hidden" th:field="*{createdDate}" />
-        <input type="hidden" th:field="*{updatedDate}" />
+    <!--    <a th:href="@{/admin/product/create}" class="btn btn-outline-primary mb-2 mt-4">Create</a>-->
+    <h1 class="text-center">CHỈNH SỬA SẢN PHẨM</h1>
+    <form class="col-md-6 mx-auto" th:action="@{/admin/product/edit/{id}(id=${product.productId})}" method="POST"
+          th:object="${product}" enctype="multipart/form-data">
+        <!--        Dùng trường ẩn để gửi data-->
+        <input type="hidden" th:field="*{productId}"/>
+        <input type="hidden" th:field="*{createdDate}"/>
+        <input type="hidden" th:field="*{updatedDate}"/>
 
         <div class="form-group">
-            <label for="product_name">Name</label>
+            <label for="product_name">Tên sản phẩm</label>
             <input class="form-control" type="text" name="product_name" th:field="*{productName}" id="product_name"
-            placeholder="Product name">
+                   placeholder="Nhập tên sản phẩm">
+            <div th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}"></div>
         </div>
         <div class="form-group">
-            <label for="description">description</label>
+            <label for="description">Mô tả</label>
             <input class="form-control" type="text" name="description" th:field="*{description}" id="description"
-                   placeholder="description">
+                   placeholder="Nhập mô tả sản phẩm">
+            <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
         </div>
         <div class="form-group">
-            <label for="price">Price</label>
+            <label for="price">Giá bán</label>
             <input class="form-control" type="text" name="price" th:field="*{price}" id="price"
-            placeholder="Price">
+                   placeholder="Nhập giá bán">
+            <div th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
         </div>
 
         <div class="form-group">
-            <label for="file">Upload Image:</label>
-            <input type="file" id="file" name="file" />
-            <br />
-            <img th:src="${s3BucketUrl} + ${product.image}" alt="Current Image" style="max-width: 200px; margin-top: 10px;" />
+            <label for="file">Hình ảnh</label>
+            <input type="file" id="file" name="file"/>
+            <br/>
+            <img th:src="${s3BucketUrl} + ${product.image}" alt="Current Image"
+                 style="max-width: 200px; margin-top: 10px;"/>
         </div>
 
         <div class="form-group">
-            <label for="status">Status:</label>
-            <select id="status" th:field="*{status}">
-                <option value="0">Inactive</option>
-                <option value="1">Active</option>
+            <label for="status">Trạng thái</label>
+            <select class="custom-select custom-select-lg mb-3" id="status" th:field="*{status}">
+                <option value="0">Không hoạt động</option>
+                <option value="1">Đang hoạt động</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" th:field="*{category.categoryId}">
-                <option th:each="category : ${categories}" th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
+            <label for="category">Danh mục</label>
+            <select class="custom-select custom-select-lg mb-3" id="category" th:field="*{category.categoryId}">
+                <option th:each="category : ${categories}" th:value="${category.categoryId}"
+                        th:text="${category.categoryName}"></option>
             </select>
+            <div th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
         </div>
 
 
         <div>
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary btn-lg">Lưu sản phẩm</button>
         </div>
     </form>
 

@@ -2,6 +2,9 @@ package com.sontung.eproject_springboot.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,13 +21,21 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String productId;
+
     @Column(length = 100)
+    @NotBlank(message = "Tên sản phẩm không được để trống")
     String productName;
+
     @Lob
+    @NotBlank(message = "Mô tả không được để trống")
     String description;
+
+    @NotNull(message = "Giá không được để trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
     BigDecimal price;
     Integer status;
     String image;
@@ -45,7 +56,7 @@ public class Product {
     Set<InvoiceDetail> invoiceDetails;
 
     @PrePersist
-    protected void onCreate(){
+    protected void onCreate() {
         var date = LocalDate.now();
         if (createdDate == null) {
             createdDate = date;
@@ -59,7 +70,7 @@ public class Product {
     }
 
     @PreUpdate
-    protected void onUpdate(){
+    protected void onUpdate() {
         updatedDate = LocalDate.now();
     }
 

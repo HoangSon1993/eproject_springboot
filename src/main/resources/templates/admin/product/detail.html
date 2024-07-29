@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vn" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Detail Product</title>
+    <style th:replace="~{/admin/common/head_tag}"></style>
+</head>
+<body>
+<div th:replace="~{/admin/common/content_first}"></div>
+<div class="container-fluid position-relative">
+    <h1 class="text-center mt-5">CHI TIẾT SẢN PHẨM</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>ID:</strong> <span th:text="${product.productId}"></span></p>
+            <p><strong>Name:</strong> <span th:text="${product.productName}"></span></p>
+            <p><strong>Description:</strong> <span th:text="${product.description}"></span></p>
+            <p><strong>Price:</strong> <span th:text="${#numbers.formatCurrency(product.price)}"></span></p>
+            <p><strong>Status:</strong> <span th:text="${product.status == 1 ? 'Available' : 'Not Available'}"></span>
+            </p>
+            <p><strong>Category:</strong> <span th:text="${product.category.categoryName}"></span></p>
+            <p><strong>Created Date:</strong> <span th:text="${product.createdDate}"></span></p>
+            <p><strong>Updated Date:</strong> <span th:text="${product.updatedDate}"></span></p>
+            <p><strong>Image:</strong></p>
+            <img th:src="@{${s3BucketUrl} + ${product.image}}" alt="Product Image" class="img-fluid" style="width:300px;height:auto;">
+        </div>
+    </div>
+    <a href="/admin/product" class="btn btn-primary mt-3">Trở lại danh sách sản phẩm</a>
+</div>
+<div th:replace="~{/admin/common/content_footer}"></div>
+</body>
+</html>
