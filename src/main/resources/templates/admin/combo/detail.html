@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Combo Detail</title>
+    <title>Chi tiết combo</title>
     <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
     <div th:replace="~{/admin/common/content_first}"></div>
     <div class="container">
-        <h3 th:text="${combo.comboName}">'s Details </h3>
+        <h3 th:text="'Chi Tiết Combo: '+ ${combo.comboName}" class="text-center"></h3>
+        <img style="object-fit: cover;width: 320px; height: 240px" th:src="@{${s3BucketUrl} + ${combo.image}}" alt="">
         <table class="table table-light mt-2">
             <thead class="table-dark">
                 <tr>
-                    <th class="text-center">Product</th>
-                    <th class="text-center">Price</th>
-                    <th class="text-center">Quantity</th>
-                    <th class="text-center">Amount</th>
+                    <th class="text-center">Sản phầm</th>
+                    <th class="text-center">Giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-center">Thành tiền</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,11 +30,11 @@
 
                 </tr>
                 <tr>
-                    <td colspan="3">Total</td>
+                    <td colspan="3">Giá gốc</td>
                     <td th:text="${combo.totalAmount}" class="text-center"></td>
                 </tr>
                 <tr>
-                    <td colspan="3">Final</td>
+                    <td colspan="3">Giá bán</td>
                     <td th:text="${combo.finalAmount}" class="text-center"></td>
                 </tr>
             </tbody>

@@ -4,40 +4,41 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Category Management</title>
+    <title>Quản lý danh mục</title>
     <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
     <div th:replace="~{/admin/common/content_first}"></div>
     <div class="container">
-        <a th:href="@{/admin/category/create}" class="btn btn-outline-primary mb-2 mt-4">Create</a>
+        <h3 class="text-center">QUẢN LÝ DANH MỤC</h3>
+        <a th:href="@{/admin/category/create}" class="btn btn-outline-primary mb-2 mt-4">Tạo danh mục</a>
         <table class="table table-light table-striped table-bordered">
             <thead class="table-dark">
                 <tr>
-                    <th class="text-center">Name</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Action</th>
+                    <th class="text-center">Tên</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Hoạt động</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="item: ${categories}">
                     <td th:text="${item.categoryName}" class="text-left"></td>
-                    <td th:text="${item.status==1}?'Active':'Inactive'"
+                    <td th:text="${item.status==1}?'Đang hoạt động':'Không hoạt động'"
                         class="text-center">
                     </td>
                     <td class="d-flex align-items-center">
                         <a th:href="@{/admin/category/detail(id=${item.categoryId})}"
                            class="btn btn-info ml-5">
-                            Detail
+                            Chi tiết
                         </a>
                         <a th:href="@{/admin/category/edit(id=${item.categoryId})}"
                            class="btn btn-warning ml-3">
-                            Edit
+                            Sửa
                         </a>
                         <form th:action="@{/admin/category/delete(id=${item.categoryId})}"
-                              onsubmit="return confirm('Are you sure you want to delete this item?')"
+                              onsubmit="return confirm('Bạn có chắc muốn Gỡ danh mục này không?')"
                               method="post">
-                            <button class="btn btn-danger ml-3">Delete</button>
+                            <button class="btn btn-danger ml-3">Gỡ</button>
                         </form>
                     </td>
                 </tr>

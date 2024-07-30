@@ -4,7 +4,9 @@ import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.entity.Product;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.object.StoredProcedure;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ public class ComboService {
     //dùng đế test danh sách product
     @Autowired
     IProductRepository iProductRepository;
+    //EntityManager entityManager;
     public List<Product> getProducts(){
       return iProductRepository.findAll();
     };
@@ -43,6 +46,7 @@ public class ComboService {
     }
 
     public void removeCombo(String comboId){
+        //StoredProcedure query =  entityManager.createStoredProcedureQuery()
         Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
         combo.setStatus(1);
         iComboRepository.save(combo);
