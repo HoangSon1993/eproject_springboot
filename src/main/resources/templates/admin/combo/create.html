@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Combo Management</title>
+    <title>Tạo Combo</title>
     <style th:replace="~{/admin/common/head_tag}"></style>
     <style>
         /* CSS to style selected options */
@@ -24,45 +24,84 @@
 <body>
 <div th:replace="~{/admin/common/content_first}"></div>
 <div class="container">
-    <h3 style="text-align: center">Create new combo</h3>
+    <h3 style="text-align: center">TẠO COMBO MỚI</h3>
     <hr/>
-    <form th:action="@{/admin/combo-detail/createConfirm}" method="post" id="comboForm">
-        <div class="form-group col-md-4">
-            <label for="comboName" class="form-label">Combo Name</label>
-            <input type="text" class="form-control" id="comboName" name="comboName">
-        </div>
-        <div class="form-group col-md-4">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="startDate" name="startDate">
-        </div>
-        <div class="form-group col-md-4">
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="endDate" name="endDate">
-        </div>
-        <div class="form-group col-md-4">
-            <label for="productId" class="form-label">Choose products</label>
-            <select id="productId" onchange="addProductToTable()" class="form-control">
-                <option value="">Select products</option>
-                <option th:each="item : ${products}"
-                        th:value="${item.productId}"
-                        th:text="${item.productName}"
-                        th:data-price="${item.price}">
-                </option>
-            </select>
+    <form th:action="@{/admin/combo/createConfirm}" method="post" id="comboForm" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="file" class="form-label">Hình ảnh</label>
+                    <input type="file" class="form-control" id="file" name="file">
+                </div>
+                <div class="form-group">
+                    <label for="comboName" class="form-label">Tên Combo</label>
+                    <input type="text" class="form-control" id="comboName" name="comboName">
+                </div>
+                <div class="form-group">
+                    <label for="startDate" class="form-label">Ngày bắt đầu</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate">
+                </div>
+                <div class="form-group">
+                    <label for="endDate" class="form-label">Ngày kết thúc</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate">
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group">
+                    <div class="form-group ">
+                        <label for="searchProduct" class="form-label">Tìm kiếm sản phẩm</label>
+                        <input type="text" id="searchProduct" class="form-control col-md-4" placeholder="Nhập tên sản phẩm">
+                    </div>
+                    <div style="height: 400px; overflow-y: auto">
+                        <table class="table table-light" >
+                            <thead class="table-dark">
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody id="productTable">
+                            <tr th:each="item :${products}">
+                                <td><img th:src="@{${s3BucketUrl} + ${item.image}}" alt="" style="height: 100px"></td>
+                                <td th:text="${item.productName}"></td>
+                                <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-success add-product-btn"
+                                            th:data-id="${item.productId}"
+                                            th:data-name="${item.productName}"
+                                            th:data-price="${item.price}">
+                                        Add
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="form-group">
             <table class="table table-light">
                 <thead class="table-dark">
                 <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Amount</th>
+                    <th>Tên</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
                 </tr>
                 </thead>
-                <tbody id="productTableBody">
+<!--                <tbody id="productTableBody">-->
+                <tbody id="selectedProductTableBody">
                 <!-- Rows will be added here by JavaScript -->
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold;">Tổng giá trị:</td>
+                        <td id="totalAmountCell">0</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
 
@@ -75,74 +114,46 @@
     </form>
 </div>
 <div th:replace="~{/admin/common/content_footer}"></div>
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Function to add selected product to the table
-        window.addProductToTable = function () {
-            const select = document.getElementById('productId');
-            const productId = select.value;
-            const productName = select.options[select.selectedIndex].text;
-            const productPrice = select.options[select.selectedIndex].getAttribute('data-price');
-            if (!productId) {
-                return;
-            }
-            const tableBody = document.getElementById('productTableBody');
+        window.addProductToTable = function (productId, productName, productPrice) {
+            const tableBody = document.getElementById('selectedProductTableBody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                    <td>${productName}</td>
-                    <td>${productPrice}</td>
-                    <td><input type="number" name="quantity" class="quantity-input" data-id="${productId}" value="1"></td>
-                    <td>${productPrice}</td>
-                `;
+                <td>${productName}</td>
+                <td>${productPrice}</td>
+                <td><input type="number" name="quantity" class="quantity-input" data-id="${productId}" value="1"></td>
+                <td class="amount-cell">${productPrice}</td>
+
+            `;
             tableBody.appendChild(newRow);
-
-            // Save the product to localStorage
-            // const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
-            // addedProducts.push({ productId, productName, uniquePrice: productPrice, quantity: 1 });
-            // localStorage.setItem('addedProducts', JSON.stringify(addedProducts));
-            // Save the product to localStorage
+            updateTotalAmount();
             updateLocalStorage();
-            // Add event listener for the new quantity input
             addQuantityChangeListener(newRow.querySelector('.quantity-input'));
-
-            // Disable the selected option
-            const selectedOption = select.options[select.selectedIndex];
-            selectedOption.disabled = true;
-            selectedOption.classList.add('selected-option');
-            select.value = ""; // Reset the select input to default
-
         }
 
-        // Function to initialize the table from localStorage
-        function initializeTable() {
-            const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
-            const tableBody = document.getElementById('productTableBody');
-            addedProducts.forEach(product => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                       <td>${product.productName}</td>
-                        <td>${product.uniquePrice}</td>
-                        <td><input type="number" name="quantity" class="quantity-input" data-id="${product.productId}" value="${product.quantity}"></td>
-                        <td>${product.uniquePrice * product.quantity}</td>
-                    `;
-                tableBody.appendChild(newRow);
-                addQuantityChangeListener(newRow.querySelector('.quantity-input'));
 
-                // Disable the corresponding option in the select input
-                const select = document.getElementById('productId');
-                const optionToDisable = Array.from(select.options).find(option => option.value == product.productId);
-                if (optionToDisable) {
-                    optionToDisable.disabled = true;
-                    optionToDisable.classList.add('selected-option');
-                }
+        function updateTotalAmount() {
+            const tableRows = document.querySelectorAll('#selectedProductTableBody tr');
+            let totalAmount = 0;
+            tableRows.forEach(row => {
+                const productPrice = parseFloat(row.querySelector('td:nth-child(2)').textContent);
+                const quantity = parseInt(row.querySelector('.quantity-input').value, 10);
+                const amountCell = row.querySelector('.amount-cell');
+                const amount = productPrice * quantity;
+                amountCell.textContent = amount;
+                totalAmount += productPrice * quantity;
             });
+            document.getElementById('totalAmountCell').textContent = totalAmount;
+            document.getElementById('finalAmount').value = totalAmount;
         }
 
-        // Function to update localStorage with current table data
         function updateLocalStorage() {
-            const tableRows = document.querySelectorAll('#productTableBody tr');
+            const tableRows = document.querySelectorAll('#selectedProductTableBody tr');
             const addedProducts = [];
-
             tableRows.forEach(row => {
                 const productId = row.querySelector('.quantity-input').getAttribute('data-id');
                 const productName = row.querySelector('td:nth-child(1)').textContent;
@@ -153,44 +164,85 @@
                     productId,
                     productName,
                     uniquePrice: productPrice,
-                    quantity: parseInt(quantity, 10)
+                    quantity: parseInt(quantity, 10),
+                    amount: productPrice * parseInt(quantity, 10)
                 });
             });
 
             localStorage.setItem('addedProducts', JSON.stringify(addedProducts));
         }
 
-        // Function to add a change listener to a quantity input
         function addQuantityChangeListener(inputElement) {
-            inputElement.addEventListener('change', updateLocalStorage);
+            inputElement.addEventListener('change', () =>{
+                updateLocalStorage();
+                updateTotalAmount();
+            });
         }
 
-        // Call initializeTable when the page loads
+        function initializeTable() {
+            const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
+            const tableBody = document.getElementById('selectedProductTableBody');
+            addedProducts.forEach(product => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${product.productName}</td>
+                    <td>${product.uniquePrice}</td>
+                    <td><input type="number" name="quantity" class="quantity-input" data-id="${product.productId}" value="${product.quantity}"></td>
+                    <td class="amount-cell">${product.uniquePrice*product.uniquePrice}</td>
+                `;
+                tableBody.appendChild(newRow);
+                addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+            });
+            //updateTotalAmount();
+        }
+
         initializeTable();
+
+        document.getElementById('comboForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
+            if (addedProducts.length === 0) {
+                alert('Please add at least one product to the combo.');
+                return;
+            }
+            const productsJsonInput = document.getElementById('productsJson');
+            productsJsonInput.value = JSON.stringify(addedProducts);
+            localStorage.removeItem('addedProducts');
+            this.submit();
+        });
+
+        window.addEventListener('beforeunload', function () {
+            localStorage.removeItem('addedProducts');
+        });
+
+        const addProductButtons = document.querySelectorAll('.add-product-btn');
+        addProductButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-name');
+                const productPrice = this.getAttribute('data-price');
+                addProductToTable(productId, productName, productPrice);
+                this.disabled = true;
+                this.classList.add('selected-option');
+            });
+        });
+
+        // Function to filter products based on search input
+        const searchProductInput = document.getElementById('searchProduct');
+        searchProductInput.addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const productRows = document.querySelectorAll('#productTable tr');
+
+            productRows.forEach(row => {
+                const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (productName.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     });
-
-    //Submit from localstorage to action create
-    document.getElementById('comboForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        var addedProducts = JSON.parse(localStorage.getItem('addedProducts')) || [];
-        if (addedProducts.length === 0) {
-            alert('Please add at least one product to the combo.');
-            return;
-        }
-        var productsJsonInput = document.getElementById('productsJson');
-        productsJsonInput.value = JSON.stringify(addedProducts);
-        console.log(productsJsonInput.value);
-
-        // Xóa dữ liệu addedProducts khỏi localStorage
-        localStorage.removeItem('addedProducts');
-        this.submit();
-    });
-
-    // Xóa localStorage khi người dùng đóng hoặc điều hướng khỏi trang
-    window.addEventListener('beforeunload', function () {
-        localStorage.removeItem('addedProducts');
-    });
-
 </script>
 </body>
 </html>

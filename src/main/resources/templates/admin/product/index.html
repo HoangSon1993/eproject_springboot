@@ -86,7 +86,6 @@
             <li th:class="page-item" th:classappend="${products.last} ? 'disabled' : ''">
                 <a th:class="page-link"  th:href="@{/admin/product(page=${products.totalPages - 1},size=${products.size})}">Last</a>
             </li>
-
         </ul>
     </div>
     <!-- End Pagination -->
