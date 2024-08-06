@@ -19,6 +19,19 @@
     <hr/>
     <a th:href="@{/admin/product/create}" class="btn btn-outline-primary btn-lg mb-4 mt-4">Tạo Sản Phẩm</a>
 
+    <!-- Form để người dùng chọn cột hiển thị -->
+    <form id="columnSelectionForm">
+        <label><input type="checkbox" name="columns" value="image" checked> Hình ảnh</label>
+        <label><input type="checkbox" name="columns" value="productName" checked> Tên sản phẩm</label>
+        <label><input type="checkbox" name="columns" value="price" checked> Giá</label>
+        <label><input type="checkbox" name="columns" value="category" checked> Danh mục</label>
+        <label><input type="checkbox" name="columns" value="status" checked> Trạng thái</label>
+        <label><input type="checkbox" name="columns" value="createdDate" checked> Ngày tạo</label>
+        <label><input type="checkbox" name="columns" value="updatedDate" checked> Ngày cập nhật</label>
+        <label><input type="checkbox" name="columns" value="actions" checked> Hành động</label>
+        <button class="btn btn-warning" type="button" onclick="saveColumnSelection()">Lưu lựa chọn</button>
+    </form>
+
     <!-- Hiển thị thông báo -->
     <div class="text-blue" th:if="${message}" th:text="${message}"></div>
     <div class="text-danger" th:if="${error}" th:text="${error}"></div>
@@ -27,22 +40,21 @@
     <table class="table table-light table-striped table-bordered">
         <thead class="table-dark">
         <tr class="text-center">
-            <th>STT</th>
-            <th>Hình ảnh</th>
-            <th>Tên sản phẩm</th>
-            <th>Giá</th>
-            <th>Danh mục</th>
-            <th>Trạng thái</th>
-            <th>Ngày tạo</th>
-            <th>Ngày cập&nbsp;nhật</th>
-            <th>Hành động</th>
-        </tr>
+            <th data-column="index">STT</th>
+            <th data-column="image">Hình ảnh</th>
+            <th data-column="productName">Tên sản phẩm</th>
+            <th data-column="price">Giá</th>
+            <th data-column="category">Danh mục</th>
+            <th data-column="status">Trạng thái</th>
+            <th data-column="createdDate">Ngày tạo</th>
+            <th data-column="updatedDate">Ngày cập&nbsp;nhật</th>
+            <th data-column="actions">Hành động</th></tr>
         </thead>
         <tbody>
         <tr th:each="item, iterStat: ${products.content}">
             <td th:text="${(itemsPerPage * pageNumber) + iterStat.index + 1}" class="text-left"></td>
             <td class="text-left">
-                <img style="object-fit: cover;width: 320px; height: 240px" th:src="@{${s3BucketUrl} + ${item.image}}" th:alt="${item.image}">
+                <img style="object-fit: cover;width: 320px; height: 240px" th:src="${item.getImageUrl}" th:alt="${item.image}">
             </td>
             <td th:text="${item.productName}" class="text-left"></td>
             <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}" class="text-left"></td>
@@ -96,4 +108,64 @@
 </div>
 <div th:replace="~{/admin/common/content_footer}"></div>
 </body>
+
+<!-- Thêm script để lấy và sử dụng lựa chọn của người dùng -->
+<script>
+    function saveColumnSelection() {
+        var selectedColumns = [];
+        var checkboxes = document.querySelectorAll('input[name="columns"]:checked');
+        checkboxes.forEach((checkbox) => {
+            selectedColumns.push(checkbox.value);
+        });
+
+        fetch('/admin/saveColumnSelection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ 'columns': selectedColumns })
+        }).then(response => {
+            if (response.ok) {
+                alert('Lựa chọn đã được lưu.');
+                location.reload();
+            } else {
+                alert('Đã xảy ra lỗi khi lưu lựa chọn.');
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch('/admin/getColumnSelection')
+            .then(response => response.json())
+            .then(data => {
+                var selectedColumns = data;
+                var tableHeaders = document.querySelectorAll('.table thead th');
+                var tableRows = document.querySelectorAll('.table tbody tr');
+                var checkboxes = document.querySelectorAll('input[name="columns"]');
+
+                checkboxes.forEach((checkbox) => {
+                    if (selectedColumns.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                    } else {
+                        checkbox.checked = false;
+                    }
+                });
+
+                tableHeaders.forEach((header, index) => {
+                    var columnName = header.getAttribute('data-column');
+                    if (!selectedColumns.includes(columnName)) {
+                        header.style.display = 'none';
+                        tableRows.forEach(row => {
+                            row.cells[index].style.display = 'none';
+                        });
+                    } else {
+                        header.style.display = '';
+                        tableRows.forEach(row => {
+                            row.cells[index].style.display = '';
+                        });
+                    }
+                });
+            });
+    });
+</script>
 </html>

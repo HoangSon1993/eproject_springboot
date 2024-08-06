@@ -40,4 +40,12 @@ public class ProductService implements IProductService {
     public void deleteById(String id) {
         productRepository.deleteById(id);
     }
+
+    public Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable) {
+        return productRepository.findByStatusAndProductNameContaining(status,productName,pageable);
+    }
+
+    public Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable) {
+        return productRepository.findByStatusAndCategory_CategoryIdAndProductNameContaining(status,categoryId,search,pageable);
+    }
 }

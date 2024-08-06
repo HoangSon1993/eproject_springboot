@@ -74,4 +74,12 @@ public class Product {
         updatedDate = LocalDate.now();
     }
 
+    @Transient
+    public String getImageUrl(){
+        if(image  == null || image.isEmpty()){
+            return "";
+        }
+        return "https://images-xoi-che-co-luyen.s3.ap-southeast-1.amazonaws.com/" + image;
+    }
+
 }
