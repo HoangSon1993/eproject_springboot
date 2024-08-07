@@ -1,11 +1,18 @@
 package com.sontung.eproject_springboot.service;
 
+import com.sontung.eproject_springboot.entity.Category;
 import com.sontung.eproject_springboot.entity.Combo;
+import com.sontung.eproject_springboot.entity.ComboDetail;
 import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.repository.ICategoryRepository;
+import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.object.StoredProcedure;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +25,10 @@ import java.util.stream.Collectors;
 public class ComboService {
     @Autowired
     IComboRepository iComboRepository;
+    @Autowired
+    IComboDetailRepository iComboDetailRepository;
+    @Autowired
+    ICategoryRepository iCategoryRepository;
     //dùng đế test danh sách product
     @Autowired
     IProductRepository iProductRepository;
@@ -28,6 +39,9 @@ public class ComboService {
     public List<Combo> getCombos(){
         return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).collect(Collectors.toList());
     };
+    public List<Combo> getExpiringCombos(){
+        return iComboRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+    }
     public Combo createCombo(Combo combo){
         combo.setCreatedDate(LocalDate.now());
         combo.setUpdatedDate(LocalDate.now());
@@ -51,4 +65,39 @@ public class ComboService {
         combo.setStatus(1);
         iComboRepository.save(combo);
     }
+    public long countComBos(){
+        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).toList().size();
+    }
+    //=====================================================================//
+    //=========================User Combo Service==========================//
+    //=====================================================================//
+    public Page<Combo> listCombos(int page, int size){
+        Pageable pageable = PageRequest.of(page-1, size);
+        return iComboRepository.findByStatus(2, pageable);
+    }
+
+    // TODO: 07/08/2024  Lấy ra combo  nổi bật, nhưng tạm thời lấy tạm
+    public List<Combo> getFeaturedCombo(){
+        return iComboRepository.findAll().stream().limit(3).collect(Collectors.toList());
+    }
+
+    // TODO: 07/08/2024 tạm thời để đây
+    public List<Combo> listCombos1(){
+        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).collect(Collectors.toList());
+    }
+    public List<Category> listCategories(){
+        return iCategoryRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+    }
+
+    public List<Combo> listComboCategory(String categoryId){
+        return iComboRepository.findCombosByStatusAndCategory(categoryId);
+    }
+
+    public List<ComboDetail> getComboDetails(String comboId){
+        return iComboDetailRepository.findByIdComboId(comboId);
+    }
+
+//    public long countComboCategory(String categoryId){
+//        return iComboRepository.countComboByCategory(categoryId);
+//    }
 }

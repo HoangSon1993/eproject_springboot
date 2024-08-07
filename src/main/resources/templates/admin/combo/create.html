@@ -19,6 +19,7 @@
             content: '✔';
             margin-left: 8px;
         }
+
     </style>
 </head>
 <body>
@@ -26,7 +27,11 @@
 <div class="container">
     <h3 style="text-align: center">TẠO COMBO MỚI</h3>
     <hr/>
-    <form th:action="@{/admin/combo/createConfirm}" method="post" id="comboForm" enctype="multipart/form-data">
+    <form th:action="@{/admin/combo/createConfirm}"
+          method="post"
+          id="comboForm"
+          th:object="${combo}"
+          enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
@@ -35,15 +40,19 @@
                 </div>
                 <div class="form-group">
                     <label for="comboName" class="form-label">Tên Combo</label>
-                    <input type="text" class="form-control" id="comboName" name="comboName">
+                    <input type="text" class="form-control" id="comboName" name="comboName" th:field="${combo.comboName}">
                 </div>
                 <div class="form-group">
                     <label for="startDate" class="form-label">Ngày bắt đầu</label>
-                    <input type="date" class="form-control" id="startDate" name="startDate">
+                    <input type="date" class="form-control" id="startDate" name="startDate" th:field="${combo.startDate}">
                 </div>
                 <div class="form-group">
                     <label for="endDate" class="form-label">Ngày kết thúc</label>
-                    <input type="date" class="form-control" id="endDate" name="endDate">
+                    <input type="date" class="form-control" id="endDate" name="endDate" th:field="${combo.endDate}">
+                </div>
+                <div class="form-group">
+                    <label for="description" class="form-label">Mô tả</label>
+                    <textarea type="text" class="form-control" id="description" name="description" th:field="${combo.description}"></textarea>
                 </div>
             </div>
             <div class="col-md-8">
@@ -53,29 +62,29 @@
                         <input type="text" id="searchProduct" class="form-control col-md-4" placeholder="Nhập tên sản phẩm">
                     </div>
                     <div style="height: 400px; overflow-y: auto">
-                        <table class="table table-light" >
+                        <table class="table table-light table-striped table-bordered">
                             <thead class="table-dark">
-                            <tr>
-                                <th>Hình ảnh</th>
-                                <th>Sản phẩm</th>
-                                <th>Giá</th>
-                                <th>Hành động</th>
-                            </tr>
+                                <tr>
+                                    <th class="text-center">Hình ảnh</th>
+                                    <th class="text-center">Sản phẩm</th>
+                                    <th class="text-center">Giá</th>
+                                    <th class="text-center">Hành động</th>
+                                </tr>
                             </thead>
                             <tbody id="productTable">
-                            <tr th:each="item :${products}">
-                                <td><img th:src="@{${s3BucketUrl} + ${item.image}}" alt="" style="height: 100px"></td>
-                                <td th:text="${item.productName}"></td>
-                                <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-success add-product-btn"
-                                            th:data-id="${item.productId}"
-                                            th:data-name="${item.productName}"
-                                            th:data-price="${item.price}">
-                                        Add
-                                    </button>
-                                </td>
-                            </tr>
+                                <tr th:each="item :${products}">
+                                    <td class="text-center"><img th:src="@{${s3BucketUrl} + ${item.image}}" alt="" style="height: 100px"></td>
+                                    <td th:text="${item.productName}" class="text-center"></td>
+                                    <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-success add-product-btn text-center"
+                                                th:data-id="${item.productId}"
+                                                th:data-name="${item.productName}"
+                                                th:data-price="${item.price}">
+                                            Add
+                                        </button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -83,13 +92,14 @@
             </div>
         </div>
         <div class="form-group">
-            <table class="table table-light">
+            <table class="table table-light table-striped table-bordered">
                 <thead class="table-dark">
                 <tr>
-                    <th>Tên</th>
-                    <th>Giá</th>
-                    <th>Số lượng</th>
-                    <th>Thành tiền</th>
+                    <th class="text-center">Tên</th>
+                    <th class="text-center">Giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-center">Thành tiền</th>
+                    <th class="text-center">Hành động</th>
                 </tr>
                 </thead>
 <!--                <tbody id="productTableBody">-->
@@ -98,24 +108,26 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" style="text-align: right; font-weight: bold;">Tổng giá trị:</td>
+                        <td colspan="4" style="text-align: right; font-weight: bold;">Tổng giá trị:</td>
                         <td id="totalAmountCell">0</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right; font-weight: bold;">Giá cuối cùng:</td>
+                        <td><input type="number" name="finalAmount" class="form-control" id="finalAmount" style="width: 100px"></td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
-        <input type="hidden" id="productsJson" name="productsJson">
-        <div class="form-group col-md-4">
-            <label for="finalAmount" class="form-label">Amount</label>
-            <input type="number" name="finalAmount" class="form-control" id="finalAmount">
-        </div>
+        <input type="hidden" id="productsJson" name="productsJson" th:field="${combo.productsJson}">
+<!--        <div class="form-group col-md-4">-->
+<!--            <label for="finalAmount" class="form-label" th:field="${combo.finalAmount}">Amount</label>-->
+<!--            <input type="number" name="finalAmount" class="form-control" id="finalAmount">-->
+<!--        </div>-->
         <input type="submit" value="Submit" class="btn btn-success">
     </form>
 </div>
 <div th:replace="~{/admin/common/content_footer}"></div>
-
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Function to add selected product to the table
@@ -123,31 +135,34 @@
             const tableBody = document.getElementById('selectedProductTableBody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td>${productName}</td>
-                <td>${productPrice}</td>
-                <td><input type="number" name="quantity" class="quantity-input" data-id="${productId}" value="1"></td>
-                <td class="amount-cell">${productPrice}</td>
-
+                <td class="text-center">${productName}</td>
+                <td class="text-center">${productPrice}</td>
+                <td class="text-center">
+                    <input type="number" name="quantity" class="quantity-input" data-id="${productId}" value="1" style="width: 50px">
+                </td>
+                <td class="amount-cell text-center">${productPrice}</td>
+                <td class="text-center"> <button class="btn btn-danger btn-remove">Gỡ</button></td>
             `;
             tableBody.appendChild(newRow);
             updateTotalAmount();
             updateLocalStorage();
-            addQuantityChangeListener(newRow.querySelector('.quantity-input'));
-        }
 
+            addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+            newRow.querySelector('.btn-remove').addEventListener('click', removeProduct);
+        }
 
         function updateTotalAmount() {
             const tableRows = document.querySelectorAll('#selectedProductTableBody tr');
             let totalAmount = 0;
             tableRows.forEach(row => {
-                const productPrice = parseFloat(row.querySelector('td:nth-child(2)').textContent);
+                const productPrice = parseFloat(row.querySelector('td:nth-child(2)').textContent.replace(/,/g, '')); // Remove commas
                 const quantity = parseInt(row.querySelector('.quantity-input').value, 10);
                 const amountCell = row.querySelector('.amount-cell');
                 const amount = productPrice * quantity;
-                amountCell.textContent = amount;
-                totalAmount += productPrice * quantity;
+                amountCell.textContent = amount.toLocaleString('en-US'); // Format with commas
+                totalAmount += amount;
             });
-            document.getElementById('totalAmountCell').textContent = totalAmount;
+            document.getElementById('totalAmountCell').textContent = totalAmount.toLocaleString('en-US'); // Format with commas
             document.getElementById('finalAmount').value = totalAmount;
         }
 
@@ -157,15 +172,14 @@
             tableRows.forEach(row => {
                 const productId = row.querySelector('.quantity-input').getAttribute('data-id');
                 const productName = row.querySelector('td:nth-child(1)').textContent;
-                const productPrice = row.querySelector('td:nth-child(2)').textContent;
+                const productPrice = row.querySelector('td:nth-child(2)').textContent.replace(/,/g, ''); // Remove commas
                 const quantity = row.querySelector('.quantity-input').value;
 
                 addedProducts.push({
                     productId,
                     productName,
-                    uniquePrice: productPrice,
+                    uniquePrice: parseFloat(productPrice),
                     quantity: parseInt(quantity, 10),
-                    amount: productPrice * parseInt(quantity, 10)
                 });
             });
 
@@ -173,10 +187,25 @@
         }
 
         function addQuantityChangeListener(inputElement) {
-            inputElement.addEventListener('change', () =>{
+            inputElement.addEventListener('change', () => {
                 updateLocalStorage();
                 updateTotalAmount();
             });
+        }
+
+        function removeProduct(event) {
+            const row = event.target.closest('tr');
+            const productId = row.querySelector('.quantity-input').getAttribute('data-id');
+            row.remove();
+            updateLocalStorage();
+            updateTotalAmount();
+
+            // Tìm và kích hoạt lại nút "Add" tương ứng với sản phẩm đã bị xóa
+            const addButton = document.querySelector(`.add-product-btn[data-id='${productId}']`);
+            if (addButton) {
+                addButton.disabled = false;
+                addButton.classList.remove('selected-option');
+            }
         }
 
         function initializeTable() {
@@ -185,15 +214,17 @@
             addedProducts.forEach(product => {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td>${product.productName}</td>
-                    <td>${product.uniquePrice}</td>
-                    <td><input type="number" name="quantity" class="quantity-input" data-id="${product.productId}" value="${product.quantity}"></td>
-                    <td class="amount-cell">${product.uniquePrice*product.uniquePrice}</td>
+                    <td class="text-center">${product.productName}</td>
+                    <td class="text-center">${product.uniquePrice.toLocaleString('en-US')}</td>
+                    <td class="text-center"><input type="number" name="quantity" class="quantity-input" data-id="${product.productId}" value="${product.quantity}" style="width: 50px"></td>
+                    <td class="amount-cell text-center">${(product.uniquePrice * product.quantity).toLocaleString('en-US')}</td>
+                    <td class="text-center"> <button class="btn btn-danger btn-remove">Gỡ</button></td>
                 `;
                 tableBody.appendChild(newRow);
                 addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+                newRow.querySelector('.btn-remove').addEventListener('click', removeProduct);
             });
-            //updateTotalAmount();
+            updateTotalAmount();
         }
 
         initializeTable();
@@ -220,8 +251,8 @@
             button.addEventListener('click', function () {
                 const productId = this.getAttribute('data-id');
                 const productName = this.getAttribute('data-name');
-                const productPrice = this.getAttribute('data-price');
-                addProductToTable(productId, productName, productPrice);
+                const productPrice = this.getAttribute('data-price').replace(/,/g, ''); // Remove commas
+                addProductToTable(productId, productName, parseFloat(productPrice));
                 this.disabled = true;
                 this.classList.add('selected-option');
             });

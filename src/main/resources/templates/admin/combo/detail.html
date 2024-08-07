@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -15,6 +15,7 @@
         <table class="table table-light mt-2">
             <thead class="table-dark">
                 <tr>
+                    <th class="text-center">Hình ảnh</th>
                     <th class="text-center">Sản phầm</th>
                     <th class="text-center">Giá</th>
                     <th class="text-center">Số lượng</th>
@@ -23,19 +24,22 @@
             </thead>
             <tbody>
                 <tr th:each="item: ${comboDetails}">
+                    <td class="text-center">
+                        <img style="object-fit: cover;width: 320px; height: 240px" th:src="@{${s3BucketUrl} + ${item.product.image}}" alt="">
+                    </td>
                     <td th:text="${item.product.productName}" class="text-center"></td>
-                    <td th:text="${item.product.price}" class="text-center"></td>
+                    <td th:text="${#numbers.formatDecimal(item.uniquePrice, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
                     <td th:text="${item.quantity}" class="text-center"></td>
-                    <td th:text="${item.product.price*item.quantity}" class="text-center"></td>
+                    <td th:text="${#numbers.formatDecimal(item.product.price*item.quantity, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
 
                 </tr>
                 <tr>
-                    <td colspan="3">Giá gốc</td>
-                    <td th:text="${combo.totalAmount}" class="text-center"></td>
+                    <td colspan="3"><b>Giá gốc:</b></td>
+                    <td th:text="${#numbers.formatDecimal(combo.totalAmount, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
                 </tr>
                 <tr>
-                    <td colspan="3">Giá bán</td>
-                    <td th:text="${combo.finalAmount}" class="text-center"></td>
+                    <td colspan="3"><b>Giá bán:</b></td>
+                    <td th:text="${#numbers.formatDecimal(combo.finalAmount, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
                 </tr>
             </tbody>
         </table>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -8,6 +8,41 @@
     <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
-
+<div th:replace="~{/admin/common/content_first}"></div>
+    <div class="container">
+        <h3 class="text-center">Combo Hết Hạn</h3>
+        <table class="table table-light table-striped table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th class="text-center">Tên Combo</th>
+                <th class="text-center">Ngày bắt đầu</th>
+                <th class="text-center">Ngày kết thúc</th>
+                <th class="text-center">Trạng thái</th>
+                <th class="text-center">Giá gốc</th>
+                <th class="text-center">Giá bán</th>
+                <th class="text-center">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item: ${expiringCombos}">
+                <td th:text="${item.comboName}" class="text-center"></td>
+                <td th:text="${item.startDate}" class="text-center"></td>
+                <td th:text="${item.endDate}" class="text-center"></td>
+                <td th:text="${item.status}==2?'Đang hoạt động':'Không hoạt động'" class="text-center"></td>
+                <td th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
+                <td th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')}" class="text-center"></td>
+                <td class="text-center d-flex align-items-center justify-content-center">
+                    <a th:href="@{/admin/combo/detail(comboId=${item.comboId})}" class="btn btn-info mr-2">Chi tiết</a>
+                    <form th:action="@{/admin/combo/delete(comboId=${item.comboId})}"
+                          method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this item?')">
+                        <!--                            <input type="submit" value="Remove" class="btn btn-danger">-->
+                        <button class="btn btn-danger">Gỡ</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
