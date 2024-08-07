@@ -6,18 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Danh sách Combo</title>
     <style th:replace="~{/user/common/head_tag}"></style>
-    <style>
-        .pagination {
-            display: flex;
-            /*flex-wrap: wrap; !* Cho phép các phần tử phân trang bọc khi cần thiết *!*/
-        }
-        .form-inline {
-            display: flex;
-            flex-wrap: nowrap; /* Ngăn chặn các phần tử bọc dòng */
-        }
-
-    </style>
-
 </head>
 <body>
     <div th:replace="~{/user/common/content_first}"></div>
@@ -54,14 +42,14 @@
                                     <div class="col-lg-12">
                                         <div class="mb-3">
                                             <h4>Danh mục</h4>
-                                            <ul class="list-unstyled fruite-categorie" >
+                                            <ul class="list-unstyled fruite-categorie">
                                                 <li>
                                                     <div class="d-flex justify-content-between fruite-name">
                                                         <a th:href="@{/combo/index}">Tất cả</a>
                                                         <span></span>
                                                     </div>
                                                 </li>
-                                                <li th:each="category: ${categories}">
+                                                <li  th:each="category: ${categories}">
                                                     <div class="d-flex justify-content-between fruite-name">
                                                         <a th:href="@{/combo/combo-cate(categoryId=${category.categoryId})}" th:text="${category.categoryName}"><i class="fas fa-apple-alt me-2"></i></a>
                                                         <span></span>
@@ -122,7 +110,7 @@
                                                 <p th:text="${item.description}"></p>
                                                 <p th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(item.endDate, 'dd/MM/yyyy')}"></p>
                                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                                    <p class="text-dark fs-5 fw-bold mb-0" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                                                    <p class="text-dark fs-5 fw-bold mb-0" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} + '(VNĐ)'"></p>
                                                     <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng</a>
                                                 </div>
                                             </div>
@@ -131,8 +119,9 @@
 
                                     <div class="col-12">
                                         <div class="pagination d-flex justify-content-center mt-5">
-                                            <!-- Pagination controls -->
-                                            <div th:replace="user/common/pagination :: pagination('/combo/index', ${currentPage}, ${totalPages}, ${size})"></div>
+                                            <a href="#" class="rounded">&laquo;</a>
+                                            <a href="#" class="active rounded">1</a>
+                                            <a href="#" class="rounded">&raquo;</a>
                                         </div>
                                     </div>
                                 </div>

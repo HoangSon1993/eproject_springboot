@@ -12,27 +12,27 @@
     <div class="container">
         <h3 class="text-center">QUẢN LÝ COMBO</h3>
         <a th:href="@{/admin/combo/create}" class="btn btn-outline-primary mt-2 mb-2">Tạo Combo</a>
-        <table class="table table-light">
+        <table class="table table-light table-striped table-bordered">
             <thead class="table-dark">
                 <tr>
-                    <th>Tên Combo</th>
-                    <th>Ngày bắt đầu</th>
-                    <th>Ngày kết thúc</th>
-                    <th>Trạng thái</th>
-                    <th>Giá gốc</th>
-                    <th>Giá bán</th>
-                    <th>Hành động</th>
+                    <th class="text-center">Tên Combo</th>
+                    <th class="text-center">Ngày bắt đầu</th>
+                    <th class="text-center">Ngày kết thúc</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Giá gốc</th>
+                    <th class="text-center">Giá bán</th>
+                    <th class="text-center">Hành động</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="item: ${combos}">
-                    <td th:text="${item.comboName}"></td>
-                    <td th:text="${item.startDate}"></td>
-                    <td th:text="${item.endDate}"></td>
-                    <td th:text="${item.status}?'Đang hoạt động':'Không hoạt động'"></td>
-                    <td th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
-                    <td th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
-                    <td class="text-center d-flex align-items-center">
+                    <td class="text-center" th:text="${item.comboName}"></td>
+                    <td class="text-center" th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}"></td>
+                    <td class="text-center" th:text="${#temporals.format(item.endDate, 'dd/MM/yyyy')}"></td>
+                    <td class="text-center" th:text="${item.status}==2?'Đang hoạt động':'Không hoạt động'"></td>
+                    <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
+                    <td class="text-center" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
+                    <td class="text-center d-flex justify-content-center align-items-center">
                         <a th:href="@{/admin/combo/detail(comboId=${item.comboId})}" class="btn btn-info mr-2">Chi tiết</a>
                         <form th:action="@{/admin/combo/delete(comboId=${item.comboId})}"
                               method="post"
@@ -44,6 +44,7 @@
                 </tr>
             </tbody>
         </table>
+        <a th:href="@{/admin/combo/expired}" class="btn btn-warning mt-2 mb-2">Thùng Rác</a>
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>
 </body>

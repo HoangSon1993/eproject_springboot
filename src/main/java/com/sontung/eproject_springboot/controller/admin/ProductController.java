@@ -97,9 +97,7 @@ public class ProductController {
 
                     // Gọi Service upload file
                     s3Service.uploadFile(image, uniqueFilename);
-
                     product.setImage(uniqueFilename);
-
                     productService.save(product);
                     redirectAttributes.addFlashAttribute("message", "File Successfully Upload");
                     return "redirect:/admin/product";

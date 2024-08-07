@@ -1,6 +1,7 @@
 package com.sontung.eproject_springboot.controller.admin;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sontung.eproject_springboot.dto.ComboDTO;
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
 import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.service.ComboDetailService;
@@ -51,48 +52,47 @@ public class ComboController {
         model.addAttribute("combos", comboService.getCombos());
         return "/admin/combo/index";
     }
+    @GetMapping("/expired")
+    public String getExpiringCombo(Model model){
+        model.addAttribute("expiringCombos", comboService.getExpiringCombos());
+        return "/admin/combo/expired";
+    }
     @GetMapping("/create")
-    public String createCombo( Model model){
+    public String createCombo(Model model){
         model.addAttribute("products", comboService.getProducts());
+        model.addAttribute("combo", new ComboDTO());
         return "/admin/combo/create";
     }
     @Transactional
     @PostMapping("/createConfirm")
-    public String createCombo(@RequestParam String comboName,
-                              @RequestParam LocalDate startDate,
-                              @RequestParam LocalDate endDate,
-                              @RequestParam String productsJson,
-                              @RequestParam BigDecimal finalAmount,
+    public String createCombo(@ModelAttribute ComboDTO comboDTO,
                               @RequestParam("file") MultipartFile image,
                               RedirectAttributes redirectAttributes) {
         try {
             Combo combo =  new Combo();
-            combo.setComboName(comboName);
-            combo.setStartDate(startDate);
-            combo.setEndDate(endDate);
+            combo.setComboName(comboDTO.getComboName());
+            combo.setDescription(comboDTO.getDescription());
+            combo.setStartDate(comboDTO.getStartDate());
+            combo.setEndDate(comboDTO.getEndDate());
 
             if (!image.isEmpty()) {
                 try {
                     // TODO: 30/7/24 fix function upload File
                     String uniqueFilename = s3Service.generateUniqueFilename(image);
-
                     s3Service.uploadFile(image, uniqueFilename);
-
                     combo.setImage(uniqueFilename);
-
                     comboService.createCombo(combo);
                     redirectAttributes.addFlashAttribute("message", "File Successfully Upload");
-                    Combo createdCombo = comboService.createCombo(combo);
                     // Chuyển đổi JSON thành danh sách các đối tượng ComboDetailDTO
-                    List<ComboDetailDTO> comboDetailDTOS = objectMapper.readValue(productsJson, new TypeReference<List<ComboDetailDTO>>() {});
+                    List<ComboDetailDTO> comboDetailDTOS = objectMapper.readValue(comboDTO.getProductsJson(), new TypeReference<List<ComboDetailDTO>>() {});
                     // Tạo DTO mới và xử lý dữ liệu bằng service
                     BigDecimal totalAmount = BigDecimal.ZERO;
                     for (ComboDetailDTO comboDetailDTO : comboDetailDTOS) {
-                        comboDetailDTO.setComboId(createdCombo.getComboId());
+                        comboDetailDTO.setComboId(combo.getComboId());
                         comboDetailService.createComboDetail(comboDetailDTO);
                         totalAmount = totalAmount.add(comboDetailDTO.getUniquePrice().multiply(BigDecimal.valueOf(comboDetailDTO.getQuantity())));
                     }
-                    comboService.updateCombo(combo, totalAmount, finalAmount);
+                    comboService.updateCombo(combo, totalAmount, comboDTO.getFinalAmount());
                     return "redirect:/admin/combo";
                 } catch (AwsServiceException e) {
                     redirectAttributes.addFlashAttribute("error", "AWS Service Exception: " + e.getMessage());
@@ -117,7 +117,6 @@ public class ComboController {
         model.addAttribute("comboDetails", comboDetailService.getComboDetails(comboId));
         return "/admin/combo/detail";
     }
-
     @PostMapping("/delete")
     public String deleteCombo(@RequestParam String comboId){
         comboService.removeCombo(comboId);

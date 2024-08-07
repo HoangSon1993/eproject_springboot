@@ -27,4 +27,5 @@ public class Cart {
     @JoinColumn(name = "account_id")
     Account account;
 
+    String comboId;
 }

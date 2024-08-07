@@ -21,6 +21,7 @@ public class Combo {
     @Column(length = 100)
     String comboName;
     String image;
+    String description;
     Integer status;
     BigDecimal totalAmount;
     BigDecimal finalAmount;
