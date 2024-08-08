@@ -17,53 +17,76 @@
                 <h3>Giỏ Hàng Của Bạn</h3>
                 <table class="table">
                     <thead>
-                    <tr>
-                        <th scope="col">Sản Phẩm</th>
-                        <th scope="col">Tên</th>
-                        <th scope="col">Giá</th>
-                        <th scope="col">Số Lượng</th>
-                        <th scope="col">Thành Tiền</th>
-                        <th scope="col">Xử Lý</th>
-                    </tr>
+                        <tr>
+                            <th scope="col">Sản Phẩm</th>
+                            <th scope="col">Tên</th>
+                            <th scope="col">Giá</th>
+                            <th scope="col">Số Lượng</th>
+                            <th scope="col">Thành Tiền</th>
+                            <th scope="col">Xử Lý</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <th scope="row">
-                            <div class="d-flex align-items-center">
-                                <img src="img/vegetable-item-3.png" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
-                            </div>
-                        </th>
-                        <td>
-                            <p class="mb-0 mt-4">Big Banana</p>
-                        </td>
-                        <td>
-                            <p class="mb-0 mt-4">2.99 $</p>
-                        </td>
-                        <td>
-                            <div class="input-group quantity mt-4" style="width: 100px;">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                        <i class="fa fa-minus"></i>
+                        <th:block th:each="item: ${cartDetail}">
+                            <tr >
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="@{${s3BucketUrl} + ${item.image}}" class="img-fluid me-5 rounded-circle" style="width: 100px; height: 100px;" alt="">
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="mb-0 mt-4" th:text="${item.comboName}"></p>
+                                </td>
+                                <td>
+                                    <p class="mb-0 mt-4" th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></p>
+                                </td>
+                                <td>
+                                    <div class="input-group quantity mt-4" style="width: 100px;">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm text-center border-0" th:value="${item.quantity}">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="mb-0 mt-4" th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
+                                </td>
+                                <td>
+                                    <button class="btn btn-md rounded-circle bg-light border mt-4" >
+                                        <i class="fa fa-times text-danger"></i>
                                     </button>
-                                </div>
-                                <input type="text" class="form-control form-control-sm text-center border-0" value="1">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <p class="mb-0 mt-4">2.99 $</p>
-                        </td>
-                        <td>
-                            <button class="btn btn-md rounded-circle bg-light border mt-4" >
-                                <i class="fa fa-times text-danger"></i>
-                            </button>
-                        </td>
+                                </td>
+                            </tr>
+                            <!-- Hiển thị comboDetails nếu không rỗng -->
+                            <tr th:if="${item.comboDetails.size() > 0}">
+                                <td colspan="6">
+                                    <table class="table" style="margin-left: 650px; width: 550px">
+                                        <thead>
+                                        <tr>
+                                            <th>Sản Phẩm</th>
+                                            <th >Tên</th>
+                                            <th>Số lượng</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="detail : ${item.comboDetails}">
+                                            <td ><img  th:src="@{${s3BucketUrl} + ${detail.product.image}}" alt="" style="height: 50px"></td>
+                                            <td th:text="${detail.product.productName}"></td>
+                                            <td th:text="${detail.quantity}"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                        </th:block>
 
-                    </tr>
+
                     </tbody>
                 </table>
             </div>

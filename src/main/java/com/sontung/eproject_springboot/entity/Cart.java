@@ -23,7 +23,7 @@ public class Cart {
     @JoinColumn(name = "product_id")
     Product product;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
 

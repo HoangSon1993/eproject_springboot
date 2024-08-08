@@ -67,17 +67,18 @@
                                         <p th:text="${combo.description}"> </p>
                                         <div class="px-2">
                                             <div class="row g-4">
-                                                <div class="col-9">
-                                                    <table class="table table-light table-striped table-bordered">
-                                                        <thead class="table-gray">
+                                                <div class="col-9" >
+                                                    <div class="row bg-light align-items-center text-center justify-content-center py-2">
+                                                        <table class="table table-light table-striped table-bordered">
+                                                            <thead class="table-gray">
                                                             <tr>
                                                                 <th>Hình ảnh</th>
                                                                 <th>Tên</th>
                                                                 <th class="text-center">Số lượng</th>
                                                                 <th></th>
                                                             </tr>
-                                                        </thead>
-                                                        <tbody>
+                                                            </thead>
+                                                            <tbody>
                                                             <tr th:each="item:${comboDetails}">
                                                                 <td><img th:src="@{${s3BucketUrl} + ${item.product.image}}" alt="" style="height: 100px"></td>
                                                                 <td th:text="${item.product.productName}"></td>
@@ -86,8 +87,10 @@
                                                                     <a th:href="@{/product/detail(productId=${item.product.productId})}" class="btn btn-info">Chi Tiết</a>
                                                                 </td>
                                                             </tr>
-                                                        </tbody>
-                                                    </table>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
