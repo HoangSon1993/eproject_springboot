@@ -10,6 +10,10 @@
         #search-icon-2:hover {
             background-color: #ffb524;
         }
+
+        .form-control::placeholder {
+            opacity: 50%;
+        }
     </style>
 </head>
 <body>
@@ -25,7 +29,7 @@
                 </div>
                 <div class="modal-body d-flex align-items-center">
                     <div class="input-group w-75 mx-auto d-flex">
-                        <input type="search" class="form-control p-3" placeholder="keywords"
+                        <input type="search" class="form-control p-3" placeholder="Tìm theo tên"
                                aria-describedby="search-icon-1">
                         <span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span>
                     </div>
@@ -38,11 +42,11 @@
 
     <!-- Single Page Header start -->
     <div class="container-fluid page-header py-5">
-        <h1 class="text-center text-white display-6">Shop</h1>
+        <h1 class="text-center text-white display-6">Sản phẩm</h1>
         <ol class="breadcrumb justify-content-center mb-0">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Pages</a></li>
-            <li class="breadcrumb-item active text-white">Shop</li>
+            <li class="breadcrumb-item"><a href="/home-page">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/product/index">Sản phẩm</a></li>
+            <!--            <li class="breadcrumb-item active text-white">Trang chủ</li>-->
         </ol>
     </div>
     <!-- Single Page Header End -->
@@ -61,14 +65,17 @@
                                 <input type="hidden" name="page" th:value="${pageNumber}">
                                 <input type="hidden" name="size" th:value="${itemsPerpage}"/>
                                 <input type="hidden" name="categoryId" th:value="${categoryId}"/>
-                                <input type="search" class="form-control p-3" placeholder="keywords"
+                                <input type="search" class="form-control p-3" placeholder="Tìm theo tên sản phẩm"
                                        aria-describedby="search-icon-1" name="search" th:value="${search}">
                                 <button type="submit" id="search-icon-2" class="input-group-text p-3"
                                         style=":hover{ background-color:#ffb524 }"><i
                                         class="fa fa-search"></i></button>
                             </form>
                         </div>
-                        <div class="col-6"></div>
+                        <div class="col-6">
+                            <span class="alert alert-success" th:if="${message}" th:text="${message}">Thông báo thành công</span>
+                            <span class="alert alert-danger" th:if="${error}" th:text="${error}">Thông báo lỗi</span>
+                        </div>
                         <div class="col-xl-3">
                             <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
                                 <label for="fruits">Default Sorting:</label>
@@ -104,10 +111,9 @@
                                                           th:text="${item.categoryName}"
                                                           style="color: #ffb524 !important;">
                                                         <i class="fas fa-apple-alt me-2"></i>Apples</span>
-                                                    <span>(3)</span>
+                                                    <span th:text="'('+${categoryProductCounts[item.categoryId]}+')'">(3)</span>
                                                 </div>
                                             </li>
-
                                         </ul>
                                     </div>
                                 </div>
@@ -299,7 +305,7 @@
                                         <li th:class="page-item"
                                             th:classappend="${products.hasNext()} ? '' : 'disabled'">  <!-- last -->
                                             <a th:href="@{/product/index(page=${products.totalPages - 1}, size=${products.size},  search=${search}, categoryId=${categoryId}, sort=${sort}) }"
-                                               class="page-link rounded">last</a>
+                                               class="page-link rounded">Last</a>
                                         </li>
                                     </ul>
                                 </div>
