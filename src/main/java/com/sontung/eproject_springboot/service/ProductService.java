@@ -48,4 +48,8 @@ public class ProductService implements IProductService {
     public Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable) {
         return productRepository.findByStatusAndCategory_CategoryIdAndProductNameContaining(status,categoryId,search,pageable);
     }
+
+    public int countByCategory(String categoryId) {
+        return productRepository.countByCategoryId(categoryId);
+    }
 }

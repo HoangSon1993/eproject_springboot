@@ -1,14 +1,15 @@
 package com.sontung.eproject_springboot.controller.user;
 
-import com.sontung.eproject_springboot.entity.Cart;
 import com.sontung.eproject_springboot.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/cart")
@@ -31,5 +32,15 @@ public class UserCartController {
     public String createCart(@RequestParam String comboId){
         cartService.createCart(comboId);
         return "redirect:/cart/index";
+    }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> addToCart(@RequestParam("productId") String productId,
+                                                         @RequestParam("quantity") int quantity) {
+        Map<String, Object> response = new HashMap<>();
+        // TODO: 9/8/24 Xử lý thêm vào giỏ hàng
+        response.put("success", true);
+        return ResponseEntity.ok(response);
     }
 }

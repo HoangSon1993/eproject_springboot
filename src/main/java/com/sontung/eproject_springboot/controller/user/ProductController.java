@@ -13,13 +13,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-@Controller
+@Controller(value = "UserProductController")
+
 @RequestMapping("product")
-public class UserProductController {
+public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
     @Value("${aws.s3.bucket.url}")
@@ -31,10 +35,32 @@ public class UserProductController {
     }
 
     @Autowired
-    public UserProductController(ProductService productService, CategoryService categoryService) {
+    public ProductController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
         this.categoryService = categoryService;
     }
+
+    @ModelAttribute("categories")
+    public List<Category> populateCategories() {
+        return categoryService.getCategories();
+    }
+
+    @ModelAttribute("categoryProductCounts")
+    public Map<String, Integer> categoryProductCount() {
+        List<Category> categories = populateCategories();
+        Map<String, Integer> categoryProductCounts = new HashMap<>();
+
+        for (Category category : categories) {
+            int productCount = productService.countByCategory(category.getCategoryId());
+            categoryProductCounts.put(category.getCategoryId(), productCount);
+        }
+        return categoryProductCounts;
+    }
+
+//    @ModelAttribute("search")
+//    public String search(@RequestParam(required = false, defaultValue = "") String search) {
+//        return search;
+//    }
 
     @GetMapping("/index")
     public String index(
@@ -54,16 +80,26 @@ public class UserProductController {
             products = productService.findByStatusAndCategory_CategoryIdAndProductNameContaining(status, categoryId, search, pageable);
         }
 
-        List<Category> categories = categoryService.getCategories();
-
         model.addAttribute("pageNumber", page); // Trang hiện tại, bắt đầu từ 0
         model.addAttribute("itemsPerpage", size); // Số mục trên mỗi trang
         model.addAttribute("products", products);
-        model.addAttribute("categories", categories);
         model.addAttribute("search", search); // Từ khoá tìm kiếm hiện tại
         model.addAttribute("categoryId", categoryId); // ID danh mục hiện tại
         model.addAttribute("sort", sort); // Hướng sắp xếp hiện tại
 
         return "/user/product/index";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<Product> productOptional = productService.findById(id);
+        if (productOptional.isPresent()) {
+            Product product = productOptional.get();
+            model.addAttribute("product", product);
+            return "user/product/detail";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm");
+            return "redirect:/product/index";
+        }
     }
 }
