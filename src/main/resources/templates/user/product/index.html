@@ -334,7 +334,7 @@
             formData.append('productId', productId);
             formData.append('quantity', quantity);
 
-            fetch('/cart/add', {
+            fetch('/cart/add-product', {
                 method: 'POST',
                 body: formData
             })

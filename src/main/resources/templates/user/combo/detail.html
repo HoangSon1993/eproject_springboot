@@ -18,9 +18,7 @@
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="border rounded">
-                                    <a href="#">
                                         <img th:src="@{${s3BucketUrl} + ${combo.image}}"  class="img-fluid rounded" alt="Image">
-                                    </a>
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -88,7 +86,7 @@
                                                                 <td th:text="${item.product.productName}"></td>
                                                                 <td th:text="${item.quantity}" class="text-center"></td>
                                                                 <td class="text-center">
-                                                                    <a th:href="@{/product/detail(productId=${item.product.productId})}" class="btn btn-info">Chi Tiết</a>
+                                                                    <a th:href="@{/product/detail/{id}(id=${item.product.productId})}" class="btn btn-info">Chi Tiết</a>
                                                                 </td>
                                                             </tr>
                                                             </tbody>

@@ -44,7 +44,7 @@ public class UserCartController {
         return "redirect:/cart/index";
     }
 
-    @PostMapping("/add")
+    @PostMapping("/add-product")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> addProductToCart(@RequestParam("productId") String productId,
                                                                 @RequestParam("quantity") int quantity) {
