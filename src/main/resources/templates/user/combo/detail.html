@@ -86,7 +86,7 @@
                                                                 <td th:text="${item.product.productName}"></td>
                                                                 <td th:text="${item.quantity}" class="text-center"></td>
                                                                 <td class="text-center">
-                                                                    <a th:href="@{/product/detail/{id}(id=${item.product.productId})}" class="btn btn-info">Chi Tiết</a>
+                                                                    <a th:href="@{/product/detail(productId=${item.product.productId})}" class="btn btn-info">Chi Tiết</a>
                                                                 </td>
                                                             </tr>
                                                             </tbody>

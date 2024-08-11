@@ -8,8 +8,8 @@ import com.sontung.eproject_springboot.repository.IAccountRepository;
 import com.sontung.eproject_springboot.repository.ICartRepository;
 import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -59,10 +59,10 @@ public class CartService {
     // TODO: 07/08/2024 Tạo giỏ hàng cho combo(do Tùng làm)
     public int addComboToCart(String comboId, int quantity) {
         try {
-            Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
-            Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException());
+            Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException());
             Cart cart = iCartRepository.findByAccountAndComboId(account, comboId);
-            if (cart == null) {
+            if(cart==null){
                 cart.setComboId(comboId);
                 cart.setQuantity(quantity);
                 cart.setAccount(account);
@@ -82,10 +82,10 @@ public class CartService {
     public List<CartDetailDTO> getCarts() {
         List<Cart> carts = iCartRepository.getCartsByAccount_AccountId(userId);
         List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
-        for (Cart cart : carts) {
-            if (cart.getComboId() != null) {
-                Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo khônng tồn tại"));
-                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo() == combo).toList();
+        for (Cart cart: carts) {
+            if(cart.getComboId()!=null){
+                Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException());
+                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo()==combo).toList();
                 CartDetailDTO cartDetailDTO = new CartDetailDTO();
                 cartDetailDTO.setComboName(combo.getComboName());
                 cartDetailDTO.setPrice(combo.getFinalAmount());
