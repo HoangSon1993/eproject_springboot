@@ -1,7 +1,5 @@
 package com.sontung.eproject_springboot.controller.user;
 
-import com.sontung.eproject_springboot.entity.Cart;
-import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.exception.ProductNotFoundException;
 import com.sontung.eproject_springboot.exception.UserNotFoundException;
 import com.sontung.eproject_springboot.service.CartService;
@@ -15,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -36,23 +33,14 @@ public class UserCartController {
     }
 
     @GetMapping("/index")
-    public String getCarts(Model model) {
-        List<Cart> cartItems = cartService.getCartByAccountId();
-
-        Map<String, Combo> comboMap = new HashMap<>();
-        for(Cart cart : cartItems) {
-            if(cart.getComboId() != null) {
-                Combo combo = comboService.getComboById(cart.getComboId());
-                comboMap.put("combo_" + cart.getComboId(), combo);
-            }
-        }
-        model.addAttribute("comboMap", comboMap);
+    public String getCarts(Model model){
+        model.addAttribute("cartDetail", cartService.getCarts());
+        model.addAttribute("amount", cartService.totalAmount());
         return "/user/cart/index";
     }
-
     @PostMapping("/create")
-    public String createCart(@RequestParam String comboId) {
-        cartService.createCart(comboId);
+    public String addComboToCart(@RequestParam String comboId, @RequestParam int quantity){
+        cartService.addComboToCart(comboId, quantity);
         return "redirect:/cart/index";
     }
 
@@ -61,7 +49,6 @@ public class UserCartController {
     public ResponseEntity<Map<String, Object>> addProductToCart(@RequestParam("productId") String productId,
                                                                 @RequestParam("quantity") int quantity) {
         Map<String, Object> response = new HashMap<>();
-        // TODO: 9/8/24 Xử lý thêm vào giỏ hàng
         try {
             cartService.addProductToCart(productId, quantity);
             response.put("success", true);

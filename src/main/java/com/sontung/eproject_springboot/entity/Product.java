@@ -13,8 +13,8 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -44,8 +44,9 @@ public class Product {
     @JoinColumn(name = "category_id")
     Category category;
 
-//    @OneToOne(mappedBy = "product")
-//    Cart cart;
+//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JsonIgnore // Để tránh vòng lặp tuần tự hóa
+//    Set<Cart> carts;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<ComboDetail> comboDetails;
