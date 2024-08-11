@@ -159,7 +159,7 @@ public class ProductController {
             product.setCreatedDate(productDetails.getCreatedDate());
             product.setUpdatedDate(productDetails.getUpdatedDate());
             product.setCategory(productDetails.getCategory());
-            product.setCart(productDetails.getCart());
+            //product.setCart(productDetails.getCart());
             product.setComboDetails(productDetails.getComboDetails());
             product.setInvoiceDetails(productDetails.getInvoiceDetails());
 

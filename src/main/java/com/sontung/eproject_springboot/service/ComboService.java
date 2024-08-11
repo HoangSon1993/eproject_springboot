@@ -8,12 +8,10 @@ import com.sontung.eproject_springboot.repository.ICategoryRepository;
 import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
-import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.object.StoredProcedure;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -95,6 +93,11 @@ public class ComboService {
 
     public List<ComboDetail> getComboDetails(String comboId){
         return iComboDetailRepository.findByIdComboId(comboId);
+    }
+
+    public Combo getComboById(String comboId) {
+        return iComboRepository.findById(comboId)
+                .orElse(null);
     }
 
 //    public long countComboCategory(String categoryId){

@@ -248,7 +248,7 @@
                                              style="top: 10px; left: 10px;">Fruits
                                         </div>
                                         <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                            <a href="/product/detail">
+                                            <a th:href="@{/product/detail/{id}(id=${item.productId})}">
                                                 <h4 th:text="${item.productName}"
                                                     style="display: -webkit-box;
                                                           -webkit-line-clamp: 1;
@@ -264,6 +264,9 @@
                                                    th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">
                                                     $4.99 / kg</p>
                                                 <a href="#"
+                                                   id="btn-add-to-cart"
+                                                   th:data-product-id="${item.productId}"
+                                                   th:data-quantity="1"
                                                    class="btn border border-secondary rounded-pill px-3 text-primary"><i
                                                         class="fa fa-shopping-bag me-2 text-primary"></i>Giỏ hàng</a>
                                             </div>
@@ -319,5 +322,36 @@
     <!-- Fruits Shop End-->
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
+<script>
+    const addToCartButtons = document.querySelectorAll("#btn-add-to-cart")
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            const quantity = this.getAttribute('data-quantity')
+
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('quantity', quantity);
+
+            fetch('/cart/add', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        alert("Sản phẩm đã được thêm vào giỏ hàng")
+                    }
+                })
+                .catch(error =>{
+                    console.error('Đã xảy ra lỗi không mong muốn: ', error);
+                    alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
+                })
+
+        })
+    })
+
+</script>
 </body>
 </html>

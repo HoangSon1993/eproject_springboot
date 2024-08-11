@@ -27,7 +27,7 @@
 </head>
 <body>
 <div th:replace="~{/user/common/content_first}"></div>
-<div class="container" style="margin-top: 200px">
+<div class="container" style="margin-top: 200px; position: relative">
     <!-- Modal Search Start -->
     <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
@@ -48,6 +48,11 @@
     </div>
     <!-- Modal Search End -->
 
+    <!-- Thông báo xác nhận -->
+    <div id="notification" class="notification" style="display: none;">
+        <p>Sản phẩm đã được thêm vào giỏ hàng!</p>
+    </div>
+    <!-- End Thông báo xác nhận -->
 
     <!-- Single Page Header start -->
     <div class="container-fluid page-header py-5">
@@ -124,10 +129,7 @@
                                                     class="fa fa-shopping-bag me-2 text-primary"></i> Thêm giỏ hàng
                                         </button>
                                     </form>
-                                    <!-- Thông báo xác nhận -->
-                                    <div id="notification" class="notification" style="display: none;">
-                                        <p>Sản phẩm đã được thêm vào giỏ hàng!</p>
-                                    </div>
+
                                 </div>
                                 <!--                                <div class="col-lg-12">-->
                                 <!--                                    <nav>-->
@@ -609,6 +611,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById("addToCartForm");
         const notification = document.getElementById('notification');
+        const quantityInput = document.querySelector('input[name="quantity"]');
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
@@ -626,7 +629,8 @@
                         // An thong bao sau 3s
                         setTimeout(() => {
                             notification.style.display = 'none';
-                        }, 3000)
+                        }, 3000);
+                        quantityInput.value = "1"
                     } else {
                         // Xu ly loi neu co
                         alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');

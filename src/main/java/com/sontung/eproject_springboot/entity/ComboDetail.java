@@ -8,7 +8,8 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,10 +19,12 @@ public class ComboDetail {
     ComboDetailId id;
     Integer quantity;
     BigDecimal uniquePrice;
+
     @ManyToOne
     @MapsId("productId")
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     Product product;
+
     @ManyToOne
     @MapsId("comboId")
     @JoinColumn(name = "combo_id", insertable = false, updatable = false)

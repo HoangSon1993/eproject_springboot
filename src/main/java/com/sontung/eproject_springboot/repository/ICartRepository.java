@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ICartRepository extends JpaRepository<Cart, String> {
     List<Cart> getCartsByAccount_AccountId(String accountId);
+    List<Cart> findCartByAccount_AccountId(String accountId);
+    Cart findByProduct_ProductIdAndAccount_AccountId(String productId, String accountId);
 }
