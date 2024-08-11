@@ -24,32 +24,36 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <h4 class="fw-bold mb-3" th:text="${combo.comboName}"></h4>
-                                <p class="mb-3" th:text="${#temporals.format(combo.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(combo.endDate, 'dd/MM/yyyy')}"></p>
-                                <h5 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(combo.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></h5>
-                                <div class="d-flex mb-4">
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star"></i>
-                                </div>
-                                <p class="mb-4"></p>
-                                <p class="mb-4"></p>
-                                <div class="input-group quantity mb-5" style="width: 100px;">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                            <i class="fa fa-minus"></i>
-                                        </button>
+                                <form th:action="@{/cart/create(comboId=${combo.comboId})}" method="post">
+                                    <h4 class="fw-bold mb-3" th:text="${combo.comboName}"></h4>
+                                    <p class="mb-3" th:text="${#temporals.format(combo.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(combo.endDate, 'dd/MM/yyyy')}"></p>
+                                    <h5 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(combo.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></h5>
+                                    <div class="d-flex mb-4">
+                                        <i class="fa fa-star text-secondary"></i>
+                                        <i class="fa fa-star text-secondary"></i>
+                                        <i class="fa fa-star text-secondary"></i>
+                                        <i class="fa fa-star text-secondary"></i>
+                                        <i class="fa fa-star"></i>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm text-center border-0" value="1">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
+                                    <p class="mb-4"></p>
+                                    <p class="mb-4"></p>
+                                    <div class="input-group quantity mb-5" style="width: 100px;">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-minus rounded-circle bg-light border" type="button" onclick="changeQuantity(-1,event)" >
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm text-center border-0" th:value="1" name="quantity" id="quantityInput">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-plus rounded-circle bg-light border" type="button" onclick="changeQuantity(1, event)">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng</a>
+                                    <button class="btn border border-secondary rounded-pill px-3 text-primary">
+                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng
+                                    </button>
+                                </form>
                             </div>
                             <div class="col-lg-12">
                                 <nav>
@@ -215,7 +219,11 @@
                                 <p th:text="${item.description}"></p>
                                 <div class="d-flex justify-content-between flex-lg-wrap">
                                     <p class="text-dark fs-5 fw-bold" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
-                                    <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i>+ Giỏ Hàng</a>
+                                    <form th:action="@{/cart/create(comboId=${item.comboId})}" method="post">
+                                        <button class="btn border border-secondary rounded-pill px-3 text-primary">
+                                            <i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -226,5 +234,31 @@
         <!-- Single Product End -->
     </div>
     <div th:replace="~{/user/common/content_footer}"></div>
+    <script>
+        // function changeQuantity(amount){
+        //     const quantityInput = document.getElementById('quantityInput');
+        //     let currentQuantity = parseInt(quantityInput.value);
+        //     var newQuantity = currentQuantity + amount;
+        //     console.log(amount, currentQuantity, newQuantity);
+        //     quantityInput.value = newQuantity;
+        // }
+        function changeQuantity(amount, event) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const quantityInput = document.getElementById('quantityInput');
+            let currentQuantity = parseInt(quantityInput.value);
+            var newQuantity = currentQuantity + amount;
+
+            if (newQuantity < 1) {
+                newQuantity = 1; // Ngăn việc giảm xuống dưới 1
+            }
+
+            console.log(amount, currentQuantity, newQuantity);
+            quantityInput.value = newQuantity;
+        }
+    </script>
+
+
 </body>
 </html>

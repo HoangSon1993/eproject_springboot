@@ -1,13 +1,18 @@
 package com.sontung.eproject_springboot.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ManyToAny;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +24,7 @@ public class Cart {
     Integer quantity;
     BigDecimal amount;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "product_id")
     Product product;
 

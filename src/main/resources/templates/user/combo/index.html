@@ -124,6 +124,7 @@
                                                 <div class="d-flex justify-content-between flex-lg-wrap">
                                                     <p class="text-dark fs-5 fw-bold mb-0" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
                                                     <form th:action="@{/cart/create(comboId=${item.comboId})}" method="post">
+                                                        <input type="hidden" name="quantity" th:value="1">
                                                         <button class="btn border border-secondary rounded-pill px-3 text-primary">
                                                             <i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng
                                                         </button>
