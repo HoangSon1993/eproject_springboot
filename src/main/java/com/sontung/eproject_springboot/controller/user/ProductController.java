@@ -34,7 +34,6 @@ public class ProductController {
         return s3BucketUrl;
     }
 
-    @Autowired
     public ProductController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
         this.categoryService = categoryService;

@@ -8,7 +8,6 @@ import com.sontung.eproject_springboot.repository.ICategoryRepository;
 import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,77 +20,92 @@ import java.util.stream.Collectors;
 
 @Service
 public class ComboService {
-    @Autowired
-    IComboRepository iComboRepository;
-    @Autowired
-    IComboDetailRepository iComboDetailRepository;
-    @Autowired
-    ICategoryRepository iCategoryRepository;
+    private final IComboRepository iComboRepository;
+    private final IComboDetailRepository iComboDetailRepository;
+    private final ICategoryRepository iCategoryRepository;
     //dùng đế test danh sách product
-    @Autowired
-    IProductRepository iProductRepository;
-    //EntityManager entityManager;
-    public List<Product> getProducts(){
-      return iProductRepository.findAll();
-    };
-    public List<Combo> getCombos(){
-        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).collect(Collectors.toList());
-    };
-    public List<Combo> getExpiringCombos(){
-        return iComboRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+    private final IProductRepository iProductRepository;
+
+    public ComboService(IComboRepository iComboRepository, IComboDetailRepository iComboDetailRepository, ICategoryRepository iCategoryRepository, IProductRepository iProductRepository) {
+        this.iComboRepository = iComboRepository;
+        this.iComboDetailRepository = iComboDetailRepository;
+        this.iCategoryRepository = iCategoryRepository;
+        this.iProductRepository = iProductRepository;
     }
-    public Combo createCombo(Combo combo){
+
+    //EntityManager entityManager;
+    public List<Product> getProducts() {
+        return iProductRepository.findAll();
+    }
+
+    ;
+
+    public List<Combo> getCombos() {
+        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+    }
+
+    ;
+
+    public List<Combo> getExpiringCombos() {
+        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 1).collect(Collectors.toList());
+    }
+
+    public Combo createCombo(Combo combo) {
         combo.setCreatedDate(LocalDate.now());
         combo.setUpdatedDate(LocalDate.now());
         combo.setStatus(2);
         return iComboRepository.save(combo);
     }
-    public Combo getCombo(String comboId){
+
+    public Combo getCombo(String comboId) {
         return iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
     }
 
-    public int updateCombo(Combo combo, BigDecimal totalAmount, BigDecimal finalAmount){
+    public int updateCombo(Combo combo, BigDecimal totalAmount, BigDecimal finalAmount) {
         combo.setFinalAmount(finalAmount);
         combo.setTotalAmount(totalAmount);
         iComboRepository.save(combo);
         return 1;
     }
 
-    public void removeCombo(String comboId){
+    public void removeCombo(String comboId) {
         //StoredProcedure query =  entityManager.createStoredProcedureQuery()
         Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
         combo.setStatus(1);
         iComboRepository.save(combo);
     }
-    public long countComBos(){
-        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).toList().size();
+
+    public long countComBos() {
+        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).toList().size();
     }
+
     //=====================================================================//
     //=========================User Combo Service==========================//
     //=====================================================================//
-    public Page<Combo> listCombos(int page, int size){
-        Pageable pageable = PageRequest.of(page-1, size);
+    public Page<Combo> listCombos(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
         return iComboRepository.findByStatus(2, pageable);
     }
 
     // TODO: 07/08/2024  Lấy ra combo  nổi bật, nhưng tạm thời lấy tạm
-    public List<Combo> getFeaturedCombo(){
+    public List<Combo> getFeaturedCombo() {
         return iComboRepository.findAll().stream().limit(3).collect(Collectors.toList());
     }
 
     // TODO: 07/08/2024 tạm thời để đây
-    public List<Combo> listCombos1(){
-        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).collect(Collectors.toList());
-    }
-    public List<Category> listCategories(){
-        return iCategoryRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+    public List<Combo> listCombos1() {
+        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
     }
 
-    public List<Combo> listComboCategory(String categoryId){
+    public List<Category> listCategories() {
+        return iCategoryRepository.findAll().stream().filter(c -> c.getStatus() == 1).collect(Collectors.toList());
+    }
+
+    public List<Combo> listComboCategory(String categoryId) {
         return iComboRepository.findCombosByStatusAndCategory(categoryId);
     }
 
-    public List<ComboDetail> getComboDetails(String comboId){
+    public List<ComboDetail> getComboDetails(String comboId) {
         return iComboDetailRepository.findByIdComboId(comboId);
     }
 

@@ -2,34 +2,36 @@ package com.sontung.eproject_springboot.service;
 
 import com.sontung.eproject_springboot.entity.Category;
 import com.sontung.eproject_springboot.repository.ICategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class CategoryService {
-    @Autowired
-    ICategoryRepository iCategoryRepository;
-    public List<Category> getCategories(){
+    private final ICategoryRepository iCategoryRepository;
+
+    public CategoryService(ICategoryRepository iCategoryRepository) {
+        this.iCategoryRepository = iCategoryRepository;
+    }
+
+    public List<Category> getCategories() {
         return iCategoryRepository.findAll();
     }
 
-    public int createCategory(Category category){
+    public int createCategory(Category category) {
         category.setCreatedDate(LocalDate.now());
         category.setUpdatedDate(LocalDate.now());
         iCategoryRepository.save(category);
         return 1;
     }
 
-    public Category getCategory(String id){
+    public Category getCategory(String id) {
         return iCategoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Not Found"));
     }
 
-    public Category editCategory(String id, Category updateCategory){
-        Category category =  iCategoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Not Found"));
+    public Category editCategory(String id, Category updateCategory) {
+        Category category = iCategoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Not Found"));
         category.setCategoryName(updateCategory.getCategoryName());
         category.setStatus(updateCategory.getStatus());
         category.setCreatedDate(updateCategory.getCreatedDate());
@@ -37,7 +39,7 @@ public class CategoryService {
         return iCategoryRepository.save(category);
     };
 
-    public void deleteCategory(String id){
+    public void deleteCategory(String id) {
         iCategoryRepository.deleteById(id);
     }
 }

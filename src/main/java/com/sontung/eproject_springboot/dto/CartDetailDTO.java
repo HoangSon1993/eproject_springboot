@@ -7,13 +7,16 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartDetailDTO {
-    String comboName;
+    // todo: Thêm field chứa cart id
+    String id;  // id của product hoặc combo mà thôi
+    String name; // name chung có thể là product hoặc combo
     String image;
     BigDecimal price;
     int quantity;

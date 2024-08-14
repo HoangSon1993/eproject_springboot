@@ -12,84 +12,106 @@
 <div class="container" style="margin-top: 70px">
 
     <!-- Single Page Header start -->
-<!--    <div class="container-fluid page-header py-5">-->
-<!--        <h1 class="text-center text-white display-6">Giỏ Hàng Của Bạn</h1>-->
-<!--        <ol class="breadcrumb justify-content-center mb-0">-->
-<!--            <li class="breadcrumb-item"><a th:href="@{/home/index}">Trang chủ</a></li>-->
-<!--            <li class="breadcrumb-item active text-white">Giỏ Hàng Của Bạn</li>-->
-<!--        </ol>-->
-<!--    </div>-->
+    <!--    <div class="container-fluid page-header py-5">-->
+    <!--        <h1 class="text-center text-white display-6">Giỏ Hàng Của Bạn</h1>-->
+    <!--        <ol class="breadcrumb justify-content-center mb-0">-->
+    <!--            <li class="breadcrumb-item"><a th:href="@{/home/index}">Trang chủ</a></li>-->
+    <!--            <li class="breadcrumb-item active text-white">Giỏ Hàng Của Bạn</li>-->
+    <!--        </ol>-->
+    <!--    </div>-->
     <!-- Single Page Header End -->
     <!-- Cart Page Start -->
+
+
     <div class="container-fluid py-5">
         <div class="container py-5">
             <div class="table-responsive">
+                <!--            Thông báo thành công hay lỗi -->
+                <div th:if="${message}" class="alert alert-success" role="alert">
+                    <span th:text="${message}"></span>
+                </div>
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <span th:text="${error}"></span>
+                </div>
+                <!--            Thông báo thành công hay lỗi -->
                 <h3>Giỏ Hàng Của Bạn</h3>
                 <table class="table">
                     <thead>
-                        <tr>
-                            <th scope="col">Sản Phẩm</th>
-                            <th scope="col">Tên</th>
-                            <th scope="col">Giá</th>
-                            <th scope="col">Số Lượng</th>
-                            <th scope="col">Thành Tiền</th>
-                            <th scope="col">Xử Lý</th>
-                        </tr>
+                    <tr>
+                        <th scope="col">Sản Phẩm</th>
+                        <th scope="col">Tên</th>
+                        <th scope="col">Giá</th>
+                        <th scope="col">Số Lượng</th>
+                        <th scope="col">Thành Tiền</th>
+                        <th scope="col">Xử Lý</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <th:block th:each="item: ${cartDetail}">
-                            <tr >
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img th:src="@{${s3BucketUrl} + ${item.image}}" class="img-fluid me-5 rounded-circle" style="width: 100px; height: 100px;" alt="">
+                    <th:block th:each="item: ${cartDetail}">
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:src="@{${s3BucketUrl} + ${item.image}}" class="img-fluid me-5"
+                                         style="width: 160px; object-fit: cover" alt="">
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4" th:text="${item.name}"></p>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4"
+                                   th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></p>
+                            </td>
+                            <td>
+                                <div class="input-group quantity mt-4" style="width: 100px;">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
                                     </div>
-                                </td>
-                                <td>
-                                    <p class="mb-0 mt-4" th:text="${item.comboName}"></p>
-                                </td>
-                                <td>
-                                    <p class="mb-0 mt-4" th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></p>
-                                </td>
-                                <td>
-                                    <div class="input-group quantity mt-4" style="width: 100px;">
-                                        <div class="input-group-btn">
-                                            <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                                <i class="fa fa-minus"></i>
-                                            </button>
-                                        </div>
-                                        <input type="text" class="form-control form-control-sm text-center border-0" th:value="${item.quantity}">
-                                        <div class="input-group-btn">
-                                            <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                        </div>
+                                    <input type="text" class="form-control form-control-sm text-center border-0"
+                                           name="quantity"
+                                           th:value="${item.quantity}">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
                                     </div>
-                                </td>
-                                <td>
-                                    <p class="mb-0 mt-4" th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
-                                </td>
-                                <td>
-                                    <button class="btn btn-md rounded-circle bg-light border mt-4" >
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4"
+                                   th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
+                            </td>
+                            <td>
+                                <form th:action="@{/cart/remove}" method="post">
+                                    <input type="hidden" name="id" th:value="${item.id}">
+                                    <input type="hidden" name="type"
+                                           th:value="${item.comboDetails == null ? 'product': 'combo'}">
+                                    <button class="btn btn-md rounded-circle bg-light border mt-4"
+                                            th:action="@{/cart/remove}" th:method="post">
                                         <i class="fa fa-times text-danger"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            <!-- Hiển thị comboDetails nếu không rỗng -->
-                            <tr th:if="${item.comboDetails != null && item.comboDetails.size() > 0}">
-                                <td colspan="6">
-                                    <table class="table" style="margin-left: 650px; width: 550px">
-                                        <tr th:each="detail : ${item.comboDetails}">
-                                            <td ><img  th:src="@{${s3BucketUrl} + ${detail.product.image}}" alt="" style="height: 50px"></td>
-                                            <td th:text="${detail.product.productName}"></td>
-                                            <td th:text="${detail.quantity}"></td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr th:if="${item.comboDetails == null}">
+                                </form>
+                            </td>
+                        </tr>
+                        <!-- Hiển thị comboDetails nếu không rỗng -->
+                        <tr th:if="${item.comboDetails != null && item.comboDetails.size() > 0}">
+                            <td colspan="6">
+                                <table class="table" style="margin-left: 650px; width: 550px">
+                                    <tr th:each="detail : ${item.comboDetails}">
+                                        <td><img th:src="@{${s3BucketUrl} + ${detail.product.image}}" alt=""
+                                                 style="height: 50px"></td>
+                                        <td th:text="${detail.product.productName}"></td>
+                                        <td th:text="${detail.quantity}"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr th:if="${item.comboDetails == null}">
 
-                            </tr>
-                        </th:block>
+                        </tr>
+                    </th:block>
                     </tbody>
                 </table>
             </div>
@@ -101,7 +123,8 @@
                             <h1 class="display-6 mb-4">Giỏ Hàng: <span class="fw-normal">Tổng</span></h1>
                             <div class="d-flex justify-content-between mb-4">
                                 <h5 class="mb-0 me-4">Tổng tiền sản phẩm:</h5>
-                                <p class="mb-0" th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
+                                <p class="mb-0 total-amount"
+                                   th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <h5 class="mb-0 me-4">Phí Vận Chuyển</h5>
@@ -109,13 +132,16 @@
                                     <p class="mb-0">0 (VNĐ)</p>
                                 </div>
                             </div>
-<!--                            <p class="mb-0 text-end">Shipping to Ukraine.</p>-->
+                            <!--                            <p class="mb-0 text-end">Shipping to Ukraine.</p>-->
                         </div>
                         <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                             <h5 class="mb-0 ps-4 me-4">Tổng Thanh Toán</h5>
-                            <p class="mb-0 pe-4" th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
+                            <p class="mb-0 pe-4"
+                               th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
                         </div>
-                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Thanh Toán</button>
+                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
+                                type="button">Thanh Toán
+                        </button>
                     </div>
                 </div>
             </div>
@@ -125,5 +151,35 @@
 
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
+<script>
+    document.querySelectorAll('.btn-minus, .btn-plus').forEach(button => {
+        button.addEventListener('click', function () {
+            const quantityInput = this.closest('.input-group').querySelector('input');
+            // const quantity = this.classList.contains('btn-plus') ? parseInt(quantityInput.value) + 1 : parseInt(quantityInput.value) - 1;
+            const quantity = quantityInput.value;
+            //todo: xử lý lấy được cartId và gửi lên server
+
+            const cartIdInput = document.querySelector('input[name="id"]');
+            const cartId = cartIdInput.value
+
+            fetch('/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id: cartId, quantity: quantity})
+            }).then(response => response.json())
+                .then(date => {
+                    if (date.success) {
+                        quantityInput.value = quantity;
+                        // Update total price
+                        document.querySelector('.total-amount').innerText = data.newTotal;
+                    } else {
+                        alert('Đã có lỗi xảy ra!')
+                    }
+                })
+        })
+    })
+</script>
 </body>
 </html>
