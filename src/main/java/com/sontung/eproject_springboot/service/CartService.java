@@ -69,14 +69,15 @@ public class CartService {
             Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
             Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
             Cart cart = iCartRepository.findByAccountAndComboId(account, comboId);
-            if (cart == null) {
-                cart.setComboId(comboId);
-                cart.setQuantity(quantity);
-                cart.setAccount(account);
-                cart.setAmount(combo.getFinalAmount());
-                iCartRepository.save(cart);
+            if(cart==null){
+                Cart new_cart = new Cart();
+                new_cart.setComboId(comboId);
+                new_cart.setQuantity(quantity);
+                new_cart.setAccount(account);
+                new_cart.setAmount(combo.getFinalAmount());
+                iCartRepository.save(new_cart);
             } else {
-                int newQuantity = cart.getQuantity() + 1;
+                int newQuantity = cart.getQuantity() + quantity;
                 cart.setQuantity(newQuantity);
                 iCartRepository.save(cart);
             }
@@ -90,8 +91,7 @@ public class CartService {
         List<Cart> carts = iCartRepository.getCartsByAccount_AccountId(userId);
         List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
         for (Cart cart : carts) {
-            if (cart.getComboId() != null) {
-                // Case CartDetail is Combo
+            if (cart.getComboId() != null && cart.getProduct() == null) {
                 Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo khônng tồn tại"));
                 List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo() == combo).toList();
                 CartDetailDTO cartDetailDTO = new CartDetailDTO();
@@ -106,17 +106,16 @@ public class CartService {
                 cartDetailDTOList.add(cartDetailDTO);
             } else {
                 // Case CartDetail is Product
-                if (cart.getProduct() != null) { // Todo: xem lại nên check getProduct hay getProductId thì performance cao hơn
-                    CartDetailDTO cartDetailDTO = new CartDetailDTO();
-                    Product product = cart.getProduct();
-                    cartDetailDTO.setId(product.getProductId());
-                    cartDetailDTO.setName(product.getProductName());
-                    cartDetailDTO.setPrice(product.getPrice());
-                    cartDetailDTO.setQuantity(cart.getQuantity());
-                    cartDetailDTO.setImage(product.getImage());
+                CartDetailDTO cartDetailDTO = new CartDetailDTO();
+                Product product = cart.getProduct();
+                cartDetailDTO.setId(product.getProductId());
+                cartDetailDTO.setName(product.getProductName());
+                cartDetailDTO.setPrice(product.getPrice());
+                cartDetailDTO.setQuantity(cart.getQuantity());
+                cartDetailDTO.setImage(product.getImage());
 
-                    cartDetailDTOList.add(cartDetailDTO);
-                }
+                cartDetailDTOList.add(cartDetailDTO);
+
             }
         }
         return cartDetailDTOList;
@@ -156,13 +155,13 @@ public class CartService {
 
     public void updateProductQuantity(String cartId, Integer newQuantity) {
         Cart cart = iCartRepository.findById(cartId)
-                .orElseThrow(()-> new RuntimeException("Giỏ hàng không tồn tại."));
-        if(!cart.getAccount().getAccountId().equals(userId)) {
+                .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
+        if (!cart.getAccount().getAccountId().equals(userId)) {
             throw new RuntimeException("Người dùng không có quyền cập nhật sản phẩm");
         }
 
         Product product = productRepository.findById(cart.getProduct().getProductId())
-                        .orElseThrow(()-> new RuntimeException("Sản phẩm không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
         cart.setQuantity(newQuantity);
         cart.setAmount(product.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
         iCartRepository.save(cart);
