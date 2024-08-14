@@ -63,13 +63,14 @@ public class CartService {
             Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException());
             Cart cart = iCartRepository.findByAccountAndComboId(account, comboId);
             if(cart==null){
-                cart.setComboId(comboId);
-                cart.setQuantity(quantity);
-                cart.setAccount(account);
-                cart.setAmount(combo.getFinalAmount());
-                iCartRepository.save(cart);
+                Cart new_cart = new Cart();
+                new_cart.setComboId(comboId);
+                new_cart.setQuantity(quantity);
+                new_cart.setAccount(account);
+                new_cart.setAmount(combo.getFinalAmount());
+                iCartRepository.save(new_cart);
             } else {
-                int newQuantity = cart.getQuantity() + 1;
+                int newQuantity = cart.getQuantity() + quantity;
                 cart.setQuantity(newQuantity);
                 iCartRepository.save(cart);
             }
@@ -94,15 +95,13 @@ public class CartService {
                 cartDetailDTO.setComboDetails(comboDetailList);
                 cartDetailDTOList.add(cartDetailDTO);
             } else {
-                if (cart.getProduct() != null) {
-                    CartDetailDTO cartDetailDTO = new CartDetailDTO();
-                    Product product = cart.getProduct();
-                    cartDetailDTO.setComboName(product.getProductName());
-                    cartDetailDTO.setPrice(product.getPrice());
-                    cartDetailDTO.setQuantity(cart.getQuantity());
-                    cartDetailDTO.setImage(product.getImage());
-                    cartDetailDTOList.add(cartDetailDTO);
-                }
+                CartDetailDTO cartDetailDTO = new CartDetailDTO();
+                Product product = cart.getProduct();
+                cartDetailDTO.setComboName(product.getProductName());
+                cartDetailDTO.setPrice(product.getPrice());
+                cartDetailDTO.setQuantity(cart.getQuantity());
+                cartDetailDTO.setImage(product.getImage());
+                cartDetailDTOList.add(cartDetailDTO);
             }
         }
         return cartDetailDTOList;

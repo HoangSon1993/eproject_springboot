@@ -79,10 +79,6 @@ public class ComboService {
         return iComboRepository.findAll().stream().limit(3).collect(Collectors.toList());
     }
 
-    // TODO: 07/08/2024 tạm thời để đây
-    public List<Combo> listCombos1(){
-        return iComboRepository.findAll().stream().filter(c->c.getStatus()==2).collect(Collectors.toList());
-    }
     public List<Category> listCategories(){
         return iCategoryRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
     }

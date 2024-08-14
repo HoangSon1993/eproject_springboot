@@ -17,7 +17,6 @@
         }
 
     </style>
-
 </head>
 <body>
     <div th:replace="~{/user/common/content_first}"></div>
@@ -113,16 +112,20 @@
                                         <div class="rounded position-relative fruite-item">
                                             <div class="fruite-img">
                                                 <a th:href="@{/combo/detail(comboId=${item.comboId})}">
-                                                    <img th:src="@{${s3BucketUrl} + ${item.image}}" class="img-fluid w-100 rounded-top" alt="">
+                                                    <img th:src="@{${s3BucketUrl} + ${item.image}}"
+                                                         class="img-fluid w-100 rounded-top"
+                                                         alt=""
+                                                         style="width: 294px;height: 171px;
+                                                         object-fit: cover">
                                                 </a>
                                             </div>
-                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;" th:text="${item.comboName}"></div>
+                                            <div class="text-white bg-info px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #F98866" th:text="${item.comboName}"></div>
                                             <div class="p-4 border border-secondary border-top-0 rounded-bottom">
                                                 <h4 th:text="${item.comboName}"></h4>
                                                 <p th:text="${item.description}"></p>
                                                 <p th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(item.endDate, 'dd/MM/yyyy')}"></p>
                                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                                    <p class="text-dark fs-5 fw-bold mb-0" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                                                    <p class="text-dark fs-5 fw-bold mb-0" th:text="${#numbers.formatDecimal(item.finalAmount, 1, 'COMMA', 0, 'POINT')} "></p>
                                                     <form th:action="@{/cart/create(comboId=${item.comboId})}" method="post">
                                                         <input type="hidden" name="quantity" th:value="1">
                                                         <button class="btn border border-secondary rounded-pill px-3 text-primary">
