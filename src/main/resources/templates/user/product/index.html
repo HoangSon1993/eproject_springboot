@@ -253,12 +253,14 @@
                                                     style="display: -webkit-box;
                                                           -webkit-line-clamp: 1;
                                                           -webkit-box-orient: vertical;
-                                                           overflow: hidden">Grapes</h4>
+                                                           overflow: hidden;
+                                                           min-height: 3em">Grapes</h4>
                                             </a>
                                             <p th:text="${item.description}" style="display: -webkit-box;
-                                                      -webkit-line-clamp: 3;
+                                                      -webkit-line-clamp: 2;
                                                       -webkit-box-orient: vertical;
-                                                       overflow: hidden"></p>
+                                                       overflow: hidden;
+                                                       min-height: 3em"></p>
                                             <div class="d-flex justify-content-between flex-lg-wrap">
                                                 <p class="text-dark fs-5 fw-bold mb-0"
                                                    th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">
@@ -340,11 +342,11 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    if(data.success){
+                    if (data.success) {
                         alert("Sản phẩm đã được thêm vào giỏ hàng")
                     }
                 })
-                .catch(error =>{
+                .catch(error => {
                     console.error('Đã xảy ra lỗi không mong muốn: ', error);
                     alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
                 })
