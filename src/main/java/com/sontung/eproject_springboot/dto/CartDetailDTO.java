@@ -17,7 +17,7 @@ public class CartDetailDTO {
     String id;  // id của Cart
     String name; // name chung có thể là product hoặc combo
     String image;
-    BigDecimal price;
+    BigDecimal price; // price one product/combo
     int quantity;
     List<ComboDetail> comboDetails;
     boolean checked;

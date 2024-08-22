@@ -51,10 +51,14 @@
                     <th:block th:each="item: ${cartDetail}">
                         <tr>
                             <td>
-                                <input type="checkbox"
-                                       th:attr="name=${'checkedItems[' + item.id + ']'}"
-                                       th:checked="${#lists.contains(checkedItems, item.id)}">
-<!--                                       name="selectedItems" th:value="${item.id}"-->
+                                <label>
+                                    <input type="checkbox"
+                                           th:attr="name=${'checkedItems[' + item.id + ']'}"
+                                           th:checked="${#lists.contains(checkedItems, item.id)}"
+                                           th:data-id="${item.id}"
+                                           class="product-checkbox">
+                                </label>
+                                <!--                                       name="selectedItems" th:value="${item.id}"-->
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -78,7 +82,9 @@
                                     </div>
                                     <input type="text" class="form-control form-control-sm text-center border-0"
                                            name="quantity"
-                                           th:value="${item.quantity}">
+                                           th:value="${item.quantity}"
+                                           th:data-quantity-id="${item.id}"
+                                           th:classappend="quantity-input">
                                     <div class="input-group-btn">
                                         <button class="btn btn-sm btn-plus rounded-circle bg-light border p-2">
                                             <i class="fa fa-plus"></i>
@@ -88,6 +94,7 @@
                             </td>
                             <td>
                                 <p class="mb-0 mt-4 amount-element"
+                                   th:attr="data-price=${item.price}"
                                    th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
                             </td>
                             <td>
@@ -128,24 +135,24 @@
                             <h1 class="display-6 mb-4">Giỏ Hàng: <span class="fw-normal">Tổng</span></h1>
                             <div class="d-flex justify-content-between mb-4">
                                 <h5 class="mb-0 me-4">Tổng tiền sản phẩm:</h5>
-<!--                                total-amount-->
+                                <!--                                total-amount-->
                                 <p class="mb-0 total-amount"
-                                   th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
+                                   th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'"></p>
                             </div>
                             <div class="d-flex justify-content-between">
-<!--                                Shipping-cost-->
+                                <!--                                Shipping-cost-->
                                 <h5 class="mb-0 me-4 ">Phí Vận Chuyển</h5>
                                 <div class="">
-                                    <p class="mb-0 shipping-cost">0 (VNĐ)</p>
+                                    <p class="mb-0 shipping-cost">0 (VND)</p>
                                 </div>
                             </div>
                             <!--                            <p class="mb-0 text-end">Shipping to Ukraine.</p>-->
                         </div>
                         <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                             <h5 class="mb-0 ps-4 me-4">Tổng Thanh Toán</h5>
-<!--                            total-payment-->
+                            <!--                            total-payment-->
                             <p class="mb-0 pe-4 total-payment"
-                               th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VNĐ)'"></p>
+                               th:text="${#numbers.formatDecimal(amount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'"></p>
                         </div>
                         <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
                                 type="button">Thanh Toán
@@ -160,56 +167,228 @@
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
 <script>
-    document.querySelectorAll('.btn-minus, .btn-plus').forEach(button => {
-        button.addEventListener('click', function () {
-            const quantityInput = this.closest('.input-group').querySelector('input');
-            // const quantity = this.classList.contains('btn-plus') ? parseInt(quantityInput.value) + 1 : parseInt(quantityInput.value) - 1;
-            const quantity = quantityInput.value;
-            //todo: xử lý lấy được cartId và gửi lên server
+    /**
+     *
+     **/
+    document.addEventListener("DOMContentLoaded", function () {
+        let prevQuantity = 0;
+        // khi người dùng thay đổi số lượng bằng nút tăng/giảm
+        document.querySelectorAll('.btn-minus, .btn-plus').forEach((button) => {
+                button.addEventListener('click', function () {
+                    let quantityInput = this.closest('.input-group').querySelector('input');
+                    prevQuantity =parseInt(quantityInput.value) + 1;
+                    handleQuantityChange(this);
+                })
+            }
+        )
 
-            const form = this.closest('tr').querySelector('form');
-            const cartId = form.querySelector('input[name="id"]').value;
-
-            fetch('/cart/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({id: cartId, quantity: quantity})
+        // Khi người dùng thay đổi số lượng bằng cách nhập trực tiếp.
+        document.querySelectorAll('.quantity-input').forEach((input) => {
+            input.addEventListener('focus', function () {
+                prevQuantity = parseInt(this.value);
             })
-                .then(response => {
-                    console.log(response)
-                    return response.json()
-                })
-                .then(data => {
-                    if (data.success) {
-                        quantityInput.value = quantity;
-                        console.log(data)
-                        // Update amount
-                        document.querySelector('.amount-element').innerText = data.amount.toLocaleString('en-US');
 
-                        // Update total price
-                        document.querySelector('.total-amount').innerText = new Intl.NumberFormat('en-US',{
-                            style:'decimal',
-                            minimumFractionDigits: 0,
-                        }).format(data.newTotal) + ' (VNĐ)';
-
-                        const shippingCostElement = document.querySelector('.shipping-cost')
-                        let shippingCostText = shippingCostElement.innerText.replace(' (VNĐ)','').trim()
-                        let shippingCostValue = parseInt(shippingCostText.replace(/\./g, ''));
-
-                        const totalPaymentElement = document.querySelector('.total-payment')
-                        let totalPaymentValue = data.newTotal + shippingCostValue;
-
-                        totalPaymentElement.innerText = new Intl.NumberFormat('en-US',{
-                            style:'decimal',
-                            minimumFractionDigits: 0,
-                        }).format(totalPaymentValue) + ' (VNĐ)';
-                    } else {
-                        alert('Đã có lỗi xảy ra!')
-                    }
-                })
+            input.addEventListener('change', function () {
+                handleQuantityChange(this);
+            })
         })
+
+        function handleQuantityChange(element) {
+            const quantityInput = element.classList.contains("btn-minus") || element.classList.contains('btn-plus')
+                ? element.closest('.input-group').querySelector('input')
+                : element
+
+            let quantity = parseInt(quantityInput.value)
+            let form = element.closest('tr').querySelector('form');
+            let cartId = form.querySelector('input[name="id"]').value
+            let price = parseFloat(element.closest('tr').querySelector('.amount-element').getAttribute('data-price'));
+
+            // Trường hợp số lượng giảm xuống 0
+            if (quantity <= 0) {
+                if (confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ hàng?")) {
+                    // call api
+                    fetch(`/remove`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: cartId
+                        })
+                    }).then(response => {
+                        if (response.redirected) {
+                            // Nếu server trả về một redirect, thực hiện điều hướng tới URL đó
+                            window.location.href = response.url;
+                        } else {
+                            // Nếu không có redirect, xóa sản phẩm khỏi giao diện
+                            element.closest('tr').remove();
+                            // Cập nhật lại tổng tiền
+                            updateTotalAmount();
+                        }
+                    }).catch(error => console.error("Lỗi: " + error));
+                } else {
+                    // Nếu người dùng chọn "Cancel", khôi phục số lượng về giá trị trước đó
+                    quantityInput.value = prevQuantity;
+                }
+            } else {
+                console.log('change quantity')
+                // Call Api update quantity
+                fetch(`/cart/updateQuantity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        //  'X-CSRF-TOKEN':
+                    },
+                    body: JSON.stringify({
+                        id: cartId,
+                        quantity: quantity
+                    })
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // cap nhat thanh tien
+                            let updatedAmount = quantity * price;
+                            console.log(element)
+                            element.closest('tr').querySelector('.amount-element')
+                                .textContent = updatedAmount.toLocaleString('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            });
+
+                            // Tinh lai tong tien
+                            updateTotalAmount();
+                        } else {
+                            alert("Có lỗi xảy ra khi cập nhật số lượng sản phẩm");
+                        }
+                    }).catch(error => console.error("Lỗi " + error))
+            }
+
+        }
+
+        // document.querySelectorAll('.btn-minus, .btn-plus').forEach((button) => {
+        //     button.addEventListener('click', function () {
+        //         const quantityInput = this.closest('.input-group').querySelector('input');
+        //         let quantity = parseInt(quantityInput.value);
+        //
+        //         let form = this.closest('tr').querySelector('form');
+        //         let cartId = form.querySelector('input[name="id"]').value;
+        //
+        //         let price = parseFloat(this.closest('tr').querySelector('.amount-element').getAttribute('data-price'));
+        //         // Neu so luong giam xuong 0, xoa san pham khoi gio hang
+        //         if (this.classList.contains('btn-minus') && quantity < 1) {
+        //             if (confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ hàng?")) {
+        //                 fetch(`/cart/remove`, {
+        //                     method: 'POST',
+        //                     headers: {
+        //                         'Content-Type': 'application/x-www-form-urlencoded'
+        //                         // Content-Type: application/x-www-form-urlencoded
+        //                     },
+        //                     body: new URLSearchParams({
+        //                         id: cartId
+        //                     })
+        //                 }).then(response => {
+        //                     // Do dùng chúng action /remove và server trả về 1 redirected
+        //                     // Nên thực hiện load lại trang.
+        //                     if (response.redirected) {
+        //                         window.location.href = response.url;
+        //                     } else {
+        //                         this.closest('tr').remove();
+        //                         updateTotalAmount();
+        //                     }
+        //                 })
+        //                     .catch(error => console.error("Xoá sản phẩm có lỗi từ server: " + error))
+        //             } else {
+        //                 // Nguoi dung bam Cancel trong hop thoai confirm
+        //                 quantityInput.value = quantity + 1;
+        //             }
+        //         } else {
+        //             // Call Api
+        //             fetch(`/cart/updateQuantity`, {
+        //                 method: 'POST',
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                     //  'X-CSRF-TOKEN':
+        //                 },
+        //                 body: JSON.stringify({
+        //                     id: cartId,
+        //                     quantity: quantity
+        //                 })
+        //             }).then(response => response.json())
+        //                 .then(data => {
+        //                     if (data.success) {
+        //                         // cap nhat thanh tien
+        //                         let updatedAmount = quantity * price;
+        //                         this.closest('tr').querySelector('.amount-element')
+        //                             .textContent = updatedAmount.toLocaleString('vi-VN', {
+        //                             style: 'currency',
+        //                             currency: 'VND'
+        //                         });
+        //
+        //                         // Tinh lai tong tien
+        //                         updateTotalAmount();
+        //                     } else {
+        //                         alert("Có lỗi xảy ra khi cập nhật số lượng sản phẩm");
+        //                     }
+        //                 }).catch(error => console.error("Lỗi " + error))
+        //         }
+        //     });
+        // });
+
+        // khi nguoi dung chon hoac bo chon sp
+        document.querySelectorAll('.product-checkbox').forEach((element) => {
+            element.addEventListener('change', () => {
+                    console.log(element)
+                    let id = element.getAttribute('data-id');
+                    let checked = element.checked;
+
+                    fetch(`/cart/updateChecked`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'id': id,
+                            'checked': checked
+                        })
+                    }).then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Sau khi cap nhat tinh toan tien lai o client
+                                updateTotalAmount();
+                            } else {
+                                console.error("Có lỗi xảy ra khi cập nhật checked");
+                            }
+
+                        }).catch(error => {
+                        console.error("Có lỗi từ server: " + error);
+                    })
+                }
+            )
+        })
+
+        // Ham tinh toan tong tien dua tren cac san pham dc chon
+        function updateTotalAmount() {
+            let totalAmount = 0;
+            document.querySelectorAll('.product-checkbox:checked').forEach((checkbox) => {
+                let row = checkbox.closest('tr');
+                let amountElement = row.querySelector('.amount-element');
+                let amount = parseFloat(amountElement.textContent.replace(/[^\d]/g, ''));
+                totalAmount += amount;
+            });
+
+            // cap nhat tong tien
+            let totalAmountElement = document.querySelector('.total-amount');
+            let totalPaymentElement = document.querySelector('.total-payment');
+            totalAmountElement.textContent = totalAmount.toLocaleString('us-US', {
+                style: 'currency',
+                currency: 'VND'
+            });
+            totalPaymentElement.textContent = totalAmountElement.textContent
+        }
+
+        //tinh tong tien khi trang duoc load lan dau
+        updateTotalAmount();
+
     })
 </script>
 </body>

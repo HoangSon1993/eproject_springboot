@@ -18,7 +18,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.UUID)
     String cartId;
     Integer quantity;
-    BigDecimal amount;
+    BigDecimal price; // change from amount to price
 
     @ManyToOne
     @JoinColumn(name = "product_id")

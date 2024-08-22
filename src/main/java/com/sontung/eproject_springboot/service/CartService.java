@@ -50,13 +50,12 @@ public class CartService {
         if (cartItem != null) {
             // Update quantity and amount
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setAmount(cartItem.getAmount().add(product.getPrice().multiply(BigDecimal.valueOf(quantity))));
         } else {
             // The product does not exist in the cart
             cartItem = new Cart();
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
-            cartItem.setAmount(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
+            cartItem.setPrice(product.getPrice());
             cartItem.setAccount(account);
         }
         // Save change to database
@@ -65,7 +64,7 @@ public class CartService {
     }
 
     // 07/08/2024 Tạo giỏ hàng cho combo(do Tùng làm)
-    public int addComboToCart(String comboId, int quantity) {
+    public Cart addComboToCart(String comboId, int quantity) {
         try {
             Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
             Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
@@ -75,16 +74,16 @@ public class CartService {
                 new_cart.setComboId(comboId);
                 new_cart.setQuantity(quantity);
                 new_cart.setAccount(account);
-                new_cart.setAmount(combo.getFinalAmount());
+                new_cart.setPrice(combo.getFinalAmount()); // Tung xem lai vi da change amount -> price
                 iCartRepository.save(new_cart);
             } else {
                 int newQuantity = cart.getQuantity() + quantity;
                 cart.setQuantity(newQuantity);
                 iCartRepository.save(cart);
             }
-            return 1;
+            return cart;
         } catch (Exception e) {
-            return 0;
+            return null;
         }
     }
 
@@ -129,7 +128,7 @@ public class CartService {
         for (Cart cart : carts) {
             // Kiểm tra nếu cartItem được check
             if(checkedItems.contains(cart.getCartId())) {
-                total = total.add(cart.getAmount());
+                total = total.add(cart.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
             }
         }
         return total;
@@ -149,10 +148,10 @@ public class CartService {
         }
     }
 
-    public BigDecimal updateQuantity(String cartId, Integer newQuantity) {
+    public boolean updateQuantity(String cartId, Integer newQuantity) {
         Cart cart = iCartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
-        BigDecimal amount;
+        //BigDecimal amount;
 
 //        if (!cart.getAccount().getAccountId().equals(userId)) {
 //            throw new RuntimeException("Người dùng không có quyền cập nhật sản phẩm");
@@ -160,16 +159,16 @@ public class CartService {
 
         if (cart.getComboId() == null) {
             cart.setQuantity(newQuantity);
-            cart.setAmount(cart.getProduct().getPrice().multiply(BigDecimal.valueOf(newQuantity)));
-            amount = cart.getProduct().getPrice().multiply(BigDecimal.valueOf(newQuantity));
+            cart.setPrice(cart.getProduct().getPrice());
+           // amount = cart.getProduct().getPrice().multiply(BigDecimal.valueOf(newQuantity));
         } else {
             // Case Combo
             cart.setQuantity(newQuantity);
             Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
-            cart.setAmount(combo.getFinalAmount().multiply(BigDecimal.valueOf(newQuantity)));
-            amount = combo.getFinalAmount().multiply(BigDecimal.valueOf(newQuantity));
+            cart.setPrice(combo.getFinalAmount());
+           // amount = combo.getFinalAmount().multiply(BigDecimal.valueOf(newQuantity));
         }
         iCartRepository.save(cart);
-        return amount;
+        return true;
     }
 }

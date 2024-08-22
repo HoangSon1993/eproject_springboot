@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.controller.user;
 
+import com.sontung.eproject_springboot.dto.CartDetailDTO;
 import com.sontung.eproject_springboot.dto.request.CartUpdateRequest;
 import com.sontung.eproject_springboot.entity.Cart;
 import com.sontung.eproject_springboot.exception.ProductNotFoundException;
@@ -45,35 +46,47 @@ public class UserCartController {
     @GetMapping("/index")
     public String getCarts(Model model, @ModelAttribute("checkedItems") List<String> checkedItems) {
 
-        model.addAttribute("cartDetail", cartService.getCarts());
+        List<CartDetailDTO> cartDetail = cartService.getCarts();
 
         // Cập nhật trạng thái checked cho các sản phẩm đã chọn
-        cartService.getCarts().forEach(item -> {
+        cartDetail.forEach(item -> {
             if (checkedItems.contains(item.getId())) {
                 item.setChecked(true);
             }
         });
 
+        model.addAttribute("cartDetail", cartDetail);
         model.addAttribute("amount", cartService.getTotalAmount(checkedItems));
         return "/user/cart/index";
     }
 
     @PostMapping("/create")
-    public String addComboToCart(@RequestParam String comboId, @RequestParam int quantity) {
-        cartService.addComboToCart(comboId, quantity);
+    public String addComboToCart(
+            @RequestParam String comboId,
+            @RequestParam int quantity,
+            @ModelAttribute("checkedItems") List<String> checkedItems
+    ) {
+       Cart cart = cartService.addComboToCart(comboId, quantity);
+
+       // Thêm combo và danh sách checked
+        if(!checkedItems.contains(cart.getCartId())){
+            checkedItems.add(cart.getCartId());
+        }
         return "redirect:/cart/index";
     }
 
     @PostMapping("/add-product")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> addProductToCart(@RequestParam("productId") String productId,
-                                                                @RequestParam("quantity") int quantity,
-                                                                @ModelAttribute("checkedItems") List<String> checkedItems) {
+    public ResponseEntity<Map<String, Object>> addProductToCart(
+            @RequestParam("productId") String productId,
+            @RequestParam("quantity") int quantity,
+            @ModelAttribute("checkedItems") List<String> checkedItems) {
         Map<String, Object> response = new HashMap<>();
         try {
-           Cart cart = cartService.addProductToCart(productId, quantity);
+            Cart cart = cartService.addProductToCart(productId, quantity);
 
             // Thêm sản phẩm vào danh sách checked
+            // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì them vào
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
             }
@@ -92,28 +105,28 @@ public class UserCartController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Map<String, Object>> updateCart(
-            @RequestBody CartUpdateRequest request,
-            @ModelAttribute("checkedItems") List<String> checkedItems) {
-        // todo chưa hoàn thành, cần nhận được cartId
+    public ResponseEntity<Map<String, Object>> updateCart(@RequestBody CartUpdateRequest request,
+                                                          @ModelAttribute("checkedItems") List<String> checkedItems) {
         Map<String, Object> response = new HashMap<>();
         try {
             // Cập nhật số lượng sản phẩm
-            var amount = cartService.updateQuantity(request.getId(), request.getQuantity());
+            if (request.getQuantity() != null) {
+                var amount = cartService.updateQuantity(request.getId(), request.getQuantity());
+                response.put("amount", amount);
+            }
 
             // Kiểm tra và cập nhật danh sách checkedItems
-            if (request.isChecked()) {
-                if (!checkedItems.contains(request.getId())) {
-                    checkedItems.add(request.getId());
-                } else {
-                    checkedItems.remove(request.getId());
-                }
-            }
+//            if (request.isChecked()) {
+//                if (!checkedItems.contains(request.getId())) {
+//                    checkedItems.add(request.getId());
+//                } else {
+//                    checkedItems.remove(request.getId());
+//                }
+//            }
 
 
             var totalAmount = cartService.getTotalAmount(checkedItems);
             response.put("success", true);
-            response.put("amount", amount);
             response.put("newTotal", totalAmount);
 
         } catch (RuntimeException e) {
@@ -127,11 +140,41 @@ public class UserCartController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/updateQuantity")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateQuantity(@RequestBody CartUpdateRequest request) {
+        Map<String, Object> response = new HashMap<>();
+
+        boolean success = cartService.updateQuantity(request.getId(), request.getQuantity());
+        response.put("success", success);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/updateChecked")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateCheckedItem(
+            @RequestParam("id") String id,
+            @RequestParam("checked") Boolean checked,
+            @ModelAttribute("checkedItems") List<String> checkedItems) {
+        Map<String, Object> response = new HashMap<>();
+        // Cap nhat ds checkedItems
+        if (checked) {
+            if (!checkedItems.contains(id)) {
+                checkedItems.add(id);
+            }
+        } else {
+            checkedItems.remove(id);
+        }
+
+        response.put("success", true);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/remove")
-    public String removeFromCart(@RequestParam("id") String id,
-                                 RedirectAttributes redirectAttributes,
-                                 @ModelAttribute("checkedItems") List<String> checkedItems
-    ) {
+    public String removeFromCart(
+            @RequestParam("id") String id,
+            RedirectAttributes redirectAttributes,
+            @ModelAttribute("checkedItems") List<String> checkedItems) {
         try {
             // Xoá sản phẩm khỏi giỏ hàng
             cartService.removeItemFromCart(id);
