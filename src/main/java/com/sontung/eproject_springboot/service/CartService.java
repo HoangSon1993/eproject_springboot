@@ -127,7 +127,7 @@ public class CartService {
         BigDecimal total = BigDecimal.ZERO;
         for (Cart cart : carts) {
             // Kiểm tra nếu cartItem được check
-            if(checkedItems.contains(cart.getCartId())) {
+            if (checkedItems.contains(cart.getCartId())) {
                 total = total.add(cart.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
             }
         }
@@ -151,22 +151,15 @@ public class CartService {
     public boolean updateQuantity(String cartId, Integer newQuantity) {
         Cart cart = iCartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
-        //BigDecimal amount;
-
-//        if (!cart.getAccount().getAccountId().equals(userId)) {
-//            throw new RuntimeException("Người dùng không có quyền cập nhật sản phẩm");
-//        }
 
         if (cart.getComboId() == null) {
             cart.setQuantity(newQuantity);
             cart.setPrice(cart.getProduct().getPrice());
-           // amount = cart.getProduct().getPrice().multiply(BigDecimal.valueOf(newQuantity));
         } else {
             // Case Combo
             cart.setQuantity(newQuantity);
             Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
             cart.setPrice(combo.getFinalAmount());
-           // amount = combo.getFinalAmount().multiply(BigDecimal.valueOf(newQuantity));
         }
         iCartRepository.save(cart);
         return true;

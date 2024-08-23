@@ -38,7 +38,9 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th scope="col">Chọn</th>
+                        <th scope="col">
+                            <input class="select-all" type="checkbox"/>
+                        </th>
                         <th scope="col">Sản Phẩm</th>
                         <th scope="col">Tên</th>
                         <th scope="col">Giá</th>
@@ -250,10 +252,10 @@
                             let updatedAmount = quantity * price;
                             console.log(element)
                             element.closest('tr').querySelector('.amount-element')
-                                .textContent = updatedAmount.toLocaleString('vi-VN', {
-                                style: 'currency',
-                                currency: 'VND'
-                            });
+                                .textContent =  new Intl.NumberFormat('en-US',{
+                                style:'decimal',
+                                minimumFractionDigits: 0,
+                            }).format(updatedAmount);
 
                             // Tinh lai tong tien
                             updateTotalAmount();
@@ -264,75 +266,15 @@
             }
 
         }
-
-        // document.querySelectorAll('.btn-minus, .btn-plus').forEach((button) => {
-        //     button.addEventListener('click', function () {
-        //         const quantityInput = this.closest('.input-group').querySelector('input');
-        //         let quantity = parseInt(quantityInput.value);
         //
-        //         let form = this.closest('tr').querySelector('form');
-        //         let cartId = form.querySelector('input[name="id"]').value;
-        //
-        //         let price = parseFloat(this.closest('tr').querySelector('.amount-element').getAttribute('data-price'));
-        //         // Neu so luong giam xuong 0, xoa san pham khoi gio hang
-        //         if (this.classList.contains('btn-minus') && quantity < 1) {
-        //             if (confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ hàng?")) {
-        //                 fetch(`/cart/remove`, {
-        //                     method: 'POST',
-        //                     headers: {
-        //                         'Content-Type': 'application/x-www-form-urlencoded'
-        //                         // Content-Type: application/x-www-form-urlencoded
-        //                     },
-        //                     body: new URLSearchParams({
-        //                         id: cartId
-        //                     })
-        //                 }).then(response => {
-        //                     // Do dùng chúng action /remove và server trả về 1 redirected
-        //                     // Nên thực hiện load lại trang.
-        //                     if (response.redirected) {
-        //                         window.location.href = response.url;
-        //                     } else {
-        //                         this.closest('tr').remove();
-        //                         updateTotalAmount();
-        //                     }
-        //                 })
-        //                     .catch(error => console.error("Xoá sản phẩm có lỗi từ server: " + error))
-        //             } else {
-        //                 // Nguoi dung bam Cancel trong hop thoai confirm
-        //                 quantityInput.value = quantity + 1;
-        //             }
-        //         } else {
-        //             // Call Api
-        //             fetch(`/cart/updateQuantity`, {
-        //                 method: 'POST',
-        //                 headers: {
-        //                     'Content-Type': 'application/json',
-        //                     //  'X-CSRF-TOKEN':
-        //                 },
-        //                 body: JSON.stringify({
-        //                     id: cartId,
-        //                     quantity: quantity
-        //                 })
-        //             }).then(response => response.json())
-        //                 .then(data => {
-        //                     if (data.success) {
-        //                         // cap nhat thanh tien
-        //                         let updatedAmount = quantity * price;
-        //                         this.closest('tr').querySelector('.amount-element')
-        //                             .textContent = updatedAmount.toLocaleString('vi-VN', {
-        //                             style: 'currency',
-        //                             currency: 'VND'
-        //                         });
-        //
-        //                         // Tinh lai tong tien
-        //                         updateTotalAmount();
-        //                     } else {
-        //                         alert("Có lỗi xảy ra khi cập nhật số lượng sản phẩm");
-        //                     }
-        //                 }).catch(error => console.error("Lỗi " + error))
-        //         }
-        //     });
-        // });
+        document.querySelector('.select-all').addEventListener('change',(element)=>{
+            let checked = element.target.checked;
+            console.log(checked)
+            document.querySelectorAll('.product-checkbox').forEach(element =>{
+                element.checked = checked;
+            })
+            updateTotalAmount();
+        })
 
         // khi nguoi dung chon hoac bo chon sp
         document.querySelectorAll('.product-checkbox').forEach((element) => {
@@ -379,10 +321,10 @@
             // cap nhat tong tien
             let totalAmountElement = document.querySelector('.total-amount');
             let totalPaymentElement = document.querySelector('.total-payment');
-            totalAmountElement.textContent = totalAmount.toLocaleString('us-US', {
-                style: 'currency',
-                currency: 'VND'
-            });
+            totalAmountElement.textContent =  new Intl.NumberFormat('en-US',{
+                style:'decimal',
+                minimumFractionDigits: 0,
+            }).format(totalAmount) + ' (VND)';
             totalPaymentElement.textContent = totalAmountElement.textContent
         }
 

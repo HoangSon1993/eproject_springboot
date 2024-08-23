@@ -104,42 +104,6 @@ public class UserCartController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<Map<String, Object>> updateCart(@RequestBody CartUpdateRequest request,
-                                                          @ModelAttribute("checkedItems") List<String> checkedItems) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            // Cập nhật số lượng sản phẩm
-            if (request.getQuantity() != null) {
-                var amount = cartService.updateQuantity(request.getId(), request.getQuantity());
-                response.put("amount", amount);
-            }
-
-            // Kiểm tra và cập nhật danh sách checkedItems
-//            if (request.isChecked()) {
-//                if (!checkedItems.contains(request.getId())) {
-//                    checkedItems.add(request.getId());
-//                } else {
-//                    checkedItems.remove(request.getId());
-//                }
-//            }
-
-
-            var totalAmount = cartService.getTotalAmount(checkedItems);
-            response.put("success", true);
-            response.put("newTotal", totalAmount);
-
-        } catch (RuntimeException e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Đã có lỗi không mong muốn xảy ra");
-        }
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/updateQuantity")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateQuantity(@RequestBody CartUpdateRequest request) {
