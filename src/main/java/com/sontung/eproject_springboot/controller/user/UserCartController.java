@@ -6,6 +6,7 @@ import com.sontung.eproject_springboot.entity.Cart;
 import com.sontung.eproject_springboot.exception.ProductNotFoundException;
 import com.sontung.eproject_springboot.exception.UserNotFoundException;
 import com.sontung.eproject_springboot.service.CartService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 @RequestMapping("/cart")
 @SessionAttributes("checkedItems")
@@ -56,23 +58,29 @@ public class UserCartController {
         });
 
         model.addAttribute("cartDetail", cartDetail);
-        model.addAttribute("amount", cartService.getTotalAmount(checkedItems));
         return "/user/cart/index";
     }
 
     @PostMapping("/create")
     public String addComboToCart(
+            RedirectAttributes redirectAttributes,
             @RequestParam String comboId,
             @RequestParam int quantity,
-            @ModelAttribute("checkedItems") List<String> checkedItems
-    ) {
-       Cart cart = cartService.addComboToCart(comboId, quantity);
-
-       // Thêm combo và danh sách checked
-        if(!checkedItems.contains(cart.getCartId())){
-            checkedItems.add(cart.getCartId());
+            @ModelAttribute("checkedItems") List<String> checkedItems) {
+        try {
+            Cart cart = cartService.addComboToCart(comboId, quantity);
+            // Thêm combo và danh sách checked
+            if (!checkedItems.contains(cart.getCartId())) {
+                checkedItems.add(cart.getCartId());
+            }
+            redirectAttributes.addFlashAttribute("message", "Thêm combo thành công.");
+            return "redirect:/cart/index";
+        } catch (RuntimeException ex) {
+            log.error(ex.getMessage(), ex);
+            //todo: hiển thị thông báo lỗi ở view
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/combo/index";
         }
-        return "redirect:/cart/index";
     }
 
     @PostMapping("/add-product")
@@ -106,11 +114,17 @@ public class UserCartController {
 
     @PostMapping("/updateQuantity")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateQuantity(@RequestBody CartUpdateRequest request) {
+    public ResponseEntity<Map<String, Object>> updateQuantity(
+            @RequestBody CartUpdateRequest request) {
         Map<String, Object> response = new HashMap<>();
+        try {
+            boolean success = cartService.updateQuantity(request.getId(), request.getQuantity());
+            response.put("success", success);
 
-        boolean success = cartService.updateQuantity(request.getId(), request.getQuantity());
-        response.put("success", success);
+        } catch (RuntimeException ex) {
+            log.error(ex.getMessage(), ex);
+            response.put("success", false);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -119,6 +133,8 @@ public class UserCartController {
     public ResponseEntity<Map<String, Object>> updateCheckedItem(
             @RequestParam("id") String id,
             @RequestParam("checked") Boolean checked,
+            @RequestParam("selectAll") Boolean selectAll,
+            @RequestParam("cartItems") List<String> cartItems,
             @ModelAttribute("checkedItems") List<String> checkedItems) {
         Map<String, Object> response = new HashMap<>();
         // Cap nhat ds checkedItems
@@ -147,6 +163,7 @@ public class UserCartController {
             checkedItems.remove(id);
             redirectAttributes.addFlashAttribute("message", "Sản phẩm đã được xoá khỏi giỏ hàng");
         } catch (RuntimeException ex) {
+            log.error(ex.getMessage(), ex);
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/cart/index";

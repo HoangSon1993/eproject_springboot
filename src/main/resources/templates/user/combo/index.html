@@ -37,7 +37,11 @@
                                         class="fa fa-search"></i></span>
                             </div>
                         </div>
-                        <div class="col-6"></div>
+                        <div class="col-6">
+<!--                             Thông báo thành công hoặc lỗi-->
+                            <span class="alert alert-success" th:if="${message}" th:text="${message}">Thông báo thành công</span>
+                            <span class="alert alert-danger" th:if="${error}" th:text="${error}">Thông báo lỗi</span>
+                        </div>
                         <div class="col-xl-3">
                             <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
                                 <label for="fruits">Default Sorting:</label>

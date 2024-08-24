@@ -14,18 +14,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDetail {
-    @EmbeddedId
-    InvoiceDetailId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String invoiceDetailId;
     Integer quantity;
-    BigDecimal uniquePrice;
+    BigDecimal price;
+    String productId;
 
     @ManyToOne
-    @MapsId("product_id")
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
-    Product product;
-
-    @ManyToOne
-    @MapsId("invoice_id")
-    @JoinColumn(name = "invoice_id", insertable = false, updatable = false)
+    @JoinColumn(name = "invoice_id")
     Invoice invoice;
+
+
 }

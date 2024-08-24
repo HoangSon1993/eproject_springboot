@@ -5,23 +5,26 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Cart {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String cartId;
-    Integer quantity;
-    BigDecimal price; // change from amount to price
+    String orderId;
+    Date orderDate;
+    BigDecimal totalAmount;
+    String status;
 
-    String productId;
-    String comboId;
+    @OneToOne(mappedBy = "order")
+    Invoice invoice; // Optional, for reverse navigation
 
     @ManyToOne
     @JoinColumn(name = "account_id")

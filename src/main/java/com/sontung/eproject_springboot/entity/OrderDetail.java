@@ -13,18 +13,19 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Cart {
+public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String cartId;
+    String orderDetailId;
     Integer quantity;
-    BigDecimal price; // change from amount to price
-
-    String productId;
-    String comboId;
+    BigDecimal price;
+    BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    Account account;
+    @JoinColumn(name = "order_id")
+    Order order;
 
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    Product product;
 }

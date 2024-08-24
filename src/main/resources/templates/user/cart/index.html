@@ -178,7 +178,7 @@
         document.querySelectorAll('.btn-minus, .btn-plus').forEach((button) => {
                 button.addEventListener('click', function () {
                     let quantityInput = this.closest('.input-group').querySelector('input');
-                    prevQuantity =parseInt(quantityInput.value) + 1;
+                    prevQuantity = parseInt(quantityInput.value) + 1;
                     handleQuantityChange(this);
                 })
             }
@@ -252,8 +252,8 @@
                             let updatedAmount = quantity * price;
                             console.log(element)
                             element.closest('tr').querySelector('.amount-element')
-                                .textContent =  new Intl.NumberFormat('en-US',{
-                                style:'decimal',
+                                .textContent = new Intl.NumberFormat('en-US', {
+                                style: 'decimal',
                                 minimumFractionDigits: 0,
                             }).format(updatedAmount);
 
@@ -266,15 +266,43 @@
             }
 
         }
-        //
-        document.querySelector('.select-all').addEventListener('change',(element)=>{
-            let checked = element.target.checked;
-            console.log(checked)
-            document.querySelectorAll('.product-checkbox').forEach(element =>{
+
+         // xư ly check all item
+            document.querySelector('.select-all').addEventListener('change', (element) => {
+                let checked = element.target.checked;
+                console.log(checked)
+                document.querySelectorAll('.product-checkbox').forEach(element => {
                 element.checked = checked;
             })
-            updateTotalAmount();
-        })
+                let cartItems= []
+                document.querySelectorAll('.product-checkbox').forEach(checkbox =>{
+                    if(checkbox.checked){
+                        console.log(checkbox)
+                        let id = checkbox.getAttribute('data-id')
+                        cartItems.push(id)
+                    }
+
+                })
+
+            fetch(`/cart/updateChecked`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'selectAll': checked,
+                    'cartItems': cartItems
+                })
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateTotalAmount();
+                    }else {
+                        console.error("Có lỗi xảy ra khi cập nhật checked")
+                    }
+                }).catch(error => {
+                console.error("Có lỗi từ server: " + error);
+         })
 
         // khi nguoi dung chon hoac bo chon sp
         document.querySelectorAll('.product-checkbox').forEach((element) => {
@@ -321,8 +349,8 @@
             // cap nhat tong tien
             let totalAmountElement = document.querySelector('.total-amount');
             let totalPaymentElement = document.querySelector('.total-payment');
-            totalAmountElement.textContent =  new Intl.NumberFormat('en-US',{
-                style:'decimal',
+            totalAmountElement.textContent = new Intl.NumberFormat('en-US', {
+                style: 'decimal',
                 minimumFractionDigits: 0,
             }).format(totalAmount) + ' (VND)';
             totalPaymentElement.textContent = totalAmountElement.textContent
