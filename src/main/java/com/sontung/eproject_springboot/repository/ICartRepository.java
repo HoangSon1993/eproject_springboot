@@ -16,11 +16,11 @@ public interface ICartRepository extends JpaRepository<Cart, String> {
     @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId")
     List<Cart> getCartsByAccount_AccountId(@Param("accountId") String accountId);
     Cart findByAccountAndComboId(Account account, String comboId);
-    Cart findByProduct_ProductIdAndAccount_AccountId(String productId, String userId);
+    Cart findByProductIdAndAccount_AccountId(String productId, String userId);
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM Cart c WHERE c.product.productId = :productId AND c.account.accountId = :accountId")
+    @Query("DELETE FROM Cart c WHERE c.productId = :productId AND c.account.accountId = :accountId")
     void removeProductFromCart(@Param("productId") String productId, @Param("accountId") String accountId);
 
     @Transactional

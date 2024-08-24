@@ -42,61 +42,62 @@ public class CartService {
 
 
     // 07/08/2024 Tạo giỏ hàng cho product(do anh Sơn làm)
-    public void addProductToCart(String productId, int quantity) {
+    public Cart addProductToCart(String productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
         Account account = iAccountRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Người dùng không tồn tại"));
-        Cart cartItem = iCartRepository.findByProduct_ProductIdAndAccount_AccountId(productId, userId);
+        Cart cartItem = iCartRepository.findByProductIdAndAccount_AccountId(productId, userId);
         if (cartItem != null) {
             // Update quantity and amount
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setAmount(cartItem.getAmount().add(product.getPrice().multiply(BigDecimal.valueOf(quantity))));
         } else {
             // The product does not exist in the cart
             cartItem = new Cart();
-            cartItem.setProduct(product);
+            cartItem.setProductId(productId);
             cartItem.setQuantity(quantity);
-            cartItem.setAmount(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
+            cartItem.setPrice(product.getPrice());
             cartItem.setAccount(account);
         }
         // Save change to database
         iCartRepository.save(cartItem);
+        return cartItem;
     }
 
     // 07/08/2024 Tạo giỏ hàng cho combo(do Tùng làm)
-    public int addComboToCart(String comboId, int quantity) {
-        try {
-            Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
-            Account account = iAccountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+    public Cart addComboToCart(String comboId, int quantity) {
+
+            Combo combo = iComboRepository.findById(comboId)
+                    .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
+            Account account = iAccountRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
             Cart cart = iCartRepository.findByAccountAndComboId(account, comboId);
-            if(cart==null){
-                Cart new_cart = new Cart();
-                new_cart.setComboId(comboId);
-                new_cart.setQuantity(quantity);
-                new_cart.setAccount(account);
-                new_cart.setAmount(combo.getFinalAmount());
-                iCartRepository.save(new_cart);
+            if (cart == null) {
+                cart = new Cart();
+                cart.setComboId(comboId);
+                cart.setQuantity(quantity);
+                cart.setAccount(account);
+                cart.setPrice(combo.getFinalAmount()); // Tung xem lai vi da change amount -> price
+                iCartRepository.save(cart);
             } else {
                 int newQuantity = cart.getQuantity() + quantity;
                 cart.setQuantity(newQuantity);
                 iCartRepository.save(cart);
             }
-            return 1;
-        } catch (Exception e) {
-            return 0;
-        }
+            return cart;
+
     }
 
     public List<CartDetailDTO> getCarts() {
         List<Cart> carts = iCartRepository.getCartsByAccount_AccountId(userId);
         List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
         for (Cart cart : carts) {
-            if (cart.getComboId() != null && cart.getProduct() == null) {
+            if (cart.getComboId() != null && cart.getProductId() == null) {
+                // Case CartDetail is Combo
                 Combo combo = iComboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo khônng tồn tại"));
                 List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo() == combo).toList();
                 CartDetailDTO cartDetailDTO = new CartDetailDTO();
 
-                cartDetailDTO.setId(combo.getComboId());
+                cartDetailDTO.setId(cart.getCartId());
                 cartDetailDTO.setName(combo.getComboName());
                 cartDetailDTO.setPrice(combo.getFinalAmount());
                 cartDetailDTO.setQuantity(cart.getQuantity());
@@ -107,8 +108,9 @@ public class CartService {
             } else {
                 // Case CartDetail is Product
                 CartDetailDTO cartDetailDTO = new CartDetailDTO();
-                Product product = cart.getProduct();
-                cartDetailDTO.setId(product.getProductId());
+                Product product = productRepository.findById(cart.getProductId()).orElse(null);
+                // Todo: handle Case product == null
+                cartDetailDTO.setId(cart.getCartId());
                 cartDetailDTO.setName(product.getProductName());
                 cartDetailDTO.setPrice(product.getPrice());
                 cartDetailDTO.setQuantity(cart.getQuantity());
@@ -121,12 +123,18 @@ public class CartService {
         return cartDetailDTOList;
     }
 
-    //==Tính tổng giá trị của giỏ hàng
-    public BigDecimal getTotalAmount() {
+    /**
+     * Tính tổng giá trị của giỏ hàng
+     * Được sử dụng khi người dùng checkout -> page order
+     **/
+    public BigDecimal getTotalAmount(List<String> checkedItems) {
         List<Cart> carts = iCartRepository.getCartsByAccount_AccountId(userId);
         BigDecimal total = BigDecimal.ZERO;
         for (Cart cart : carts) {
-            total = total.add(cart.getAmount().multiply(BigDecimal.valueOf(cart.getQuantity())));
+            // Kiểm tra nếu cartItem được check
+            if (checkedItems.contains(cart.getCartId())) {
+                total = total.add(cart.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
+            }
         }
         return total;
     }
@@ -137,33 +145,31 @@ public class CartService {
         return carts.size();
     }
 
-    public void removeProductFromCart(String productId) {
+    public void removeItemFromCart(String cartId) {
         try {
-            iCartRepository.removeProductFromCart(productId, userId);
+            iCartRepository.deleteById(cartId);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi xoá sản phẩm ra khỏi giỏ hàng");
         }
     }
 
-    public void removeComboFromCart(String comboId) {
-        try {
-            iCartRepository.removeComboFromCart(comboId, userId);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi xoá combo ra khỏi giỏ hàng");
-        }
-    }
-
-    public void updateProductQuantity(String cartId, Integer newQuantity) {
+    public boolean updateQuantity(String cartId, Integer newQuantity) {
         Cart cart = iCartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
-        if (!cart.getAccount().getAccountId().equals(userId)) {
-            throw new RuntimeException("Người dùng không có quyền cập nhật sản phẩm");
-        }
 
-        Product product = productRepository.findById(cart.getProduct().getProductId())
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-        cart.setQuantity(newQuantity);
-        cart.setAmount(product.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+        if (cart.getComboId() == null) {
+            cart.setQuantity(newQuantity);
+            Product product = productRepository.findById(cart.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+            cart.setPrice(product.getPrice());
+        } else {
+            // Case Combo
+            cart.setQuantity(newQuantity);
+            Combo combo = iComboRepository.findById(cart.getComboId())
+                    .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
+            cart.setPrice(combo.getFinalAmount());
+        }
         iCartRepository.save(cart);
+        return true;
     }
 }

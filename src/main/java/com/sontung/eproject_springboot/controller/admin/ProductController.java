@@ -161,7 +161,7 @@ public class ProductController {
             product.setCategory(productDetails.getCategory());
             //product.setCart(productDetails.getCart());
             product.setComboDetails(productDetails.getComboDetails());
-            product.setInvoiceDetails(productDetails.getInvoiceDetails());
+//            product.setInvoiceDetails(productDetails.getInvoiceDetails());
 
             // Xử lý ảnh mới nếu có
             if (!image.isEmpty()) {

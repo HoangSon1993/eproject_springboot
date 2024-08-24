@@ -14,11 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartDetailDTO {
-    // todo: Thêm field chứa cart id
-    String id;  // id của product hoặc combo mà thôi
+    String id;  // id của Cart
     String name; // name chung có thể là product hoặc combo
     String image;
-    BigDecimal price;
+    BigDecimal price; // price one product/combo
     int quantity;
     List<ComboDetail> comboDetails;
+    boolean checked;
 }

@@ -13,15 +13,19 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InvoiceDetail {
+public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String invoiceDetailId;
+    String orderDetailId;
     Integer quantity;
     BigDecimal price;
-    String productId;
+    BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    Invoice invoice;
+    @JoinColumn(name = "order_id")
+    Order order;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    Product product;
 }

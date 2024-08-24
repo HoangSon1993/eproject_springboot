@@ -5,23 +5,29 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InvoiceDetail {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String invoiceDetailId;
-    Integer quantity;
-    BigDecimal price;
-    String productId;
+    String orderId;
+    Date orderDate;
+    BigDecimal totalAmount;
+    String status;
+
+    @OneToOne(mappedBy = "order")
+    Invoice invoice; // Optional, for reverse navigation
 
     @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    Invoice invoice;
+    @JoinColumn(name = "account_id")
+    Account account;
+
 }

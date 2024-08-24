@@ -1,13 +1,11 @@
 package com.sontung.eproject_springboot.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -19,15 +17,12 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceId;
-    String code;
-    LocalDate createdDate;
-    String shippingAddress;
-    String shippingPhone;
+    LocalDateTime invoiceDate;
     BigDecimal totalAmount;
-    Integer status;
-    String accountId;
-    String email;
-    String fullName;
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    Set<InvoiceDetail> invoiceDetails;
+    String paymentStatus;
+    String paymentMethod;
+
+    @OneToOne
+    @JoinColumn(name = "order_id", unique = true) // unique to enforce the one-to-one relationship
+    Order order;
 }

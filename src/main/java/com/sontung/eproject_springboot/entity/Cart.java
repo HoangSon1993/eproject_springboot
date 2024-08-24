@@ -18,15 +18,13 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.UUID)
     String cartId;
     Integer quantity;
-    BigDecimal amount;
+    BigDecimal price; // change from amount to price
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    Product product;
+    String productId;
+    String comboId;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
 
-    String comboId;
 }

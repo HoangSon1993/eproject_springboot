@@ -44,15 +44,8 @@ public class Product {
     @JoinColumn(name = "category_id")
     Category category;
 
-//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JsonIgnore // Để tránh vòng lặp tuần tự hóa
-//    Set<Cart> carts;
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<ComboDetail> comboDetails;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    Set<InvoiceDetail> invoiceDetails;
 
     @PrePersist
     protected void onCreate() {
