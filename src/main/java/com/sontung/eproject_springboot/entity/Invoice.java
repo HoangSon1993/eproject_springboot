@@ -26,6 +26,8 @@ public class Invoice {
     BigDecimal totalAmount;
     Integer status;
     String accountId;
+    String email;
+    String fullName;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<InvoiceDetail> invoiceDetails;
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chi tiết hóa đơn</title>
+    <style th:replace="~{/admin/common/head_tag}"></style>
+</head>
+<body>
+    <div th:replace="~{/admin/common/content_first}"></div>
+    <div class="container">
+        <h1 class="text-center">Chi tiết hóa đơn</h1> <hr/>
+        <div class="row">
+            <div class="col-md-6">
+                <dl>
+                    <dt>Mã hóa đơn</dt>
+                    <dd th:text="${invoice.code}"></dd>
+                    <dt>Ngày tạo</dt>
+                    <dd th:text="${#temporals.format(invoice.createdDate, 'dd/MM/yyyy')}"></dd>
+                    <dt>Trạng thái</dt>
+                    <dd th:text="${invoice.status}==1?'Hoàn thành':'Chưa hoàn thành'"></dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl>
+                    <dt>Địa chỉ giao hàng</dt>
+                    <dd th:text="${invoice.shippingAddress}"></dd>
+                    <dt>Số điện thoại người nhận</dt>
+                    <dd th:text="${invoice.shippingPhone}"></dd>
+                    <dt>Tổng tiền</dt>
+                    <dd th:text="${#numbers.formatDecimal(invoice.totalAmount, 1, 'COMMA', 0, 'POINT') + '(VNĐ)'}"></dd>
+                </dl>
+            </div>
+        </div>
+        <hr/>
+        <table class="table table-light">
+            <thead class="table-dark table-striped table-bordered">
+                <tr>
+                    <th class="text-center">Hình ảnh</th>
+                    <th class="text-center">Tên sản phẩm</th>
+                    <th class="text-center">Đơn giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-center">Thành tiền</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="invoiceItem: ${invoiceDetails}">
+                    <tr th:if="${invoiceItem.combo==null}">
+                        <td class="text-center">
+                            <img style="object-fit: cover;width: 240px; height: 185px" th:src="@{${s3BucketUrl} + ${invoiceItem.product.image}}" alt="">
+                        </td>
+                        <td class="text-center" th:text="${invoiceItem.product.productName}"></td>
+                        <td class="text-center" th:text="${#numbers.formatDecimal(invoiceItem.uniquePrice, 1, 'COMMA', 0, 'POINT')}"></td>
+                        <td class="text-center" th:text="${invoiceItem.quantity}"></td>
+                        <td class="text-center" th:text="${#numbers.formatDecimal(invoiceItem.uniquePrice*invoiceItem.quantity, 1, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                </th:block>
+                <th:block th:each="combo: ${combos}">
+                    <tr>
+                        <td class="text-center">
+                            <img style="object-fit: cover;width: 240px; height: 185px" th:src="@{${s3BucketUrl} + ${combo.combo.image}}" alt="">
+                        </td>
+                        <td class="text-center" th:text="${combo.combo.comboName}"></td>
+                        <td class="text-center" th:text="${#numbers.formatDecimal(combo.combo.finalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
+                        <td class="text-center" th:text="${combo.quantity}"></td>
+                        <td class="text-center" th:text="${#numbers.formatDecimal(combo.quantity*combo.combo.finalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                    <th:block th:each="invoiceDetailCombo: ${invoiceDetails}">
+                        <th:block th:if="${invoiceDetailCombo.combo!=null}">
+                            <tr th:if="${invoiceDetailCombo.combo.comboId==combo.combo.comboId}">
+                                <td colspan="6">
+                                    <table class="table" style="margin-left: 650px; width: 550px">
+                                        <tr>
+                                            <td><img class="text-center" th:src="@{${s3BucketUrl} + ${invoiceDetailCombo.product.image}}"
+                                                     alt=""
+                                                     style="height: 50px"></td>
+                                            <td class="text-center" th:text="${invoiceDetailCombo.product.productName}"></td>
+                                            <td class="text-center" th:text="${invoiceDetailCombo.quantity/invoiceDetailCombo.comboQuantity}"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="~{/admin/common/content_footer}"></div>
+</body>
+</html>

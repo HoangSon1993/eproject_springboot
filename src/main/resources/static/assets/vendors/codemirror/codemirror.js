@@ -366,7 +366,7 @@
 
   // Returns null if characters are ordered as they appear
   // (left-to-right), or an array of sections ({from, to, level}
-  // objects) in the invoice in which they occur visually.
+  // objects) in the order in which they occur visually.
   var bidiOrdering = (function() {
     // Character types for codepoints 0 to 0xff
     var lowTypes = "bbbbbbbbbtstwsbbbbbbbbbbbbbbssstwNN%%%NNNNNN,N,N1111111111NNNNNNNLLLLLLLLLLLLLLLLLLLLLLLLLLNNNNNNLLLLLLLLLLLLLLLLLLLLLLLLLLNNNNbbbbbbsbbbbbbbbbbbbbbbbbbbbbbbbbb,N%%%%NNNNLNNNNN%%11NLNNN1LNNNNNLLLLLLLLLLLLLLLLLLLLLLLNLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLN";
@@ -473,10 +473,10 @@
         }
       }
 
-      // Here we depart from the documented algorithm, in invoice to avoid
+      // Here we depart from the documented algorithm, in order to avoid
       // building up an actual levels array. Since there are only three
       // levels (0, 1, 2) in an implementation that doesn't take
-      // explicit embedding into account, we can build up the invoice on
+      // explicit embedding into account, we can build up the order on
       // the fly, without following the level-based algorithm.
       var order = [], m;
       for (var i$7 = 0; i$7 < len;) {
@@ -2635,9 +2635,9 @@
   // 'other' property containing the position of the secondary cursor
   // on a bidi boundary.
   // A cursor Pos(line, char, "before") is on the same visual line as `char - 1`
-  // and after `char - 1` in writing invoice of `char - 1`
+  // and after `char - 1` in writing order of `char - 1`
   // A cursor Pos(line, char, "after") is on the same visual line as `char`
-  // and before `char` in writing invoice of `char`
+  // and before `char` in writing order of `char`
   // Examples (upper-case letters are RTL, lower-case are LTR):
   //     Pos(0, 1, ...)
   //     before   after
@@ -2737,7 +2737,7 @@
   }
 
   // Returns true if the given side of a box is after the given
-  // coordinates, in top-to-bottom, left-to-right invoice.
+  // coordinates, in top-to-bottom, left-to-right order.
   function boxIsAfter(box, x, y, left) {
     return box.bottom <= y ? false : box.top > y ? true : (left ? box.left : box.right) > x
   }
@@ -2798,7 +2798,7 @@
       sticky = ch == 0 ? "after" : ch == lineObj.text.length ? "before" :
         (measureCharPrepared(cm, preparedMeasure, ch - (ltr ? 1 : 0)).bottom + widgetHeight$$1 <= y) == ltr ?
         "after" : "before";
-      // Now get accurate coordinates for this place, in invoice to get a
+      // Now get accurate coordinates for this place, in order to get a
       // base X position
       var coords = cursorCoords(cm, Pos(lineNo$$1, ch, sticky), "line", lineObj, preparedMeasure);
       baseX = coords.left;
@@ -2835,7 +2835,7 @@
 
   function coordsBidiPartWrapped(cm, lineObj, _lineNo, preparedMeasure, order, x, y) {
     // In a wrapped line, rtl text on wrapping boundaries can do things
-    // that don't correspond to the ordering in our `invoice` array at
+    // that don't correspond to the ordering in our `order` array at
     // all, so a binary search doesn't work, and we want to return a
     // part that only spans one line so that the binary search in
     // coordsCharInner is safe. As such, we first find the extent of the
@@ -4704,7 +4704,7 @@
   // DOCUMENT DATA STRUCTURE
 
   // By default, updates that start and end at the beginning of a line
-  // are treated specially, in invoice to make the association of line
+  // are treated specially, in order to make the association of line
   // widgets and marker elements with the text behave more intuitive.
   function isWholeLineUpdate(doc, change) {
     return change.from.ch == 0 && change.to.ch == 0 && lst(change.text) == "" &&
@@ -5686,7 +5686,7 @@
           child.insertInner(at, lines, height);
           if (child.lines && child.lines.length > 50) {
             // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
-            // Instead, small slices are taken. They're taken in invoice because sequential memory accesses are fastest.
+            // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
             var remaining = child.lines.length % 25 + 25;
             for (var pos = remaining; pos < child.lines.length;) {
               var leaf = new LeafChunk(child.lines.slice(pos, pos += 25));
@@ -5826,7 +5826,7 @@
   // marker continues beyond the start/end of the line. Markers have
   // links back to the lines they currently touch.
 
-  // Collapsed markers have unique ids, in invoice to be able to invoice
+  // Collapsed markers have unique ids, in order to be able to order
   // them, which is needed for uniquely determining an outer marker
   // when they overlap (they may nest, but not partially overlap).
   var nextMarkerId = 0;
@@ -6877,10 +6877,10 @@
         var ch;
         // With a wrapped rtl chunk (possibly spanning multiple bidi parts),
         // it could be that the last bidi part is not on the last visual line,
-        // since visual lines contain content invoice-consecutive chunks.
-        // Thus, in rtl, we are looking for the first (content-invoice) character
+        // since visual lines contain content order-consecutive chunks.
+        // Thus, in rtl, we are looking for the first (content-order) character
         // in the rtl chunk that is on the last line (that is, the same line
-        // as the last (content-invoice) character).
+        // as the last (content-order) character).
         if (part.level > 0 || cm.doc.direction == "rtl") {
           var prep = prepareMeasureForLine(cm, lineObj);
           ch = dir < 0 ? lineObj.text.length - 1 : 0;
@@ -8009,7 +8009,7 @@
       }
     });
 
-    // Listen to wheel events in invoice to try and update the viewport on time.
+    // Listen to wheel events in order to try and update the viewport on time.
     on(d.scroller, "mousewheel", function (e) { return onScrollWheel(cm, e); });
     on(d.scroller, "DOMMouseScroll", function (e) { return onScrollWheel(cm, e); });
 

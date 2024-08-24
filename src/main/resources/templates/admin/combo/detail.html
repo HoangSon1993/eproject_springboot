@@ -10,8 +10,35 @@
 <body>
     <div th:replace="~{/admin/common/content_first}"></div>
     <div class="container">
-        <h3 th:text="'Chi Tiết Combo: '+ ${combo.comboName}" class="text-center"></h3>
-        <img style="object-fit: cover;width: 320px; height: 240px" th:src="@{${s3BucketUrl} + ${combo.image}}" alt="">
+        <h3 th:text="'Chi Tiết Combo: '+ ${combo.comboName}" class="text-center"></h3> <hr/>
+        <div class="row">
+            <div class="col-md-4">
+                <dl>
+                    <dt>Tên Combo</dt>
+                    <dd th:text="${combo.comboName}"></dd>
+                    <dt>Ngày bắt đầu</dt>
+                    <dd th:text="${combo.startDate}"></dd>
+                    <dt>Ngày kết thúc</dt>
+                    <dd th:text="${combo.endDate}"></dd>
+                </dl>
+            </div>
+            <div class="col-md-4">
+                <dl>
+                    <dt>Trạng thái</dt>
+                    <dd th:text="${combo.status==1?'Hoạt động':'Hết hạn'}"></dd>
+                    <dt>Giá gốc</dt>
+                    <dd th:text="${combo.totalAmount}"></dd>
+                    <dt>Giá bán</dt>
+                    <dd th:text="${combo.finalAmount}"></dd>
+                </dl>
+            </div>
+            <div class="col-md-4">
+                <dl>
+                    <dt>Hình ảnh</dt>
+                    <dd><img style="object-fit: cover;width: 240px; height: 185px" th:src="@{${s3BucketUrl} + ${combo.image}}" alt=""></dd>
+                </dl>
+            </div>
+        </div>
         <table class="table table-light mt-2">
             <thead class="table-dark">
                 <tr>

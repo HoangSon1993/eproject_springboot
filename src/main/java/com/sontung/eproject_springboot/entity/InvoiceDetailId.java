@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +14,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDetailId implements Serializable {
-    String product_id;
-    String invoice_id;
+    @Column(name = "product_id")
+    String productId;
+    @Column(name = "invoice_id")
+    String invoiceId;
+
 }

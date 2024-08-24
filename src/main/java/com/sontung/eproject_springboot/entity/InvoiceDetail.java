@@ -18,14 +18,16 @@ public class InvoiceDetail {
     InvoiceDetailId id;
     Integer quantity;
     BigDecimal uniquePrice;
-
+    int comboQuantity;
     @ManyToOne
-    @MapsId("product_id")
+    @MapsId("productId")
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     Product product;
 
     @ManyToOne
-    @MapsId("invoice_id")
+    @MapsId("invoiceId")
     @JoinColumn(name = "invoice_id", insertable = false, updatable = false)
     Invoice invoice;
+
+    String comboId;
 }
