@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,9 @@ public class UserCartController {
 
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
+
+    @Value("${user.id}")
+    private String userId; // userId tạm
 
     public UserCartController(CartService cartService) {
         this.cartService = cartService;
@@ -48,7 +52,7 @@ public class UserCartController {
     @GetMapping("/index")
     public String getCarts(Model model, @ModelAttribute("checkedItems") List<String> checkedItems) {
 
-        List<CartDetailDTO> cartDetail = cartService.getCarts();
+        List<CartDetailDTO> cartDetail = cartService.getCarts(userId, null);
 
         // Cập nhật trạng thái checked cho các sản phẩm đã chọn
         cartDetail.forEach(item -> {
@@ -68,7 +72,7 @@ public class UserCartController {
             @RequestParam int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems) {
         try {
-            Cart cart = cartService.addComboToCart(comboId, quantity);
+            Cart cart = cartService.addComboToCart(userId, comboId, quantity);
             // Thêm combo và danh sách checked
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
@@ -77,7 +81,6 @@ public class UserCartController {
             return "redirect:/cart/index";
         } catch (RuntimeException ex) {
             log.error(ex.getMessage(), ex);
-            //todo: hiển thị thông báo lỗi ở view
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/combo/index";
         }
@@ -91,7 +94,7 @@ public class UserCartController {
             @ModelAttribute("checkedItems") List<String> checkedItems) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Cart cart = cartService.addProductToCart(productId, quantity);
+            Cart cart = cartService.addProductToCart(userId, productId, quantity);
 
             // Thêm sản phẩm vào danh sách checked
             // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì them vào
@@ -131,21 +134,38 @@ public class UserCartController {
     @PostMapping("/updateChecked")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateCheckedItem(
-            @RequestParam("id") String id,
-            @RequestParam("checked") Boolean checked,
-            @RequestParam("selectAll") Boolean selectAll,
-            @RequestParam("cartItems") List<String> cartItems,
+            @RequestParam(value = "id", required = false) String id,
+            @RequestParam(value = "checked", required = false) Boolean checked,
+            @RequestParam(value = "selectAll", required = false) Boolean selectAll,
+            @RequestParam(value = "cartItems", required = false) List<String> cartItems,
             @ModelAttribute("checkedItems") List<String> checkedItems) {
         Map<String, Object> response = new HashMap<>();
-        // Cap nhat ds checkedItems
-        if (checked) {
-            if (!checkedItems.contains(id)) {
-                checkedItems.add(id);
+
+        // Truong hop selectAll != null
+        if (selectAll != null) {
+            if (selectAll) {
+                // case checkAll
+                checkedItems.clear();
+                checkedItems.addAll(cartItems);
+                // ....
+
+            } else {
+                // case unCheckAll
+                checkedItems.clear();
+                // ....
             }
         } else {
-            checkedItems.remove(id);
-        }
+            //Case old: check or unCheck one item
 
+            // Cap nhat ds checkedItems
+            if (checked) {
+                if (!checkedItems.contains(id)) {
+                    checkedItems.add(id);
+                }
+            } else {
+                checkedItems.remove(id);
+            }
+        }
         response.put("success", true);
         return ResponseEntity.ok(response);
     }
@@ -167,5 +187,31 @@ public class UserCartController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/cart/index";
+    }
+
+    @GetMapping("/checkout")
+    public String checkout_form(@RequestParam(required = false) List<String> cartItems, Model model) {
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            // Nếu không có sản phẩm nào được chọn, điều hướng về trang giỏ hàng
+            model.addAttribute("message", "Vui lòng chọn sản phẩm để thanh toán.");
+            return "redirect:/cart/index";
+        }
+        // Lấy thông tin sản phẩm từ các ID được chọn
+        List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(userId, cartItems);
+        BigDecimal totalAmount = cartService.getTotalAmount(userId, cartItems);
+
+        // Truyền thông tin sang view
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("cartDetails", cartDetailDTOS);
+        model.addAttribute("cartItems", cartItems);
+
+        return "/user/cart/checkout";
+    }
+
+    @PostMapping("/checkout")
+    public String checkout(@RequestBody List<String> cartItems, Model model) {
+        // Chuyển hướng sang GET để hiển thị trang checkout với các sản phẩm được chọn
+        return "redirect:/cart/checkout?cartItems=" + String.join(",", cartItems);
     }
 }

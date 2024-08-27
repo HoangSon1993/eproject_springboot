@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đơn Hàng</title>
+    <style th:replace="~{/user/common/head_tag}"></style>
+</head>
+<body>
+<div th:replace="~{/user/common/content_first}"></div>
+<div class="container" style="margin-top: 70px">
+    <!-- Checkout Page Start -->
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <h1 class="mb-4">Chi Tiết Đơn Hàng</h1>
+            <div class="row g-5">
+                <div class="col-md-12 col-lg-5 col-xl-5">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-6">
+                            <div class="form-item w-100">
+                                <label class="form-label my-3">Tên<sup>*</sup></label>
+                                <input type="text" class="form-control" name="firstName">
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-lg-6">
+                            <div class="form-item w-100">
+                                <label class="form-label my-3">Họ<sup>*</sup></label>
+                                <input type="text" class="form-control" name="lastName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label my-3">Địa chỉ <sup>*</sup></label>
+                        <input type="text" class="form-control" placeholder="Địa Chỉ Giao Hàng" name="address">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label my-3">Số Địện Thoại<sup>*</sup></label>
+                        <input type="tel" class="form-control" placeholder="Số Điện Thoại" name="phoneNumber">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label my-3">Địa Chỉ Email<sup>*</sup></label>
+                        <input type="email" class="form-control" placeholder="Điện Chỉ Email" name="email">
+                    </div>
+
+                </div>
+                <div class="col-md-12 col-lg-7 col-xl-7">
+                    <div class="table-responsive">
+                        <table class="table" id="orderDetailsTable">
+                            <thead>
+                            <tr>
+                                <th scope="col">Sản Phẩm</th>
+                                <th scope="col">Tên</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Số Lượng</th>
+                                <th scope="col">Thành Tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <th:block th:each="item: ${cartDetails}">
+                                <tr class="order-item">
+                                    <th scope="row">
+                                        <div class="d-flex align-items-center mt-2">
+                                            <img th:src="@{${s3BucketUrl} + ${item.image}}"
+                                                 class="img-fluid rounded-circle"
+                                                 style="width: 90px; height: 90px;" alt="">
+                                        </div>
+                                    </th>
+                                    <td class="py-5" th:text="${item.name}">Awesome Brocoli</td>
+                                    <td class="py-5" th:text="${item.price}">$69.00</td>
+                                    <td class="py-5" th:text="${item.quantity}">2</td>
+                                    <td class="py-5"
+                                        th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}">
+                                        $138.00
+                                    </td>
+                                </tr>
+                            </th:block>
+
+
+                            <tr>
+                                <th scope="row">
+                                </th>
+                                <td class="py-5"></td>
+                                <td class="py-5"></td>
+                                <td class="py-5">
+                                    <p class="mb-0 text-dark py-3">Tiền Hàng</p>
+                                </td>
+                                <td class="py-5">
+                                    <div class="py-3 border-bottom border-top">
+                                        <p class="mb-0 text-dark"
+                                           th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
+                                            $414.00</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!--                            <tr>-->
+                            <!--                                <th scope="row">-->
+                            <!--                                </th>-->
+                            <!--                                <td class="py-5">-->
+                            <!--                                    <p class="mb-0 text-dark py-4">Phí Giao Hàng</p>-->
+                            <!--                                </td>-->
+                            <!--                                <td colspan="3" class="py-5">-->
+                            <!--                                    <div class="form-check text-start">-->
+                            <!--                                        <input type="checkbox" class="form-check-input bg-primary border-0"-->
+                            <!--                                               id="Shipping-1" name="Shipping-1" value="Shipping">-->
+                            <!--                                        <label class="form-check-label" for="Shipping-1">Free Shipping</label>-->
+                            <!--                                    </div>-->
+                            <!--                                    <div class="form-check text-start">-->
+                            <!--                                        <input type="checkbox" class="form-check-input bg-primary border-0"-->
+                            <!--                                               id="Shipping-2" name="Shipping-1" value="Shipping">-->
+                            <!--                                        <label class="form-check-label" for="Shipping-2">Flat rate: $15.00</label>-->
+                            <!--                                    </div>-->
+                            <!--                                    <div class="form-check text-start">-->
+                            <!--                                        <input type="checkbox" class="form-check-input bg-primary border-0"-->
+                            <!--                                               id="Shipping-3" name="Shipping-1" value="Shipping">-->
+                            <!--                                        <label class="form-check-label" for="Shipping-3">Local Pickup: $8.00</label>-->
+                            <!--                                    </div>-->
+                            <!--                                </td>-->
+                            <!--                            </tr>-->
+                            <tr>
+                                <th scope="row">
+                                </th>
+                                <td class="py-5">
+                                    <p class="mb-0 text-dark text-uppercase py-3">Tổng Hóa Đơn</p>
+                                </td>
+                                <td class="py-5"></td>
+                                <td class="py-5"></td>
+                                <td class="py-5">
+                                    <div class="py-3 border-bottom border-top">
+                                        <p class="mb-0 text-dark"
+                                           th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
+                                            $135.00</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+                        <div class="col-12">
+                            <div class="form-check text-start my-3">
+                                <input type="checkbox" class="form-check-input bg-primary border-0" id="Payments-1"
+                                       name="Payments" value="Payments">
+                                <label class="form-check-label" for="Payments-1">Check Payments</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+                        <div class="col-12">
+                            <div class="form-check text-start my-3">
+                                <input type="checkbox" class="form-check-input bg-primary border-0" id="Delivery-1"
+                                       name="Delivery" value="Delivery">
+                                <label class="form-check-label" for="Delivery-1">Cash On Delivery</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4 text-center align-items-center justify-content-center pt-4">
+                        <button type="button" id="checkoutButton"
+                                class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">
+                            Đặt Hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+    <!-- Checkout Page End -->
+</div>
+<div th:replace="~{/user/common/content_footer}"></div>
+
+<script th:inline="javascript">  //th:inline="javascript" phải có dòng này thì mới dùng biến của thymeleaf được.
+
+    document.getElementById("checkoutButton").addEventListener("click", function (event) {
+        event.preventDefault()
+
+        // thu thap du lieu
+        const firstName = document.querySelector('input[name="firstName"]').value;
+        const lastName = document.querySelector('input[name="lastName"]').value;
+        const address = document.querySelector('input[name="address"]').value;
+        const phoneNumber = document.querySelector('input[name="phoneNumber"]').value;
+        const email = document.querySelector('input[name="email"]').value;
+
+        // Todo: Xu ly them neu ng dung xoa sp khoi Order
+        let cartItems = /*[[${cartItems}]]*/ [];
+
+        const orderData = {
+            firstName: firstName,
+            lastName: lastName,
+            shippingAddress: address,
+            shippingPhone: phoneNumber,
+            email: email,
+            cartItems: cartItems
+        }
+
+        // Fetch data to server
+        fetch('/order/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // 'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value // Đảm bảo bảo mật với CSRF token
+            },
+            body: JSON.stringify(orderData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+
+                } else {
+                    // xu ly loi neu co
+                    alert('Đặt hàng không thành công, vui lòng thử lại!')
+                }
+            })
+            .catch(error => console.error('Đã có lỗi trong quá trình xử lý đơn hàng', error))
+    })
+
+</script>
+</body>
+</html>

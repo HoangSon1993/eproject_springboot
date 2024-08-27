@@ -15,8 +15,12 @@ import java.util.List;
 public interface ICartRepository extends JpaRepository<Cart, String> {
     @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId")
     List<Cart> getCartsByAccount_AccountId(@Param("accountId") String accountId);
+    List<Cart> getCartsByCartIdAndAccount_AccountId(@Param("cartId") String cartId,@Param("accountId") String accountId);
+
+
     Cart findByAccountAndComboId(Account account, String comboId);
     Cart findByProductIdAndAccount_AccountId(String productId, String userId);
+    Cart findByCartIdAndAccount_AccountId(String cartId, String accountId);
 
     @Transactional
     @Modifying

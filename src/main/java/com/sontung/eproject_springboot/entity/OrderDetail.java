@@ -14,18 +14,22 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String orderDetailId;
+    @EmbeddedId
+    OrderDetailId id;
     Integer quantity;
+    Integer comboQuantity;
     BigDecimal price;
     BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "order_id")
+    @MapsId("orderId")
+    @JoinColumn(name = "order_id", insertable = false, updatable = false)
     Order order;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @MapsId("productId")
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     Product product;
+
+    String comboId;
 }

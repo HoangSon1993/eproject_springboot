@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserInvoiceController {
     @GetMapping("/index")
     public String getInvoice(){
-        return "/user/invoice/index";
+        return "/user/order/index";
     }
 }

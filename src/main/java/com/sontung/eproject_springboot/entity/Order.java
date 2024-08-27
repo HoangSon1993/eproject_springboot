@@ -22,6 +22,8 @@ public class Order {
     Date orderDate;
     BigDecimal totalAmount;
     String status;
+    String shippingAddress;
+    String shippingPhone;
 
     @OneToOne(mappedBy = "order")
     Invoice invoice; // Optional, for reverse navigation
