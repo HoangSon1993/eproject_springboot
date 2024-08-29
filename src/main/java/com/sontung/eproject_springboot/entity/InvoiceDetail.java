@@ -17,9 +17,10 @@ public class InvoiceDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceDetailId;
-    Integer quantity;
-    BigDecimal price;
-    String productId;
+    Integer quantity; // so luong
+    BigDecimal price; // gia cua 1 san pham
+    String productId; // product
+    BigDecimal totalPrice; // tong tien cua san pham = quantity * price
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")

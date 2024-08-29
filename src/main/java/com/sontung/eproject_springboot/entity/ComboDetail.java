@@ -1,6 +1,5 @@
 package com.sontung.eproject_springboot.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,7 +15,7 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ComboDetail {
     @EmbeddedId
-    ComboDetailId id;
+    ComboDetailId comboDetailId;
     Integer quantity;
     BigDecimal uniquePrice;
 

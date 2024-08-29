@@ -2,13 +2,8 @@ package com.sontung.eproject_springboot.service;
 
 import com.sontung.eproject_springboot.dto.ComboDTO;
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
-import com.sontung.eproject_springboot.dto.OrderDetailDTO;
 import com.sontung.eproject_springboot.entity.*;
-import com.sontung.eproject_springboot.repository.ICategoryRepository;
-import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
-import com.sontung.eproject_springboot.repository.IProductRepository;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -35,6 +30,7 @@ public class ComboService {
     private final CategoryService categoryService;
     private final ComboDetailService comboDetailService;
     private final ProductService productService;
+
     public ComboService(IComboRepository iComboRepository,
                         ProductService productService,
                         CategoryService categoryService,
@@ -64,6 +60,7 @@ public class ComboService {
         combo.setStatus(2);
         return iComboRepository.save(combo);
     }
+
     public Combo createCombo1(ComboDTO comboDTO, String uniqueFilename) {
         Combo combo = new Combo();
         combo.setComboName(comboDTO.getComboName());
@@ -76,6 +73,7 @@ public class ComboService {
         combo.setImage(uniqueFilename);
         return iComboRepository.save(combo);
     }
+
     public Combo getCombo(String comboId) {
         return iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
     }
@@ -98,7 +96,7 @@ public class ComboService {
         return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).toList().size();
     }
 
-    public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO){
+    public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO) {
         return comboDetailService.createComboDetail(comboDetailDTO);
     }
 
@@ -115,8 +113,8 @@ public class ComboService {
         return iComboRepository.findAll().stream().limit(3).collect(Collectors.toList());
     }
 
-    public List<Category> listCategories(){
-        return categoryService.getCategories().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+    public List<Category> listCategories() {
+        return categoryService.getCategories().stream().filter(c -> c.getStatus() == 1).collect(Collectors.toList());
     }
 
     public List<Combo> listComboCategory(String categoryId) {
@@ -131,19 +129,20 @@ public class ComboService {
         return iComboRepository.findById(comboId)
                 .orElse(null);
     }
+
     //====Tìm kiếm các sản phầm được bán trong ngày được chọn
 //    public List<Order> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
 //
 //        return orderService.getOrdersByFilterDate(filterDate);
 //    }
-    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
         List<Order> orders = orderService.getOrdersByFilterDate(filterDate);
         List<String> orderIdList = new ArrayList<>();
-        for (Order order: orders) {
+        for (Order order : orders) {
             orderIdList.add(order.getOrderId());
         }
         List<OrderDetail> orderDetailList = new ArrayList<>();
-        for (String orderId: orderIdList) {
+        for (String orderId : orderIdList) {
             orderDetailList = orderDetailService.getOrderDetails(orderId);
         }
         return orderDetailList;

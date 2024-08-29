@@ -293,6 +293,7 @@
         }).format(totalAmount) + ' (VND)';
         totalPaymentElement.textContent = totalAmountElement.textContent
     }
+
     document.addEventListener("DOMContentLoaded", function () {
         let prevQuantity = 0;
         // khi người dùng thay đổi số lượng bằng nút tăng/giảm
@@ -401,14 +402,13 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(checkedItems)
-            }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.local.href = '/order/confirmation';
-                    } else {
-                        alert("Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại!")
-                    }
-                }).catch(error => {
+            }).then(response => {
+                if (response.url) {
+                    window.location.href = response.url
+                } else {
+                    alert("Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại!")
+                }
+            }).catch(error => {
                 console.error("Có lỗi từ server" + error)
             })
         })

@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 
 public interface IComboDetailRepository extends JpaRepository<ComboDetail, ComboDetailId> {
-    List<ComboDetail> findByIdComboId(String comboId);
+    List<ComboDetail> findByCombo_ComboId(String comboId);
 }
