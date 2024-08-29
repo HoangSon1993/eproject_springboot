@@ -97,7 +97,7 @@ public class ComboService {
     }
 
     public List<ComboDetail> getComboDetails(String comboId) {
-        return iComboDetailRepository.findByIdComboId(comboId);
+        return iComboDetailRepository.findByCombo_ComboId(comboId);
     }
 
     public Combo getComboById(String comboId) {

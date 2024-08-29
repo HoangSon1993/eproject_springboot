@@ -16,11 +16,12 @@ import java.time.LocalDateTime;
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String invoiceId;
-    LocalDateTime invoiceDate;
-    BigDecimal totalAmount;
-    String paymentStatus;
-    String paymentMethod;
+    String invoiceId; // invoiceNumber
+    LocalDateTime invoiceDate; // ngay hoa don duoc lap
+    BigDecimal totalAmount; // tong tien
+    String paymentStatus; // da thanh toan, chua thanh toan, huy bo
+    String paymentMethod; // chuyen khoan, tin dung, tien mat
+    String paymentDate; // ngay thanh toan
 
     @OneToOne
     @JoinColumn(name = "order_id", unique = true) // unique to enforce the one-to-one relationship

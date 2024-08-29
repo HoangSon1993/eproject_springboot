@@ -1,18 +1,11 @@
-//package com.sontung.eproject_springboot.repository;
-//
-//import com.sontung.eproject_springboot.dto.ComboInvoiceDTO;
-//import com.sontung.eproject_springboot.entity.Combo;
-//import com.sontung.eproject_springboot.entity.InvoiceDetail;
-//import com.sontung.eproject_springboot.entity.InvoiceDetailId;
-//import org.springframework.data.jpa.repository.JpaRepository;
-//import org.springframework.data.jpa.repository.Query;
-//import org.springframework.data.repository.query.Param;
-//import org.springframework.stereotype.Repository;
-//
-//import java.util.List;
-//
-//@Repository
-//public interface IInvoiceDetailRepository extends JpaRepository<InvoiceDetail, InvoiceDetailId> {
+package com.sontung.eproject_springboot.repository;
+
+import com.sontung.eproject_springboot.entity.InvoiceDetail;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface IInvoiceDetailRepository extends JpaRepository<InvoiceDetail, String> {
 //    List<InvoiceDetail> findByIdInvoiceId(String invoiceId);
 //
 //    @Query("SELECT DISTINCT c " +
@@ -27,5 +20,5 @@
 //            "WHERE id.invoice.invoiceId = :invoiceId " +
 //            "GROUP BY c.comboId")
 //    List<ComboInvoiceDTO> findCombosWithUniqueQuantityByInvoiceId(@Param("invoiceId") String invoiceId);
-//
-//}
+
+}

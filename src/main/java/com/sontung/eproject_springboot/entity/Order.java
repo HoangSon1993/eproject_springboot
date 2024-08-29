@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -32,4 +33,6 @@ public class Order {
     @JoinColumn(name = "account_id")
     Account account;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    List<OrderDetail> orderDetails;
 }

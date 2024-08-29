@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ComboDetail {
     @EmbeddedId
-    ComboDetailId id;
+    ComboDetailId comboDetailId;
     Integer quantity;
     BigDecimal uniquePrice;
 

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 @Repository
 public interface IProductRepository extends JpaRepository<Product, String> {
     Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable);
@@ -15,5 +17,11 @@ public interface IProductRepository extends JpaRepository<Product, String> {
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category.categoryId = :categoryId")
     int countByCategoryId(@Param("categoryId") String categoryId);
+
+    /**
+     * get only Product_ProductPrice
+     * **/
+    @Query("select c.price from Product c where c.productId = :productId")
+    BigDecimal getPriceByProductId(@Param("productId") String productId);
 
 }

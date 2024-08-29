@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderForm {
+public class OrderDtoRequest {
     private String firstName;
     private String lastName;
     private String shippAddress;

@@ -172,48 +172,48 @@
 
 <script th:inline="javascript">  //th:inline="javascript" phải có dòng này thì mới dùng biến của thymeleaf được.
 
-    document.getElementById("checkoutButton").addEventListener("click", function (event) {
-        event.preventDefault()
+document.getElementById("checkoutButton").addEventListener("click", function (event) {
+    event.preventDefault()
 
-        // thu thap du lieu
-        const firstName = document.querySelector('input[name="firstName"]').value;
-        const lastName = document.querySelector('input[name="lastName"]').value;
-        const address = document.querySelector('input[name="address"]').value;
-        const phoneNumber = document.querySelector('input[name="phoneNumber"]').value;
-        const email = document.querySelector('input[name="email"]').value;
+    // thu thap du lieu
+    const firstName = document.querySelector('input[name="firstName"]').value;
+    const lastName = document.querySelector('input[name="lastName"]').value;
+    const address = document.querySelector('input[name="address"]').value;
+    const phoneNumber = document.querySelector('input[name="phoneNumber"]').value;
+    const email = document.querySelector('input[name="email"]').value;
 
-        // Todo: Xu ly them neu ng dung xoa sp khoi Order
-        let cartItems = /*[[${cartItems}]]*/ [];
+    // Todo: Xu ly them neu ng dung xoa sp khoi Order
+    let cartItems = /*[[${cartItems}]]*/ [];
 
-        const orderData = {
-            firstName: firstName,
-            lastName: lastName,
-            shippingAddress: address,
-            shippingPhone: phoneNumber,
-            email: email,
-            cartItems: cartItems
-        }
+    const orderData = {
+        firstName: firstName,
+        lastName: lastName,
+        shippAddress: address,
+        shippingPhone: phoneNumber,
+        email: email,
+        cartItems: cartItems
+    }
 
-        // Fetch data to server
-        fetch('/order/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // 'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value // Đảm bảo bảo mật với CSRF token
-            },
-            body: JSON.stringify(orderData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-
-                } else {
-                    // xu ly loi neu co
-                    alert('Đặt hàng không thành công, vui lòng thử lại!')
-                }
-            })
-            .catch(error => console.error('Đã có lỗi trong quá trình xử lý đơn hàng', error))
+    // Fetch data to server
+    fetch('/order/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // 'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value // Đảm bảo bảo mật với CSRF token
+        },
+        body: JSON.stringify(orderData)
     })
+        .then((response) => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.url
+            } else {
+                // xu ly loi neu co
+                alert('Đặt hàng không thành công, vui lòng thử lại!')
+            }
+        })
+        .catch(error => console.error('Đã có lỗi trong quá trình xử lý đơn hàng', error))
+})
 
 </script>
 </body>

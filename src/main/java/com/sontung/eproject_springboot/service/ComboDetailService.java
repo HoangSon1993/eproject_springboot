@@ -32,7 +32,7 @@ public class ComboDetailService {
         Product product = iProductRepository.findById(comboDetailDTO.getProductId()).orElseThrow(() -> new RuntimeException("Error"));
         Combo combo = iComboRepository.findById(comboDetailDTO.getComboId()).orElseThrow(() -> new RuntimeException("Error"));
         ComboDetailId comboDetailId = new ComboDetailId(comboDetailDTO.getComboId(), comboDetailDTO.getProductId());
-        comboDetail.setId(comboDetailId);
+        comboDetail.setComboDetailId(comboDetailId);
         comboDetail.setCombo(combo);
         comboDetail.setProduct(product);
         iComboDetailRepository.save(comboDetail);
@@ -40,6 +40,6 @@ public class ComboDetailService {
     }
 
     public List<ComboDetail> getComboDetails(String comboId) {
-        return iComboDetailRepository.findByIdComboId(comboId);
+        return iComboDetailRepository.findByCombo_ComboId(comboId);
     }
 }
