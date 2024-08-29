@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sontung.eproject_springboot.dto.ComboDTO;
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
 import com.sontung.eproject_springboot.entity.Combo;
-import com.sontung.eproject_springboot.service.ComboDetailService;
 import com.sontung.eproject_springboot.service.ComboService;
 import com.sontung.eproject_springboot.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -20,7 +20,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -29,12 +29,9 @@ public class ComboController {
     private final S3Service s3Service;
     @Autowired
     ComboService comboService;
-    @Autowired
-    ComboDetailService comboDetailService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ComboController(ComboDetailService comboDetailService, S3Service s3Service) {
-        this.comboDetailService = comboDetailService;
+    public ComboController(S3Service s3Service) {
         this.s3Service = s3Service;
     }
 
@@ -48,8 +45,13 @@ public class ComboController {
 
     // TODO: 29/07/2024  
     @GetMapping("")
-    public String getCombos(Model model){
-        model.addAttribute("combos", comboService.getCombos());
+    public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate, Model model){
+        if(filterDate==null){
+            model.addAttribute("combos", comboService.getCombos());
+        }else{
+            model.addAttribute("filterDate", filterDate);
+            model.addAttribute("orders", comboService.getOrdersByDate(filterDate));
+        }
         return "/admin/combo/index";
     }
     @GetMapping("/expired")
@@ -69,7 +71,7 @@ public class ComboController {
                               @RequestParam("file") MultipartFile image,
                               RedirectAttributes redirectAttributes) {
         try {
-            Combo combo =  new Combo();
+            Combo combo = new Combo();
             combo.setComboName(comboDTO.getComboName());
             combo.setDescription(comboDTO.getDescription());
             combo.setStartDate(comboDTO.getStartDate());
@@ -89,7 +91,7 @@ public class ComboController {
                     BigDecimal totalAmount = BigDecimal.ZERO;
                     for (ComboDetailDTO comboDetailDTO : comboDetailDTOS) {
                         comboDetailDTO.setComboId(combo.getComboId());
-                        comboDetailService.createComboDetail(comboDetailDTO);
+                        comboService.createComboDetail(comboDetailDTO);
                         totalAmount = totalAmount.add(comboDetailDTO.getUniquePrice().multiply(BigDecimal.valueOf(comboDetailDTO.getQuantity())));
                     }
                     comboService.updateCombo(combo, totalAmount, comboDTO.getFinalAmount());
@@ -114,7 +116,7 @@ public class ComboController {
     @GetMapping("/detail")
     public String getCombo(@RequestParam String comboId, Model model){
         model.addAttribute("combo", comboService.getCombo(comboId));
-        model.addAttribute("comboDetails", comboDetailService.getComboDetails(comboId));
+        model.addAttribute("comboDetails", comboService.getComboDetails(comboId));
         return "/admin/combo/detail";
     }
     @PostMapping("/delete")

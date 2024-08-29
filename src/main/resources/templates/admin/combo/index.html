@@ -11,9 +11,39 @@
     <div th:replace="~{/admin/common/content_first}"></div>
     <div class="container">
         <h3 class="text-center">QUẢN LÝ COMBO</h3> <hr/>
-        <a th:href="@{/admin/combo/create}" class="btn btn-outline-primary mt-2 mb-2">Tạo Combo</a>
-        <table class="table table-light table-striped table-bordered">
-            <thead class="table-dark">
+        <div class="row">
+            <div class="col-md-4">
+                <a th:href="@{/admin/combo/create}" class="btn btn-outline-primary mt-2 mb-2">Tạo Combo</a>
+            </div>
+            <div class="col-md-4">
+                <form th:action="@{/admin/combo}" method="get">
+                    <div class="form-group">
+                        <label class="form-label" for="filterDate"><b>Tìm theo ngày</b></label>
+                        <input type="date"
+                               id="filterDate"
+                               name="filterDate"
+                               class="form-control mt-3"
+                               th:value="${filterDate != null} ? ${#dates.format(filterDate, 'yyyy-MM-dd')} : ''"
+                               onchange="this.form.submit()">
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form action="">
+                    <div class="form-group">
+                        <input type="text"
+                               name="searchName"
+                               id="searchName"
+                               placeholder="Số điện thoại"
+                               class="form-control">
+                        <button class="btn btn-outline-primary mt-2">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <th:block th:if="${filterDate==null}">
+            <table class="table table-light table-striped table-bordered mt-4">
+                <thead class="table-dark">
                 <tr>
                     <th class="text-center">Tên Combo</th>
                     <th class="text-center">Ngày bắt đầu</th>
@@ -23,8 +53,8 @@
                     <th class="text-center">Giá bán</th>
                     <th class="text-center">Hành động</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 <tr th:each="item: ${combos}">
                     <td class="text-center" th:text="${item.comboName}"></td>
                     <td class="text-center" th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}"></td>
@@ -37,13 +67,38 @@
                         <form th:action="@{/admin/combo/delete(comboId=${item.comboId})}"
                               method="post"
                               onsubmit="return confirm('Are you sure you want to delete this item?')">
-<!--                            <input type="submit" value="Remove" class="btn btn-danger">-->
-                             <button class="btn btn-danger">Gỡ</button>
+                            <!--                            <input type="submit" value="Remove" class="btn btn-danger">-->
+                            <button class="btn btn-danger">Gỡ</button>
                         </form>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </th:block>
+        <th:block th:if="${filterDate!=null}">
+            <h3 th:text="'Các combo được bán trong ngày ' + ${#dates.format(filterDate, 'dd/MM/yyyy')}"></h3>
+            <table class="table table-light">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">Combo</th>
+                        <th class="text-center">Mã đơn hàng</th>
+                        <th class="text-center">Số điện thoại</th>
+                        <th class="text-center">Số lượng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order: ${orders}">
+                        <th:block th:if="${order.combo!=null}">
+                            <td class="text-center" th:text="${order.combo.comboName}"></td>
+                            <td class="text-center" th:text="${order.order.orderId}"></td>
+                            <td class="text-center" th:text="${order.order.shippingPhone}"></td>
+                            <td class="text-center" th:text="${order.quantity}"></td>
+                        </th:block>
+                    </tr>
+                </tbody>
+            </table>
+        </th:block>
+
         <a th:href="@{/admin/combo/expired}" class="btn btn-warning mt-2 mb-2">Thùng Rác</a>
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>

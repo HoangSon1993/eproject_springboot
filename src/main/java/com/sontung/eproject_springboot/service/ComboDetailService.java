@@ -27,7 +27,7 @@ public class ComboDetailService {
         this.iProductRepository = iProductRepository;
     }
 
-    public int createComboDetail(ComboDetailDTO comboDetailDTO) {
+    public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO) {
         ComboDetail comboDetail = icomboDetailMapper.toComboDetail(comboDetailDTO);
         Product product = iProductRepository.findById(comboDetailDTO.getProductId()).orElseThrow(() -> new RuntimeException("Error"));
         Combo combo = iComboRepository.findById(comboDetailDTO.getComboId()).orElseThrow(() -> new RuntimeException("Error"));
@@ -36,7 +36,7 @@ public class ComboDetailService {
         comboDetail.setCombo(combo);
         comboDetail.setProduct(product);
         iComboDetailRepository.save(comboDetail);
-        return 1;
+        return comboDetail;
     }
 
     public List<ComboDetail> getComboDetails(String comboId) {

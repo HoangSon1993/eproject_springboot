@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -17,7 +17,7 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceId;
-    LocalDateTime invoiceDate;
+    LocalDate invoiceDate;
     BigDecimal totalAmount;
     String paymentStatus;
     String paymentMethod;

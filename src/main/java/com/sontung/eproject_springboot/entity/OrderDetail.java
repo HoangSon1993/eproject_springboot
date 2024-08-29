@@ -28,4 +28,8 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "product_id")
     Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "combo_id")
+    Combo combo;
 }

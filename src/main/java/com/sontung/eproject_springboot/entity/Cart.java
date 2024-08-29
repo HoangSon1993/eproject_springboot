@@ -22,7 +22,6 @@ public class Cart {
 
     String productId;
     String comboId;
-
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;

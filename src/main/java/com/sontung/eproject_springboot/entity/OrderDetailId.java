@@ -7,22 +7,15 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 
-@Getter
 @Embeddable
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ComboDetailId implements Serializable {
-    @Column(name = "combo_id")
-    String comboId;
-    @Column(name = "product_id")
+public class OrderDetailId implements Serializable {
+    @Column(name="product_id")
     String productId;
-
-    public void setComboId(String comboId) {
-        this.comboId = comboId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
+    @Column(name="order_id")
+    String orderId;
 }

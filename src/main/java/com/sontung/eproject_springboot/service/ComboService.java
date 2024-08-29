@@ -1,41 +1,53 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.entity.Category;
-import com.sontung.eproject_springboot.entity.Combo;
-import com.sontung.eproject_springboot.entity.ComboDetail;
-import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.dto.ComboDTO;
+import com.sontung.eproject_springboot.dto.ComboDetailDTO;
+import com.sontung.eproject_springboot.dto.OrderDetailDTO;
+import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.repository.ICategoryRepository;
 import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
+import org.aspectj.weaver.ast.Or;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ComboService {
+    @Autowired
+    @Lazy
+    OrderService orderService;
+    @Autowired
+    OrderDetailService orderDetailService;
     private final IComboRepository iComboRepository;
-    private final IComboDetailRepository iComboDetailRepository;
-    private final ICategoryRepository iCategoryRepository;
-    //dùng đế test danh sách product
-    private final IProductRepository iProductRepository;
-
-    public ComboService(IComboRepository iComboRepository, IComboDetailRepository iComboDetailRepository, ICategoryRepository iCategoryRepository, IProductRepository iProductRepository) {
+    private final CategoryService categoryService;
+    private final ComboDetailService comboDetailService;
+    private final ProductService productService;
+    public ComboService(IComboRepository iComboRepository,
+                        ProductService productService,
+                        CategoryService categoryService,
+                        ComboDetailService comboDetailService) {
         this.iComboRepository = iComboRepository;
-        this.iComboDetailRepository = iComboDetailRepository;
-        this.iCategoryRepository = iCategoryRepository;
-        this.iProductRepository = iProductRepository;
+        this.productService = productService;
+        this.categoryService = categoryService;
+        this.comboDetailService = comboDetailService;
     }
 
     //EntityManager entityManager;
     public List<Product> getProducts() {
-        return iProductRepository.findAll();
+        return productService.findAll();
     }
 
     public List<Combo> getCombos() {
@@ -52,7 +64,18 @@ public class ComboService {
         combo.setStatus(2);
         return iComboRepository.save(combo);
     }
-
+    public Combo createCombo1(ComboDTO comboDTO, String uniqueFilename) {
+        Combo combo = new Combo();
+        combo.setComboName(comboDTO.getComboName());
+        combo.setDescription(comboDTO.getDescription());
+        combo.setStartDate(comboDTO.getStartDate());
+        combo.setEndDate(comboDTO.getEndDate());
+        combo.setCreatedDate(LocalDate.now());
+        combo.setUpdatedDate(LocalDate.now());
+        combo.setStatus(2);
+        combo.setImage(uniqueFilename);
+        return iComboRepository.save(combo);
+    }
     public Combo getCombo(String comboId) {
         return iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
     }
@@ -75,6 +98,10 @@ public class ComboService {
         return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).toList().size();
     }
 
+    public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO){
+        return comboDetailService.createComboDetail(comboDetailDTO);
+    }
+
     //=====================================================================//
     //=========================User Combo Service==========================//
     //=====================================================================//
@@ -89,7 +116,7 @@ public class ComboService {
     }
 
     public List<Category> listCategories(){
-        return iCategoryRepository.findAll().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
+        return categoryService.getCategories().stream().filter(c->c.getStatus()==1).collect(Collectors.toList());
     }
 
     public List<Combo> listComboCategory(String categoryId) {
@@ -97,15 +124,29 @@ public class ComboService {
     }
 
     public List<ComboDetail> getComboDetails(String comboId) {
-        return iComboDetailRepository.findByIdComboId(comboId);
+        return comboDetailService.getComboDetails(comboId);
     }
 
     public Combo getComboById(String comboId) {
         return iComboRepository.findById(comboId)
                 .orElse(null);
     }
-
-//    public long countComboCategory(String categoryId){
-//        return iComboRepository.countComboByCategory(categoryId);
+    //====Tìm kiếm các sản phầm được bán trong ngày được chọn
+//    public List<Order> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+//
+//        return orderService.getOrdersByFilterDate(filterDate);
 //    }
+    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+        List<Order> orders = orderService.getOrdersByFilterDate(filterDate);
+        List<String> orderIdList = new ArrayList<>();
+        for (Order order: orders) {
+            orderIdList.add(order.getOrderId());
+        }
+        List<OrderDetail> orderDetailList = new ArrayList<>();
+        for (String orderId: orderIdList) {
+            orderDetailList = orderDetailService.getOrderDetails(orderId);
+        }
+        return orderDetailList;
+    }
+
 }

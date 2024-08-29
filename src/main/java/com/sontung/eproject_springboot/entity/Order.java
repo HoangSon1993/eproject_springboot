@@ -5,7 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -19,9 +20,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderId;
-    Date orderDate;
+    LocalDate orderDate;
     BigDecimal totalAmount;
     String status;
+    String shippingAddress;
+    String shippingPhone;
 
     @OneToOne(mappedBy = "order")
     Invoice invoice; // Optional, for reverse navigation
@@ -29,5 +32,8 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    List<OrderDetail> orderDetails;
 
 }
