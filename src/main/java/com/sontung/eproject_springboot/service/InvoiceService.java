@@ -13,13 +13,20 @@ import java.util.List;
 
 @Service
 public class InvoiceService {
-    @Autowired
+    private final
     IInvoiceRepository iInvoiceRepository;
-    @Autowired
+    private final
     IOrderRepository iOrderRepository;
 
-    @Autowired
+    private final
     IComboRepository iComboRepository;
+
+    public InvoiceService(IInvoiceRepository iInvoiceRepository, IOrderRepository iOrderRepository, IComboRepository iComboRepository) {
+        this.iInvoiceRepository = iInvoiceRepository;
+        this.iOrderRepository = iOrderRepository;
+        this.iComboRepository = iComboRepository;
+    }
+
     public List<Invoice> getInvoices(){
         return iInvoiceRepository.findAll();
     }

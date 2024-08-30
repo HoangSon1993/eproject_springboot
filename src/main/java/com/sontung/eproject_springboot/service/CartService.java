@@ -37,6 +37,11 @@ public class CartService {
 
 
     // 07/08/2024 Tạo giỏ hàng cho product(do anh Sơn làm)
+
+    /**
+     * @Summary: Add product to Cart
+     * @Description:
+     **/
     public Cart addProductToCart(String userId, String productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
@@ -83,10 +88,11 @@ public class CartService {
     }
 
     /**
-     * Sử dụng cho 2 trường hợp
-     * th1: getAll cartItem in Cart
+     * @Summary: Lấy ra danh sách item trong cart
+     * @Description: Sử dụng cho 2 trường hợp
+     * @Case1: getAll cartItem in Cart
      * required: userId, optional: cartItems
-     * th2: getAll cartItem in Cart where cartId =
+     * @Case2: getAll cartItem in Cart where cartId =
      * required: userId, cartItems
      **/
     public List<CartDetailDTO> getCarts(String userId, List<String> cartItems) {
@@ -131,8 +137,8 @@ public class CartService {
     }
 
     /**
-     * Tính tổng giá trị của giỏ hàng
-     * Giá của product được lấy từ bảng product
+     * @Summary: Tính tổng giá trị của giỏ hàng
+     * @Description Giá của product được lấy từ bảng product
      * Được sử dụng khi người dùng checkout -> page order
      * Được dùng chung ở OrderService
      **/
@@ -145,10 +151,12 @@ public class CartService {
                 BigDecimal price = BigDecimal.ZERO;
                 // Case Product
                 if (cart.getProductId() != null && cart.getComboId() == null) {
-                    price = productRepository.getPriceByProductId(cart.getProductId());
+                    BigDecimal productPrice = productRepository.getPriceByProductId(cart.getProductId());
+                    price = productPrice.multiply(new BigDecimal(cart.getQuantity()));
                 } else {
                     // Case Combo
-                    price = comboRepository.getFinalAmountByComboId(cart.getComboId());
+                    BigDecimal comboPrice = comboRepository.getFinalAmountByComboId(cart.getComboId());
+                    price = comboPrice.multiply(new BigDecimal(cart.getQuantity()));
                 }
                 total = total.add(price);
             }
@@ -156,12 +164,18 @@ public class CartService {
         return total;
     }
 
-    //==Tính tổng số lượng sản phẩm trong giỏ hàng
+    /**
+     * @Summary: Tính tổng số lượng sản phẩm trong giỏ hàng
+     **/
     public int getTotalItem(String userId) {
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         return carts.size();
     }
 
+    /**
+     * @Summary: Xóa sản phẩm ra khỏi giỏ hàng
+     * @Description: Trong Cart, khi người dùng bấm vào icon remove item thì thực hiện việc xoá item ra khỏi Cart
+     **/
     public void removeItemFromCart(String cartId) {
         try {
             cartRepository.deleteById(cartId);
@@ -170,10 +184,28 @@ public class CartService {
         }
     }
 
+    /**
+     * @Summary: Xóa CartItems trong Cart
+     * @Description: Sau khi tạo Order vaf OrderDetals thi Xoá CartItems khỏi Cart.
+     * @Param: List <String> cartItems
+     * @Return: void.
+     * @Exception:
+     * **/
+    public void removeCartItems(List<String> cartItems) {
+        if (cartItems == null || cartItems.isEmpty()) {
+            return;
+        }
+        for (String cartItem : cartItems) {
+            cartRepository.deleteById(cartItem);
+        }
+    }
+
+    /**
+     * @Summary: Câp nhật số lượng sản phẩm.
+     **/
     public boolean updateQuantity(String cartId, Integer newQuantity) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
-
         if (cart.getComboId() == null) {
             cart.setQuantity(newQuantity);
             Product product = productRepository.findById(cart.getProductId())
@@ -191,10 +223,11 @@ public class CartService {
     }
 
     /**
-     * Get All Cart Item with Account_ID and Cart_Id
-     * The price of the product or combo is obtained from the Product or Combo table.
+     * @Sumarry: Get All Cart Item with Account_ID and Cart_Id
+     * @Description: The price of the product or combo is obtained from the Product or Combo table.
      **/
-    public List<CartDetailDTO> getCartByIds(String userId, List<String> cartItems) {
+    public List<CartDetailDTO> getCartByIds(String userId, List<String> cartItems)
+    {
         List<Cart> carts = new ArrayList<>();
         for (String cartId : cartItems) {
             Cart cart = cartRepository.findByCartIdAndAccount_AccountId(cartId, userId);
