@@ -14,7 +14,9 @@
     <div class="container-fluid py-5">
         <div class="container py-5">
             <h1 class="mb-4">Chi Tiết Đơn Hàng</h1>
-            <h2>Thanh toán đơn hàng thành công</h2>
+            <h2 th:text="${message}">Thanh toán đơn hàng thành công</h2>
+<!--            Todo: the <a> lien ket toi don hang-->
+            <p th:if="${code}"><span th:text="${code}"></span></p>
             </form>
         </div>
     </div>

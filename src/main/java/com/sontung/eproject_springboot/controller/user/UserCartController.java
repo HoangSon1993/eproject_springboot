@@ -39,16 +39,37 @@ public class UserCartController {
         this.cartService = cartService;
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @ModelAttribute("s3BucketUrl")
     public String s3BucketUrl() {
         return s3BucketUrl;
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @ModelAttribute("checkedItems")
     public List<String> initializeCheckedItems() {
         return new ArrayList<>();
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @GetMapping("/index")
     public String getCarts(Model model, @ModelAttribute("checkedItems") List<String> checkedItems) {
 
@@ -65,6 +86,13 @@ public class UserCartController {
         return "/user/cart/index";
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @PostMapping("/create")
     public String addComboToCart(
             RedirectAttributes redirectAttributes,
@@ -86,6 +114,13 @@ public class UserCartController {
         }
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @PostMapping("/add-product")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> addProductToCart(
@@ -115,6 +150,13 @@ public class UserCartController {
         }
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @PostMapping("/updateQuantity")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateQuantity(
@@ -131,6 +173,13 @@ public class UserCartController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @PostMapping("/updateChecked")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateCheckedItem(
@@ -189,6 +238,13 @@ public class UserCartController {
         return "redirect:/cart/index";
     }
 
+    /**
+     * @Summary
+     * @Description
+     * @Param
+     * @Return
+     * @Exception
+     **/
     @GetMapping("/checkout")
     public String checkout_form(@RequestParam(required = false) List<String> cartItems, Model model) {
 
@@ -198,7 +254,10 @@ public class UserCartController {
             return "redirect:/cart/index";
         }
         // Lấy thông tin sản phẩm từ các ID được chọn
+        //Todo: Xủ lý chưa tối ưu, phát sinh quá nhiều truy vấn. getTotalAmout có thể gọp chung vào getCartByids không???
+
         List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(userId, cartItems);
+
         BigDecimal totalAmount = cartService.getTotalAmount(userId, cartItems);
 
         // Truyền thông tin sang view
@@ -209,6 +268,13 @@ public class UserCartController {
         return "/user/cart/checkout";
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     * @Exception:
+     **/
     @PostMapping("/checkout")
     public String checkout(@RequestBody List<String> cartItems, Model model) {
         // Chuyển hướng sang GET để hiển thị trang checkout với các sản phẩm được chọn
