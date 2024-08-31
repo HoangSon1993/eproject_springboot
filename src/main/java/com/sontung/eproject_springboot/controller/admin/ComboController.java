@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sontung.eproject_springboot.dto.ComboDTO;
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
 import com.sontung.eproject_springboot.entity.Combo;
+import com.sontung.eproject_springboot.entity.OrderDetail;
 import com.sontung.eproject_springboot.service.ComboService;
 import com.sontung.eproject_springboot.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,12 +47,24 @@ public class ComboController {
 
     // TODO: 29/07/2024  
     @GetMapping("")
-    public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate, Model model){
+    public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                            @RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "9") int size,
+                            Model model){
+        model.addAttribute("currentPage", page);
+        model.addAttribute("size", size);
         if(filterDate==null){
-            model.addAttribute("combos", comboService.getCombos());
+            Page<Combo> comboList = comboService.getCombos(page, size);
+            model.addAttribute("combos", comboList);
+            long totalItems = comboService.countAdminComBos();
+            int totalPages = (int) (Math.ceil((double) totalItems / size));
+            model.addAttribute("totalPages", totalPages);
         }else{
+            Page<OrderDetail> orderDetails = comboService.getOrdersByDate(filterDate,page,size);
             model.addAttribute("filterDate", filterDate);
-            model.addAttribute("orders", comboService.getOrdersByDate(filterDate));
+            model.addAttribute("orders", orderDetails);
+            int totalPages = (int) (Math.ceil((double) comboService.countOrderDetailInComboMgr(filterDate) / size));
+            model.addAttribute("totalPages", totalPages);
         }
         return "/admin/combo/index";
     }

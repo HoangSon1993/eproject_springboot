@@ -15,7 +15,7 @@
             <div class="col-md-6">
                 <dl>
                     <dt>Mã đơn hàng</dt>
-                    <dd th:text="${order.orderId}"></dd>
+                    <dd th:text="${order.code}"></dd>
                     <dt>Ngày tạo</dt>
                     <dd th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy')}"></dd>
                     <dt>Trạng thái</dt>

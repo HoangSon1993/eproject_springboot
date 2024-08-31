@@ -74,6 +74,7 @@
                 </tr>
                 </tbody>
             </table>
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/combo', ${currentPage}, ${totalPages}, ${size})"></div>
         </th:block>
         <th:block th:if="${filterDate!=null}">
             <h3 th:text="'Các combo được bán trong ngày ' + ${#dates.format(filterDate, 'dd/MM/yyyy')}"></h3>
@@ -88,7 +89,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="order: ${orders}">
-                        <th:block th:if="${order.combo!=null}">
+                        <th:block th:if="${order.combo != null}">
                             <td class="text-center" th:text="${order.combo.comboName}"></td>
                             <td class="text-center" th:text="${order.order.orderId}"></td>
                             <td class="text-center" th:text="${order.order.shippingPhone}"></td>
@@ -97,9 +98,11 @@
                     </tr>
                 </tbody>
             </table>
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/combo?filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
         </th:block>
 
         <a th:href="@{/admin/combo/expired}" class="btn btn-warning mt-2 mb-2">Thùng Rác</a>
+
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>
 </body>

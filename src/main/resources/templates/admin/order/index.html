@@ -50,8 +50,9 @@
                 </form>
             </div>
         </div>
-        <table class="table table-light table-striped table-bordered">
-            <thead class="table-dark">
+        <th:block th:if="${orders!=null}">
+            <table class="table table-light table-striped table-bordered">
+                <thead class="table-dark">
                 <tr>
                     <th class="text-center">Mã đơn hàng</th>
                     <th class="text-center">Ngày tạo</th>
@@ -61,10 +62,10 @@
                     <th class="text-center">Tồng tiền</th>
                     <th class="text-center">Xem chi tiết</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 <tr th:each="item: ${orders}">
-                    <td class="text-center" th:text="${item.orderId}"></td>
+                    <td class="text-center" th:text="${item.code}"></td>
                     <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
                     <td class="text-center" th:text="${item.shippingAddress}"></td>
                     <td class="text-center" th:text="${item.shippingPhone}"></td>
@@ -74,8 +75,18 @@
                         <a th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info"><i class="fa-solid fa-circle-info"></i></a>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </th:block>
+        <th:block th:if="${orders==null}">
+            <h2 th:text="'Không có đơn hàng nào trong ngày' + ${filterDate}"></h2>
+        </th:block>
+        <th:block th:if="${filterDate}==null">
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order', ${currentPage}, ${totalPages}, ${size})"></div>
+        </th:block>
+        <th:block th:if="${filterDate}!=null">
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?filterDate='+${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
+        </th:block>
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>
 </body>

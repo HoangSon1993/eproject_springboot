@@ -28,4 +28,13 @@ public interface IComboRepository extends JpaRepository<Combo, String> {
      * **/
     @Query("select c.finalAmount from Combo c where c.comboId = :comboId")
     BigDecimal getFinalAmountByComboId(@Param("comboId") String comboId);
+
+
+    // Count combo for user
+    @Query("SELECT COUNT(c) FROM Combo c WHERE c.status = :status")
+    long countByStatus(@Param("status") int status);
+
+    // Count combo for admin
+    @Query("SELECT COUNT(c) FROM Combo c")
+    long countCombo();
 }

@@ -17,6 +17,10 @@ public class OrderDetailService {
         return iOrderDetailRepository.findByOrderOrderId(orderId);
     }
 
+    public OrderDetail getOrderDetail(String orderId){
+        return iOrderDetailRepository.findOrderDetailByOrderOrderId(orderId);
+    }
+
     public List<OrderDetail> getOrderDetails(String orderId, String comboId){
         return iOrderDetailRepository.findByOrderOrderId(orderId);
     }

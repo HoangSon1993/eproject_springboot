@@ -7,6 +7,7 @@ import com.sontung.eproject_springboot.repository.IComboRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,9 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,8 +45,10 @@ public class ComboService {
         return productService.findAll();
     }
 
-    public List<Combo> getCombos() {
-        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+    public Page<Combo> getCombos(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return iComboRepository.findAll(pageable);
+        //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
     }
 
     public List<Combo> getExpiringCombos() {
@@ -92,14 +93,20 @@ public class ComboService {
         iComboRepository.save(combo);
     }
 
-    public long countComBos() {
-        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).toList().size();
+    // Count combo for user
+    public long countUserComBos() {
+        return iComboRepository.countByStatus(2);
     }
 
+    // Count combo for user
+    public long countAdminComBos() {
+        return iComboRepository.countCombo();
+    }
+
+    //
     public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO) {
         return comboDetailService.createComboDetail(comboDetailDTO);
     }
-
     //=====================================================================//
     //=========================User Combo Service==========================//
     //=====================================================================//
@@ -131,21 +138,52 @@ public class ComboService {
     }
 
     //====Tìm kiếm các sản phầm được bán trong ngày được chọn
-//    public List<Order> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
-//
-//        return orderService.getOrdersByFilterDate(filterDate);
+//    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+//        List<Order> orders = orderService.getOrdersByFilterDate(filterDate);
+//        List<String> orderIdList = orders.stream().map(Order::getOrderId).toList();
+//        Map<String, List<OrderDetail>> groupedOrderDetails = new HashMap<>();
+//        for (String orderId : orderIdList) {
+//            List<OrderDetail> orderDetails = orderDetailService.getOrderDetails(orderId);
+//            // Xóa phần tử một cách an toàn
+//            orderDetails.removeIf(item -> item.getCombo() == null);
+//            // Nhóm các OrderDetail theo comboId
+//            for (OrderDetail orderDetail : orderDetails) {
+//                String comboId = orderDetail.getCombo().getComboId();
+//                groupedOrderDetails
+//                        .computeIfAbsent(comboId, k -> new ArrayList<>())
+//                        .add(orderDetail);
+//            };
+//        }
+//        return groupedOrderDetails.values().stream()
+//                .flatMap(List::stream)
+//                .collect(Collectors.toList());
 //    }
-    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
-        List<Order> orders = orderService.getOrdersByFilterDate(filterDate);
-        List<String> orderIdList = new ArrayList<>();
-        for (Order order : orders) {
-            orderIdList.add(order.getOrderId());
-        }
-        List<OrderDetail> orderDetailList = new ArrayList<>();
-        for (String orderId : orderIdList) {
-            orderDetailList = orderDetailService.getOrderDetails(orderId);
-        }
-        return orderDetailList;
-    }
 
+    public Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                                             int page,
+                                             int size) {
+        List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
+        // Extract order IDs
+        List<String> orderIdList = orders.stream().map(Order::getOrderId).toList();
+         //Create a list to hold OrderDetail
+        List<OrderDetail> allOrderDetails = new ArrayList<>();
+
+         //Fetch and process OrderDetails for each order
+        for (String orderId : orderIdList) {
+            List<OrderDetail> orderDetails = orderDetailService.getOrderDetails(orderId);
+             //Remove items with null combo
+            orderDetails.removeIf(item -> item.getCombo() == null);
+            // Add to the list
+            allOrderDetails.addAll(orderDetails);
+        }
+        // Create a paginated response
+        int start = (page - 1) * size;
+        int end = Math.min(start + size, allOrderDetails.size());
+        List<OrderDetail> paginatedOrderDetails = allOrderDetails.subList(start, end);
+        return new PageImpl<>(paginatedOrderDetails, PageRequest.of(page - 1, size), allOrderDetails.size());
+    }
+    public long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+        List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
+        return orders.size();
+    }
 }

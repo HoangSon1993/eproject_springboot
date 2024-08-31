@@ -35,7 +35,7 @@ public class UserComboController {
         model.addAttribute("combos", comboList);
         model.addAttribute("featuredCombos", comboService.getFeaturedCombo());
         model.addAttribute("categories", comboService.listCategories());
-        long totalItems = comboService.countComBos();
+        long totalItems = comboService.countUserComBos();
         int totalPages = (int) (Math.ceil((double) totalItems / size));
         model.addAttribute("currentPage", page);
         model.addAttribute("size", size);
@@ -54,7 +54,7 @@ public class UserComboController {
     @GetMapping("/detail")
     public String getCombo(@RequestParam String comboId, Model model) {
         // TODO: 06/08/2024 Chỗ này cần lấy ra các combo nổi bật, hiện tại đang lấy tạm tất cả các combo, khi có phần hóa đơn sẽ quay lại làm
-        model.addAttribute("combos", comboService.getCombos());
+        model.addAttribute("combos", comboService.getCombos(1,2 ));
         model.addAttribute("featuredCombos", comboService.getFeaturedCombo());
         model.addAttribute("combo", comboService.getCombo(comboId));
         model.addAttribute("categories", comboService.listCategories());

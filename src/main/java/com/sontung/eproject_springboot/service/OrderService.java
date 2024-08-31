@@ -9,6 +9,9 @@ import com.sontung.eproject_springboot.repository.*;
 import com.sontung.eproject_springboot.util.VnPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
@@ -43,10 +46,23 @@ public class OrderService {
         this.comboRepository = comboRepository;
     }
 
-    public List<Order> getOrders() {
-        return iOrderRepository.findAll();
+    public Page<Order> getOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return iOrderRepository.findAll(pageable);
     }
 
+    // ====== Count order: Admin site======//
+    // Count all order
+    public long countOrder(){
+        return iOrderRepository.countOrder();
+    }
+    // Count order by filterDate
+    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return iOrderRepository.countOrderByFilterDate(filterLocalDate);
+    }
+
+    // ===============================//
     public Order getOrder(String orderId) {
         return iOrderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
     }
@@ -73,49 +89,42 @@ public class OrderService {
 //        return orderDetailService.getCombos(orderId);
 //    }
 
-    public List<Order> getOrdersByPrice(int priceValue) {
-        List<Order> orders = new ArrayList<>();
-
-        switch (priceValue) {
-            case 1: // Dưới 100k
-                orders = iOrderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("100000")) < 0)
-                        .collect(Collectors.toList());
-                break;
-            case 2: // 100k -> 200k
-                orders = iOrderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("100000")) >= 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("200000")) <= 0)
-                        .collect(Collectors.toList());
-                break;
-            case 3: // 200k -> 300k
-                orders = iOrderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("200000")) > 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("300000")) <= 0)
-                        .collect(Collectors.toList());
-                break;
-            case 4: // 300k -> 500k
-                orders = iOrderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("300000")) > 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("500000")) <= 0)
-                        .collect(Collectors.toList());
-                break;
-            case 5: // 500k Trở Lên
-                orders = iOrderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("500000")) > 0)
-                        .collect(Collectors.toList());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid price range");
-        }
-        return orders;
+    public Page<Order> getOrdersByPrice(int priceValue, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return switch (priceValue) {
+            case 1 -> iOrderRepository.findOrdersUnder100K(pageable);
+            case 2 -> iOrderRepository.findOrdersBetween100KAnd200K(pageable);
+            case 3 -> iOrderRepository.findOrdersBetween200KAnd300K(pageable);
+            case 4 -> iOrderRepository.findOrdersBetween300KAnd500K(pageable);
+            case 5 -> iOrderRepository.findOrdersOver500K(pageable);
+            default -> throw new IllegalArgumentException("Invalid price range");
+        };
     }
 
-    public List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+    public long countOrderByPrice(int priceValue) {
+        return switch (priceValue) {
+            case 1 -> iOrderRepository.countByTotalAmountLessThan(BigDecimal.valueOf(100000));
+            case 2 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(100000), BigDecimal.valueOf(200000));
+            case 3 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(200000), BigDecimal.valueOf(300000));
+            case 4 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(300000), BigDecimal.valueOf(400000));
+            case 5 -> iOrderRepository.countByTotalAmountGreaterThanEqual(BigDecimal.valueOf(400000));
+            default -> throw new IllegalArgumentException("Invalid price range");
+        };
+    }
+
+    // Filter Order by date in OrderManagement
+    public Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                                             int page,
+                                             int size) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return iOrderRepository.findAll().stream().filter(i -> i.getOrderDate().equals(filterLocalDate)).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return iOrderRepository.findByOrderDateOrder(filterLocalDate, pageable);
     }
-
+    // Filter Order by date in ComboManagement
+    public List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return iOrderRepository.findByOrderDateCombo(filterLocalDate);
+    }
     public List<Order> getOrdersByPriceAndDate(int priceValue,
                                                @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

@@ -25,6 +25,7 @@ public class Order {
     String status;
     String shippingAddress;
     String shippingPhone;
+    String code;
 
     @OneToOne(mappedBy = "order")
     Invoice invoice; // Optional, for reverse navigation
