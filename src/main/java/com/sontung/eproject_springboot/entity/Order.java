@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,6 +28,9 @@ public class Order {
     String shippingPhone;
     String code;
 
+    @Column(length = 8)
+    String code;
+
     @OneToOne(mappedBy = "order")
     Invoice invoice; // Optional, for reverse navigation
 
@@ -35,6 +39,17 @@ public class Order {
     Account account;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    List<OrderDetail> orderDetails;
+    List<OrderDetail> orderDetails = new ArrayList<>();
+
+    // Add widget to add order details to order.
+    public void addOrderDetail(OrderDetail orderDetail) {
+        orderDetails.add(orderDetail);
+        orderDetail.setOrder(this);
+    }
+
+    public void removeOrderDetail(OrderDetail orderDetail) {
+        orderDetails.remove(orderDetail);
+        orderDetail.setOrder(null);
+    }
 
 }

@@ -2,9 +2,7 @@ package com.sontung.eproject_springboot.service;
 
 import com.sontung.eproject_springboot.dto.OrderDetailDTO;
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
-import com.sontung.eproject_springboot.entity.Cart;
-import com.sontung.eproject_springboot.entity.Order;
-import com.sontung.eproject_springboot.entity.OrderDetail;
+import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.repository.*;
 import com.sontung.eproject_springboot.util.VnPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,49 +20,54 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.lang.System.out;
 
 @Service
 public class OrderService {
     private final ComboService comboService;
     private final OrderDetailService orderDetailService;
 
-    private final IOrderRepository iOrderRepository;
+    private final IOrderRepository orderRepository;
+    private final IOrderDetailRepository orderDetailRepository;
+    private final IInvoiceRepository invoiceRepository;
+    private final IInvoiceDetailRepository invoiceDetailRepository;
     private final IProductRepository productRepository;
     private final ICartRepository cartRepository;
     private final IAccountRepository accountRepository;
     private final IComboRepository comboRepository;
 
-    public OrderService(IOrderRepository iOrderRepository, OrderDetailService orderDetailService, IProductRepository productRepository, ComboService comboService, ICartRepository cartRepository, IAccountRepository accountRepository, IComboRepository comboRepository) {
+    public OrderService(ComboService comboService,
+                        OrderDetailService orderDetailService,
+                        IOrderRepository orderRepository,
+                        IProductRepository productRepository,
+                        IOrderDetailRepository orderDetailRepository,
+                        IInvoiceRepository invoiceRepository,
+                        IInvoiceDetailRepository invoiceDetailRepository,
+                        ICartRepository cartRepository,
+                        IAccountRepository accountRepository,
+                        IComboRepository comboRepository) {
         this.comboService = comboService;
         this.orderDetailService = orderDetailService;
-        this.iOrderRepository = iOrderRepository;
+        this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.orderDetailRepository = orderDetailRepository;
+        this.invoiceRepository = invoiceRepository;
+        this.invoiceDetailRepository = invoiceDetailRepository;
         this.cartRepository = cartRepository;
         this.accountRepository = accountRepository;
         this.comboRepository = comboRepository;
     }
 
-    public Page<Order> getOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        return iOrderRepository.findAll(pageable);
+    public List<Order> getOrders() {
+        return orderRepository.findAll();
     }
 
-    // ====== Count order: Admin site======//
-    // Count all order
-    public long countOrder(){
-        return iOrderRepository.countOrder();
-    }
-    // Count order by filterDate
-    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return iOrderRepository.countOrderByFilterDate(filterLocalDate);
-    }
-
-    // ===============================//
     public Order getOrder(String orderId) {
-        return iOrderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        return orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
     }
 
     public List<OrderDetailDTO> getOrderDetails(String orderId) {
@@ -92,22 +95,22 @@ public class OrderService {
     public Page<Order> getOrdersByPrice(int priceValue, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         return switch (priceValue) {
-            case 1 -> iOrderRepository.findOrdersUnder100K(pageable);
-            case 2 -> iOrderRepository.findOrdersBetween100KAnd200K(pageable);
-            case 3 -> iOrderRepository.findOrdersBetween200KAnd300K(pageable);
-            case 4 -> iOrderRepository.findOrdersBetween300KAnd500K(pageable);
-            case 5 -> iOrderRepository.findOrdersOver500K(pageable);
+            case 1 -> orderRepository.findOrdersUnder100K(pageable);
+            case 2 -> orderRepository.findOrdersBetween100KAnd200K(pageable);
+            case 3 -> orderRepository.findOrdersBetween200KAnd300K(pageable);
+            case 4 -> orderRepository.findOrdersBetween300KAnd500K(pageable);
+            case 5 -> orderRepository.findOrdersOver500K(pageable);
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
 
     public long countOrderByPrice(int priceValue) {
         return switch (priceValue) {
-            case 1 -> iOrderRepository.countByTotalAmountLessThan(BigDecimal.valueOf(100000));
-            case 2 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(100000), BigDecimal.valueOf(200000));
-            case 3 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(200000), BigDecimal.valueOf(300000));
-            case 4 -> iOrderRepository.countByTotalAmountBetween(BigDecimal.valueOf(300000), BigDecimal.valueOf(400000));
-            case 5 -> iOrderRepository.countByTotalAmountGreaterThanEqual(BigDecimal.valueOf(400000));
+            case 1 -> orderRepository.countByTotalAmountLessThan(BigDecimal.valueOf(100000));
+            case 2 -> orderRepository.countByTotalAmountBetween(BigDecimal.valueOf(100000), BigDecimal.valueOf(200000));
+            case 3 -> orderRepository.countByTotalAmountBetween(BigDecimal.valueOf(200000), BigDecimal.valueOf(300000));
+            case 4 -> orderRepository.countByTotalAmountBetween(BigDecimal.valueOf(300000), BigDecimal.valueOf(400000));
+            case 5 -> orderRepository.countByTotalAmountGreaterThanEqual(BigDecimal.valueOf(400000));
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
@@ -118,17 +121,17 @@ public class OrderService {
                                              int size) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         Pageable pageable = PageRequest.of(page - 1, size);
-        return iOrderRepository.findByOrderDateOrder(filterLocalDate, pageable);
+        return orderRepository.findByOrderDateOrder(filterLocalDate, pageable);
     }
     // Filter Order by date in ComboManagement
     public List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return iOrderRepository.findByOrderDateCombo(filterLocalDate);
+        return orderRepository.findByOrderDateCombo(filterLocalDate);
     }
     public List<Order> getOrdersByPriceAndDate(int priceValue,
                                                @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return iOrderRepository.findAll().stream().filter(i -> {
+        return orderRepository.findAll().stream().filter(i -> {
             BigDecimal totalAmount = i.getTotalAmount();
             boolean priceMatches = false;
             switch (priceValue) {
@@ -157,62 +160,76 @@ public class OrderService {
         }).collect(Collectors.toList());
     }
 
-
+    /**
+     * @Summary: Creat Order.
+     * @Description: Tạo Order và OrderDetails với những CartItems, quantity mà người dùng chọn.
+     * @Param: OrderDtoRequest orderDtoRequest, String userId.
+     * @Return: Order order.
+     * @Exception:
+     **/
     public Order createOrder(OrderDtoRequest orderDtoRequest, String userId) {
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         // 1 Tính tổng tiền dơn hàng, giá lấy trong bảng product.
         BigDecimal totalAmount = BigDecimal.ZERO;
         // 2 Create Order.
-        Order order = new Order();
-        order.setAccount(accountRepository.findById(userId).get());
-        order.setOrderDate(LocalDate.now());
-        order.setStatus("Chờ thanh toán");
-        order.setShippingAddress(orderDtoRequest.getShippAddress());
-        order.setShippingPhone(orderDtoRequest.getShippingPhone());
+        Order order = Order.builder()
+                .account(accountRepository.findById(userId).get())
+                .orderDate(LocalDate.now())
+                .status("Chờ thanh toán")
+                .shippingAddress(orderDtoRequest.getShippAddress())
+                .shippingPhone(orderDtoRequest.getShippingPhone())
+                .orderDetails(new ArrayList<>())
+                .build();
 
-        List<OrderDetail> orderDetails = new ArrayList<>();
         for (Cart cart : carts) {
             if (orderDtoRequest.getCartItems().contains(cart.getCartId())) {
                 BigDecimal price = BigDecimal.ZERO;
-                // Create Order Detail
-                OrderDetail orderDetail = new OrderDetail();
-                // Case Product
+                OrderDetail.OrderDetailBuilder orderDetail = OrderDetail.builder()
+                        .order(order)
+                        .quantity(cart.getQuantity());
                 if (cart.getProductId() != null && cart.getComboId() == null) {
-                    price = productRepository.getPriceByProductId(cart.getProductId());
-                    orderDetail.setProduct(productRepository.findById(cart.getProductId()).get());
+                    // Case Product
+                    //Todo: hanle product == null
+                    Optional<Product> product = productRepository.findById(cart.getProductId());
+                    BigDecimal productPrice = product.get().getPrice();
+                    price = productPrice.multiply(BigDecimal.valueOf(cart.getQuantity()));
+                    orderDetail.product(product.get());
                 } else {
                     // Case Combo
-                    price = comboRepository.getFinalAmountByComboId(cart.getComboId());
-                    orderDetail.setCombo(comboRepository.findById(cart.getComboId()).get());
+                    //Todo: hanle combo == null
+                    Optional<Combo> combo = comboRepository.findById(cart.getComboId());
+                    BigDecimal comboPrice = combo.get().getFinalAmount();
+                    price = comboPrice.multiply(BigDecimal.valueOf(cart.getQuantity()));
+                    orderDetail.combo(combo.get());
                 }
                 totalAmount = totalAmount.add(price);
 
-
-                orderDetail.setOrder(order);
-                orderDetail.setPrice(price);
-                orderDetail.setQuantity(cart.getQuantity());
-                orderDetail.setTotalPrice(price.multiply(new BigDecimal(cart.getQuantity())));
-
-                orderDetails.add(orderDetail);
+                // Create Order Detail
+                orderDetail
+                        .price(price)
+                        .totalPrice(price.multiply(new BigDecimal(cart.getQuantity())));
+                // add OrderDetail to Order.
+                order.addOrderDetail(orderDetail.build());
             }
         }
 
         order.setTotalAmount(totalAmount);
-        order.setOrderDetails(orderDetails);
-
+        order.setCode(VnPayUtil.getRandomNumber(8));
 
         // 3 Save Order.
-        Order savedOrder = iOrderRepository.save(order);
-//        // 4. Create and save 'OrderDetails'.
-//        for(String cartItemId : orderDtoRequest.getCartItems()) {
-//            Product product = productRepository.findById(cartItemId)
-//                    .orElseThrow(()-> new RuntimeException("Sản phẩm không tìm thấy."));
-//        }
-
-        // 5. Call VnPay in layer Controller.
-        return savedOrder;
+        orderRepository.save(order);
+        return order;
     }
 
+    /**
+     * @Summary Create URI to call VNPay for payment processing
+     * @Description Creates a URI to interact with the VNPay API for processing payments. This method generates a URI based on the provided order details and request/response context.
+     * @Param order The order object containing payment details.
+     * @Param req The HTTP request object providing context for the operation.
+     * @Param resp The HTTP response object used for sending responses.
+     * @Return A URI string used to initiate a payment request with VNPay.
+     * @Exception UnsupportedEncodingException If an error occurs while encoding the URI.
+     **/
     public String getVnpay(Order order, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
 
         String vnp_Version = "2.1.0";
@@ -222,7 +239,7 @@ public class OrderService {
         amount *= 100;
         //String bankCode = req.getParameter("bankCode");
         String bankCode = "NCB"; // Test với ngân hàng NCB vì thẻ cuả vnpay cung cấp là NCB
-        String vnp_TxnRef = VnPayUtil.getRandomNumber(8);
+        String vnp_TxnRef = order.getCode(); // VnPayUtil.getRandomNumber da duoc goi ra luc tao order
         String vnp_IpAddr = VnPayUtil.getIpAddress(req);
 
         String vnp_TmnCode = VnPayUtil.vnp_TmnCode;
@@ -238,10 +255,10 @@ public class OrderService {
             vnp_Params.put("vnp_BankCode", bankCode);
         }
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef); // co the su dung vnp_TxnRef de tao code cho Order
         vnp_Params.put("vnp_OrderType", orderType);
 
-        //        String locate = req.getParameter("language");
+//        String locate = req.getParameter("language");
 //        if (locate != null && !locate.isEmpty()) {
 //            vnp_Params.put("vnp_Locale", locate);
 //        } else {
@@ -289,5 +306,125 @@ public class OrderService {
         String paymentUrl = VnPayUtil.vnp_PayUrl + "?" + queryUrl;
 
         return paymentUrl;
+    }
+
+    /**
+     * @Summary Xử lý kết quả của Vnpay trả về.
+     * @Description: 1st: Xử lý checkSum xem giữ liệu trả về có đảm bảo hợp lệ hay không.
+     * 2nd: check 'vnp_ResponseCode' == '00' là thanh toán thành công.
+     * Sau đó kiểm tra 'code', 'total_amount' trong Order.
+     * 3nd: Tạo Invoice and Invoice_detai.
+     * @Param
+     * @Return: void.
+     * @Exception UnsupportedEncodingException
+     **/
+    public String handleResult(HttpServletRequest request) throws UnsupportedEncodingException {
+        // Get order from DB
+        String vnpOrderInfo = request.getParameter("vnp_OrderInfo");
+        String code = vnpOrderInfo.substring(vnpOrderInfo.length() - 8);
+        Order order = orderRepository.findByCode(code);
+
+
+        Map fields = new HashMap();
+        for (Enumeration params = request.getParameterNames(); params.hasMoreElements(); ) {
+            String fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
+            String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                fields.put(fieldName, fieldValue);
+            }
+        }
+        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+        if (fields.containsKey("vnp_SecureHashType")) {
+            fields.remove("vnp_SecureHashType");
+        }
+        if (fields.containsKey("vnp_SecureHash")) {
+            fields.remove("vnp_SecureHash");
+        }
+
+        // Check checksum
+        String signValue = VnPayUtil.hashAllFields(fields);
+        if (signValue.equals(vnp_SecureHash)) {
+
+            boolean checkOrderId = (request.getParameter("vnp_TxnRef").equals(order.getCode()));
+            // vnp_TxnRef exists in your database
+            double amoutParam = Double.parseDouble(request.getParameter("vnp_Amount"));
+            double totalAmount = order.getTotalAmount().doubleValue() * 100;
+            final double EPSILON = 0.01;
+            boolean checkAmount = Math.abs(amoutParam - totalAmount) < EPSILON;
+            // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in the Your database).
+
+            boolean checkOrderStatus = (order.getStatus().equals("Chờ thanh toán"));
+            // PaymnentStatus = 0 (pending)
+
+
+            if (checkOrderId) {
+                if (checkAmount) {
+                    if (checkOrderStatus) {
+                        if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
+
+                            //Here Code update PaymnentStatus = 1 into your Database
+                            order.setStatus("Đã thanh toán");
+                            orderRepository.save(order);
+
+                            // Thanh toan thanh cong
+                            // Create Order
+                            Invoice invoice = Invoice.builder()
+                                    .order(order)
+                                    .totalAmount(order.getTotalAmount())
+                                    .paymentDate(LocalDate.parse(request.getParameter("vnp_PayDate"), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                                    .invoiceDate(LocalDate.now())
+                                    .paymentStatus("Đã thanh toán")
+                                    .paymentMethod("VNPay")
+                                    .bankCode(request.getParameter("vnp_BankCode"))
+                                    .transactionNo(request.getParameter("vnp_BankTranNo"))
+                                    .cardType(request.getParameter("vnp_CardType"))
+                                    .transactionStatus(request.getParameter("vnp_TransactionStatus"))
+                                    .bankTransactionNo(request.getParameter("vnp_TransactionNo"))
+                                    .invoiceDetails(new ArrayList<>())
+                                    .build();
+
+                            // Create OrderDetail
+                            List<OrderDetail> orderDetails = order.getOrderDetails();
+                            for (OrderDetail orderDetail : orderDetails) {
+                                InvoiceDetail.InvoiceDetailBuilder invoiceDetail = InvoiceDetail.builder()
+                                        .invoice(invoice)
+                                        .quantity(orderDetail.getQuantity())
+                                        .price(orderDetail.getPrice())
+                                        .totalPrice(orderDetail.getTotalPrice());
+
+                                if (orderDetail.getProduct() != null && orderDetail.getCombo() == null) {
+                                    invoiceDetail.productId(orderDetail.getProduct().getProductId());
+                                } else {
+                                    invoiceDetail.comboId(orderDetail.getCombo().getComboId());
+                                }
+                                invoice.addInvoiceDetail(invoiceDetail.build());
+                            }
+
+                            // Save Invoice and InvoiceDetai to DB.
+                            Invoice invoiceCreated = invoiceRepository.save(invoice);
+
+                            // Tra ket qua ve cho nguoi dung
+                        } else {
+                            // Here Code update PaymnentStatus = 2 into your Database
+                        }
+                        // Thanh cong thi show thong bao nay.
+                        out.print("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
+                        return "Confirm Success";
+                    } else {
+                        out.print("{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}");
+                        return "Order already confirmed";
+                    }
+                } else {
+                    out.print("{\"RspCode\":\"04\",\"Message\":\"Invalid Amount\"}");
+                    return "Invalid Amount";
+                }
+            } else {
+                out.print("{\"RspCode\":\"01\",\"Message\":\"Order not Found\"}");
+                return "Order not Found";
+            }
+        } else {
+            out.print("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
+            return "Invalid Checksum";
+        }
     }
 }

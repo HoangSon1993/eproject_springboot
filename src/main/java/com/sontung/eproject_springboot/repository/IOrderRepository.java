@@ -14,6 +14,7 @@ import java.util.List;
 
 @Repository
 public interface IOrderRepository extends JpaRepository<Order, String> {
+    Order findByCode(String code);
     @Query("SELECT COUNT(o) FROM Order o ")
     long countOrder();
 
