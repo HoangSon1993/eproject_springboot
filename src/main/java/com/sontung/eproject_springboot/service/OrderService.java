@@ -65,7 +65,22 @@ public class OrderService {
     public List<Order> getOrders() {
         return orderRepository.findAll();
     }
+    public Page<Order> getOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return orderRepository.findAll(pageable);
+    }
 
+    // ========================== Count order: Admin site==============//
+    // Count all order
+    public long countOrder(){
+        return orderRepository.countOrder();
+    }
+    // Count order by filterDate
+    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.countOrderByFilterDate(filterLocalDate);
+    }
+    // ===================================================================//
     public Order getOrder(String orderId) {
         return orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
     }
@@ -103,7 +118,6 @@ public class OrderService {
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
-
     public long countOrderByPrice(int priceValue) {
         return switch (priceValue) {
             case 1 -> orderRepository.countByTotalAmountLessThan(BigDecimal.valueOf(100000));
@@ -114,6 +128,37 @@ public class OrderService {
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
+    public long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+        BigDecimal minAmount;
+        BigDecimal maxAmount;
+        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        switch (priceValue) {
+            case 1 -> {
+                minAmount = BigDecimal.ZERO;
+                maxAmount = BigDecimal.valueOf(100000);
+            }
+            case 2 -> {
+                minAmount = BigDecimal.valueOf(100000);
+                maxAmount = BigDecimal.valueOf(200000);
+            }
+            case 3 -> {
+                minAmount = BigDecimal.valueOf(200000);
+                maxAmount = BigDecimal.valueOf(300000);
+            }
+            case 4 -> {
+                minAmount = BigDecimal.valueOf(300000);
+                maxAmount = BigDecimal.valueOf(500000);
+            }
+            case 5 -> {
+                minAmount = BigDecimal.valueOf(500000);
+                maxAmount = BigDecimal.valueOf(Long.MAX_VALUE);
+            }
+            default -> throw new IllegalArgumentException("Invalid price range");
+        }
+
+        return orderRepository.countOrderByFilterDateAndPrice(filterLocalDate, minAmount, maxAmount);
+    }
+
 
     // Filter Order by date in OrderManagement
     public Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
@@ -128,36 +173,73 @@ public class OrderService {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return orderRepository.findByOrderDateCombo(filterLocalDate);
     }
-    public List<Order> getOrdersByPriceAndDate(int priceValue,
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+//    public List<Order> getOrdersByPriceAndDate(int priceValue,
+//                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+//        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//        return orderRepository.findAll().stream().filter(i -> {
+//            BigDecimal totalAmount = i.getTotalAmount();
+//            boolean priceMatches;
+//            switch (priceValue) {
+//                case 1: // Dưới 100k
+//                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) < 0;
+//                    break;
+//                case 2: // 100k -> 200k
+//                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) >= 0 &&
+//                            totalAmount.compareTo(new BigDecimal("200000")) <= 0;
+//                    break;
+//                case 3: // 200k -> 300k
+//                    priceMatches = totalAmount.compareTo(new BigDecimal("200000")) > 0 &&
+//                            totalAmount.compareTo(new BigDecimal("300000")) <= 0;
+//                    break;
+//                case 4: // 300k -> 500k
+//                    priceMatches = totalAmount.compareTo(new BigDecimal("300000")) > 0 &&
+//                            totalAmount.compareTo(new BigDecimal("500000")) <= 0;
+//                    break;
+//                case 5: // 500k Trở Lên
+//                    priceMatches = totalAmount.compareTo(new BigDecimal("500000")) > 0;
+//                    break;
+//                default:
+//                    throw new IllegalArgumentException("Invalid price range");
+//            }
+//            return priceMatches && i.getOrderDate().equals(filterLocalDate);
+//        }).collect(Collectors.toList());
+//    }
+
+    public Page<Order> getOrdersByPriceAndDate(int priceValue,
+                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                                               int page,
+                                               int size) {
         LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.findAll().stream().filter(i -> {
-            BigDecimal totalAmount = i.getTotalAmount();
-            boolean priceMatches = false;
-            switch (priceValue) {
-                case 1: // Dưới 100k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) < 0;
-                    break;
-                case 2: // 100k -> 200k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) >= 0 &&
-                            totalAmount.compareTo(new BigDecimal("200000")) <= 0;
-                    break;
-                case 3: // 200k -> 300k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("200000")) > 0 &&
-                            totalAmount.compareTo(new BigDecimal("300000")) <= 0;
-                    break;
-                case 4: // 300k -> 500k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("300000")) > 0 &&
-                            totalAmount.compareTo(new BigDecimal("500000")) <= 0;
-                    break;
-                case 5: // 500k Trở Lên
-                    priceMatches = totalAmount.compareTo(new BigDecimal("500000")) > 0;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid price range");
-            }
-            return priceMatches && i.getOrderDate().equals(filterLocalDate);
-        }).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page-1, size);
+
+        BigDecimal minPrice;
+        BigDecimal maxPrice;
+
+        switch (priceValue) {
+            case 1: // Dưới 100k
+                minPrice = BigDecimal.ZERO;
+                maxPrice = new BigDecimal("100000");
+                break;
+            case 2: // 100k -> 200k
+                minPrice = new BigDecimal("100000");
+                maxPrice = new BigDecimal("200000");
+                break;
+            case 3: // 200k -> 300k
+                minPrice = new BigDecimal("200000");
+                maxPrice = new BigDecimal("300000");
+                break;
+            case 4: // 300k -> 500k
+                minPrice = new BigDecimal("300000");
+                maxPrice = new BigDecimal("500000");
+                break;
+            case 5: // 500k Trở Lên
+                minPrice = new BigDecimal("500000");
+                maxPrice = new BigDecimal("999999999"); // effectively no upper limit
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid price range");
+        }
+        return orderRepository.findByPriceRangeAndDate(minPrice, maxPrice, filterLocalDate, pageable);
     }
 
     /**

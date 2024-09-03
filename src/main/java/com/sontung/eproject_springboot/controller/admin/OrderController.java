@@ -58,7 +58,10 @@ public class OrderController {
             else{
                 model.addAttribute("filterDate", filterDate);
                 model.addAttribute("amongPrice", amongPrice);
-                model.addAttribute("orders", orderService.getOrdersByPriceAndDate(amongPrice, filterDate));
+                long totalItems =  orderService.countOrderByPriceAndFilterDate(amongPrice, filterDate);
+                int totalPages = (int) (Math.ceil((double)  totalItems/ size));
+                model.addAttribute("totalPages", totalPages);
+                model.addAttribute("orders", orderService.getOrdersByPriceAndDate(amongPrice, filterDate, page, size));
             }
         }
         return "/admin/order/index";

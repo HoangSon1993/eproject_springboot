@@ -26,8 +26,6 @@ public class Order {
     String status;
     String shippingAddress;
     String shippingPhone;
-    String code;
-
     @Column(length = 8)
     String code;
 

@@ -77,16 +77,24 @@
                 </tr>
                 </tbody>
             </table>
+
         </th:block>
         <th:block th:if="${orders==null}">
             <h2 th:text="'Không có đơn hàng nào trong ngày' + ${filterDate}"></h2>
         </th:block>
-        <th:block th:if="${filterDate}==null">
+        <th:block th:if="${filterDate == null} and ${amongPrice} == null">
             <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order', ${currentPage}, ${totalPages}, ${size})"></div>
         </th:block>
-        <th:block th:if="${filterDate}!=null">
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?filterDate='+${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
+        <th:block th:if="${filterDate != null} and ${amongPrice} == null">
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
         </th:block>
+        <th:block th:if="${filterDate == null} and ${amongPrice} != null">
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?amongPrice=' + ${amongPrice}, ${currentPage}, ${totalPages}, ${size})"></div>
+        </th:block>
+        <th:block th:if="${filterDate != null} and ${amongPrice} != null">
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?amongPrice='+ ${amongPrice} + '&filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
+        </th:block>
+
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>
 </body>

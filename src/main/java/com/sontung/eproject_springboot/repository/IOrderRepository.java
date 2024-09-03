@@ -15,8 +15,14 @@ import java.util.List;
 @Repository
 public interface IOrderRepository extends JpaRepository<Order, String> {
     Order findByCode(String code);
+
     @Query("SELECT COUNT(o) FROM Order o ")
     long countOrder();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate = :filterDate AND o.totalAmount BETWEEN :minAmount AND :maxAmount")
+    long countOrderByFilterDateAndPrice(@Param("filterDate") LocalDate filterDate,
+                                        @Param("minAmount") BigDecimal minAmount,
+                                        @Param("maxAmount") BigDecimal maxAmount);
 
     @Query("SELECT o FROM Order o WHERE o.orderDate = :filterDate")
     Page<Order> findByOrderDateOrder(@Param("filterDate") LocalDate filterDate, Pageable pageable);
@@ -26,8 +32,6 @@ public interface IOrderRepository extends JpaRepository<Order, String> {
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate = :filterDate")
     long countOrderByFilterDate(@Param("filterDate") LocalDate filterDate);
-
-
 
     @Query("SELECT o FROM Order o WHERE o.totalAmount < 100000")
     Page<Order> findOrdersUnder100K(Pageable pageable);
@@ -52,4 +56,12 @@ public interface IOrderRepository extends JpaRepository<Order, String> {
 
     // Đếm số lượng Order có totalAmount lớn hơn hoặc bằng 400,000
     long countByTotalAmountGreaterThanEqual(BigDecimal amount);
+
+    @Query("SELECT o FROM Order o WHERE o.totalAmount >= :minPrice AND o.totalAmount <= :maxPrice AND o.orderDate = :filterDate")
+    Page<Order> findByPriceRangeAndDate(
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("filterDate") LocalDate filterDate,
+            Pageable pageable);
+
 }

@@ -176,14 +176,23 @@ public class ComboService {
             // Add to the list
             allOrderDetails.addAll(orderDetails);
         }
+        // Sắp xếp danh sách OrderDetail theo comboIdallOrderDetails.sort(Comparator.comparing(orderDetail -> orderDetail.getCombo().getComboId()));
         // Create a paginated response
         int start = (page - 1) * size;
         int end = Math.min(start + size, allOrderDetails.size());
         List<OrderDetail> paginatedOrderDetails = allOrderDetails.subList(start, end);
         return new PageImpl<>(paginatedOrderDetails, PageRequest.of(page - 1, size), allOrderDetails.size());
     }
-    public long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+
+    public long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
         List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
-        return orders.size();
+        List<String> orderIdList = orders.stream().map(Order::getOrderId).toList();
+        List<OrderDetail> allOrderDetails = new ArrayList<>();
+        for (String orderId : orderIdList) {
+            List<OrderDetail> orderDetails = orderDetailService.getOrderDetails(orderId);
+            orderDetails.removeIf(item -> item.getCombo() == null);
+            allOrderDetails.addAll(orderDetails);
+        }
+        return allOrderDetails.size();
     }
 }

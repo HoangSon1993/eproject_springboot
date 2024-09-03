@@ -63,7 +63,8 @@ public class ComboController {
             Page<OrderDetail> orderDetails = comboService.getOrdersByDate(filterDate,page,size);
             model.addAttribute("filterDate", filterDate);
             model.addAttribute("orders", orderDetails);
-            int totalPages = (int) (Math.ceil((double) comboService.countOrderDetailInComboMgr(filterDate) / size));
+            long totalItems = comboService.countOrderDetailInComboMgr(filterDate);
+            int totalPages = (int) (Math.ceil((double)  totalItems/ size));
             model.addAttribute("totalPages", totalPages);
         }
         return "/admin/combo/index";
