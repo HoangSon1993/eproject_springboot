@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.entity;
 
+import com.sontung.eproject_springboot.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +24,15 @@ public class Order {
     String orderId;
     LocalDate orderDate;
     BigDecimal totalAmount;
-    String status;
+
+    /**
+     * Trong DB sẽ lưu giá trị  0,1,2
+     * PEDING:'Chờ thanh toán'
+     * PAID: 'Đã thanh toán'
+     * CANCELED: 'Huỷ bỏ'
+     */
+    @Enumerated(EnumType.ORDINAL)
+    OrderStatus status;
     String shippingAddress;
     String shippingPhone;
     @Column(length = 8)
@@ -37,6 +46,7 @@ public class Order {
     Account account;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     List<OrderDetail> orderDetails = new ArrayList<>();
 
     // Add widget to add order details to order.
@@ -49,5 +59,4 @@ public class Order {
         orderDetails.remove(orderDetail);
         orderDetail.setOrder(null);
     }
-
 }

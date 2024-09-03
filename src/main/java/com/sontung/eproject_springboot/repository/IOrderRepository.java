@@ -64,4 +64,5 @@ public interface IOrderRepository extends JpaRepository<Order, String> {
             @Param("filterDate") LocalDate filterDate,
             Pageable pageable);
 
+    Order findByCodeAndAccount_AccountId(String code, String accountId);
 }
