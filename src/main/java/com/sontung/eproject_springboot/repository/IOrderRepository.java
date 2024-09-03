@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IOrderRepository extends JpaRepository<Order, String> {
-    Order findByCode(String code);
+    Order findByCodeAndAccount_AccountId(String code, String accountId);
 }

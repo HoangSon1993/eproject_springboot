@@ -3,6 +3,8 @@ package com.sontung.eproject_springboot.service;
 import com.sontung.eproject_springboot.dto.OrderDetailDTO;
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
 import com.sontung.eproject_springboot.entity.*;
+import com.sontung.eproject_springboot.enums.InvoiceStatus;
+import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.*;
 import com.sontung.eproject_springboot.util.VnPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -172,6 +174,7 @@ public class OrderService {
      * @Exception:
      **/
     public Order createOrder(OrderDtoRequest orderDtoRequest, String userId) {
+        // Todo: Bằng cách nào đó carts == empty thì k cho tạo Order
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         // 1 Tính tổng tiền dơn hàng, giá lấy trong bảng product.
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -179,10 +182,10 @@ public class OrderService {
         Order order = Order.builder()
                 .account(accountRepository.findById(userId).get())
                 .orderDate(LocalDate.now())
-                .status("Chờ thanh toán")
+                .status(OrderStatus.PENDING)
                 .shippingAddress(orderDtoRequest.getShippAddress())
                 .shippingPhone(orderDtoRequest.getShippingPhone())
-                .orderDetails(new ArrayList<>())
+                //.orderDetails(new ArrayList<>()) trong Order đã có @Buider.Default
                 .build();
 
         for (Cart cart : carts) {
@@ -218,7 +221,7 @@ public class OrderService {
         }
 
         order.setTotalAmount(totalAmount);
-        order.setCode(VnPayUtil.getRandomNumber(8));
+        order.setCode(VnPayUtil.getCodeNumber(8));
 
         // 3 Save Order.
         orderRepository.save(order);
@@ -326,11 +329,11 @@ public class OrderService {
      * @Return: void.
      * @Exception UnsupportedEncodingException
      **/
-    public String handleResult(HttpServletRequest request) throws UnsupportedEncodingException {
+    public String handleResult(HttpServletRequest request, String userId) throws UnsupportedEncodingException {
         // Get order from DB
         String vnpOrderInfo = request.getParameter("vnp_OrderInfo");
         String code = vnpOrderInfo.substring(vnpOrderInfo.length() - 8);
-        Order order = orderRepository.findByCode(code);
+        Order order = orderRepository.findByCodeAndAccount_AccountId(code,userId);
 
 
         Map fields = new HashMap();
@@ -361,7 +364,7 @@ public class OrderService {
             boolean checkAmount = Math.abs(amoutParam - totalAmount) < EPSILON;
             // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in the Your database).
 
-            boolean checkOrderStatus = (order.getStatus().equals("Chờ thanh toán"));
+            boolean checkOrderStatus = (order.getStatus() == OrderStatus.PENDING);
             // PaymnentStatus = 0 (pending)
 
 
@@ -371,24 +374,24 @@ public class OrderService {
                         if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
 
                             //Here Code update PaymnentStatus = 1 into your Database
-                            order.setStatus("Đã thanh toán");
+                            order.setStatus(OrderStatus.PAID);
                             orderRepository.save(order);
 
                             // Thanh toan thanh cong
-                            // Create Order
+                            // Create Invoice
                             Invoice invoice = Invoice.builder()
                                     .order(order)
                                     .totalAmount(order.getTotalAmount())
                                     .paymentDate(LocalDate.parse(request.getParameter("vnp_PayDate"), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
                                     .invoiceDate(LocalDate.now())
-                                    .paymentStatus("Đã thanh toán")
+                                    .paymentStatus(InvoiceStatus.PAID)
                                     .paymentMethod("VNPay")
                                     .bankCode(request.getParameter("vnp_BankCode"))
                                     .transactionNo(request.getParameter("vnp_BankTranNo"))
                                     .cardType(request.getParameter("vnp_CardType"))
                                     .transactionStatus(request.getParameter("vnp_TransactionStatus"))
                                     .bankTransactionNo(request.getParameter("vnp_TransactionNo"))
-                                    .invoiceDetails(new ArrayList<>())
+                                  //  .invoiceDetails(new ArrayList<>()) // không cần phải có dòng này vì trong Invoice đã có @Buider.Default
                                     .build();
 
                             // Create OrderDetail
@@ -417,22 +420,29 @@ public class OrderService {
                         }
                         // Thanh cong thi show thong bao nay.
                         out.print("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
-                        return "Confirm Success";
+                        return "Xác nhận thành công.";
                     } else {
                         out.print("{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}");
-                        return "Order already confirmed";
+                        return "Đơn hàng đã được xác nhận.";
                     }
                 } else {
                     out.print("{\"RspCode\":\"04\",\"Message\":\"Invalid Amount\"}");
-                    return "Invalid Amount";
+                    return "Số tiền không hợp lệ.";
                 }
             } else {
                 out.print("{\"RspCode\":\"01\",\"Message\":\"Order not Found\"}");
-                return "Order not Found";
+                return "Đơn hàng không được tìm thấy.";
             }
         } else {
             out.print("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
-            return "Invalid Checksum";
+            return "Tổng kiểm tra không hợp lệ.";
         }
+    }
+
+    /**
+     * @Summary: Lấy Order với code
+     * **/
+    public Order findByCodeAndAccountId(String accountId,String code) {
+        return orderRepository.findByCodeAndAccount_AccountId(code, accountId);
     }
 }

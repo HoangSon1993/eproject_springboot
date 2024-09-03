@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.entity;
 
+import com.sontung.eproject_springboot.enums.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,16 @@ public class Invoice {
     String invoiceId; // invoiceNumber
     LocalDate invoiceDate; // Ngày hóa đơn dược lạp
     BigDecimal totalAmount; // Tổng tiền
-    String paymentStatus; // Trạng thái thanh toán  (đã thanh toán, chưa thanh toán, hủy bỏ)
+
+    /**
+     * Trong DB sẽ lưu giá trị  0,1,2,3
+     * UNPAID:  'Chưa thanh toán'
+     * PAID:    'Đã thanh toán'
+     * PENDING: 'Đang chờ xử lý'
+     * FAILED:   'Thanh toán thất bại'
+     **/
+    @Enumerated(EnumType.ORDINAL)
+    InvoiceStatus paymentStatus; // Trạng thái thanh toán  (đã thanh toán, chưa thanh toán, hủy bỏ)
     String paymentMethod; // Phương thức thanh toán (chuyển khoản, tín dụng, tiền mặt)
     LocalDate paymentDate; // Ngày thanh toán
 
@@ -37,11 +47,12 @@ public class Invoice {
     Order order;
 
     /**
-     * @OneToMay: 'Invoice' (1 - n) 'InvoiceDetail'
-     * @param: mappedBy: Mối quan hệ này được quản lý bởi thuộc tính 'invoice' trong 'InvoiceDetail'
-     * @param :orphanRemoval: Nếu 1 'invoice_detail' bị xóa khỏi ds 'invoiceDetails', nó cũng bị xóa khỏi CSDL
-     * **/
+     * OneToMay: 'Invoice' (1 - n) 'InvoiceDetail'
+     * param: mappedBy: Mối quan hệ này được quản lý bởi thuộc tính 'invoice' trong 'InvoiceDetail'
+     * param :orphanRemoval: Nếu 1 'invoice_detail' bị xóa khỏi ds 'invoiceDetails', nó cũng bị xóa khỏi CSDL
+     **/
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     List<InvoiceDetail> invoiceDetails = new ArrayList<>();
 
     // Add widget to add invoice details to invoice.

@@ -98,12 +98,12 @@ public class CartService {
     public List<CartDetailDTO> getCarts(String userId, List<String> cartItems) {
         List<Cart> carts;
 
-        // kiem tra xem cos cartItems hay k
+        // Kiểm tra xem có cartItems hay không
         if (cartItems == null || cartItems.isEmpty()) {
-            // Truong hop lay tat ca cartItem cua User
+            // Trường hợp lấy tất cả cartItems của User
             carts = cartRepository.getCartsByAccount_AccountId(userId);
         } else {
-            // Truong hop co cartItems, lay cac cart cua User ung voi cartItems
+            // Trường hợp có cartItems, lấy các cart của User ứng với cartItems
             carts = cartItems.stream()
                     .map(cartId -> cartRepository.findByCartIdAndAccount_AccountId(cartId, userId))
                     .filter(Objects::nonNull)
@@ -223,7 +223,7 @@ public class CartService {
     }
 
     /**
-     * @Sumarry: Get All Cart Item with Account_ID and Cart_Id
+     * @Summary: Get All Cart Item with Account_ID and Cart_Id
      * @Description: The price of the product or combo is obtained from the Product or Combo table.
      **/
     public List<CartDetailDTO> getCartByIds(String userId, List<String> cartItems)

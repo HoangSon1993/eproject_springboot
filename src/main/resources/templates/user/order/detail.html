@@ -13,7 +13,7 @@
     <!-- Checkout Page Start -->
     <div class="container-fluid py-5">
         <div class="container py-5">
-            <h1 class="mb-4">Chi Tiết Đơn Hàng</h1>
+            <h1 class="mb-4">Chi Tiết Đơn Hàng: <span th:text="${order.code}"></span></h1>
             <div class="row g-5">
                 <div class="col-md-12 col-lg-5 col-xl-5">
                     <div class="row">
@@ -58,16 +58,29 @@
                             </thead>
                             <tbody>
 
-                            <th:block th:each="item: ${cartDetails}">
+                            <th:block th:each="item: ${order.orderDetails}">
                                 <tr class="order-item">
-                                    <th scope="row">
-                                        <div class="d-flex align-items-center mt-2">
-                                            <img th:src="@{${s3BucketUrl} + ${item.image}}"
-                                                 class="img-fluid rounded-circle"
-                                                 style="width: 90px; height: 90px;" alt="">
-                                        </div>
-                                    </th>
-                                    <td class="py-5" th:text="${item.name}">Awesome Brocoli</td>
+                                    <th:block th:if="${item.product != null}">
+                                        <th scope="row">
+                                            <div class="d-flex align-items-center mt-2">
+                                                <img th:src="@{${s3BucketUrl} + ${item.product.image}}"
+                                                     class="img-fluid rounded-circle"
+                                                     style="width: 90px; height: 90px;" alt="">
+                                            </div>
+                                        </th>
+                                        <td class="py-5" th:text="${item.product.productName}">Awesome Brocoli</td>
+                                    </th:block>
+                                    <th:block th:if="${item.combo != null}">
+                                        <th scope="row">
+                                            <div class="d-flex align-items-center mt-2">
+                                                <img th:src="@{${s3BucketUrl} + ${item.combo.image}}"
+                                                     class="img-fluid rounded-circle"
+                                                     style="width: 90px; height: 90px;" alt="">
+                                            </div>
+                                        </th>
+                                        <td class="py-5" th:text="${item.combo.comboName}">Awesome Brocoli</td>
+                                    </th:block>
+
                                     <td class="py-5" th:text="${item.price}">$69.00</td>
                                     <td class="py-5" th:text="${item.quantity}">2</td>
                                     <td class="py-5"
@@ -89,7 +102,7 @@
                                 <td class="py-5">
                                     <div class="py-3 border-bottom border-top">
                                         <p class="mb-0 text-dark"
-                                           th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
+                                           th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
                                             $414.00</p>
                                     </div>
                                 </td>
@@ -129,7 +142,7 @@
                                 <td class="py-5">
                                     <div class="py-3 border-bottom border-top">
                                         <p class="mb-0 text-dark"
-                                           th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
+                                           th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')} + ' (VND)'">
                                             $135.00</p>
                                     </div>
                                 </td>
@@ -171,48 +184,48 @@
 
 <script th:inline="javascript">  //th:inline="javascript" phải có dòng này thì mới dùng biến của thymeleaf được.
 
-document.getElementById("checkoutButton").addEventListener("click", function (event) {
-    event.preventDefault()
-
-    // thu thập dữ liệu.
-    const firstName = document.querySelector('input[name="firstName"]').value;
-    const lastName = document.querySelector('input[name="lastName"]').value;
-    const address = document.querySelector('input[name="address"]').value;
-    const phoneNumber = document.querySelector('input[name="phoneNumber"]').value;
-    const email = document.querySelector('input[name="email"]').value;
-
-    // Todo: Xu ly them neu ng dung xoa sp khoi Order
-    let cartItems = /*[[${cartItems}]]*/ [];
-
-    const orderData = {
-        firstName: firstName,
-        lastName: lastName,
-        shippAddress: address,
-        shippingPhone: phoneNumber,
-        email: email,
-        cartItems: cartItems
-    }
-
-    // Fetch data to server
-    fetch('/order/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            // 'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value // Đảm bảo bảo mật với CSRF token
-        },
-        body: JSON.stringify(orderData)
-    })
-        .then((response) => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.url
-            } else {
-                // xu ly loi neu co
-                alert('Đặt hàng không thành công, vui lòng thử lại!')
-            }
-        })
-        .catch(error => console.error('Đã có lỗi trong quá trình xử lý đơn hàng', error))
-})
+// document.getElementById("checkoutButton").addEventListener("click", function (event) {
+//     event.preventDefault()
+//
+//     // thu thập dữ liệu.
+//     const firstName = document.querySelector('input[name="firstName"]').value;
+//     const lastName = document.querySelector('input[name="lastName"]').value;
+//     const address = document.querySelector('input[name="address"]').value;
+//     const phoneNumber = document.querySelector('input[name="phoneNumber"]').value;
+//     const email = document.querySelector('input[name="email"]').value;
+//
+//     // Todo: Xu ly them neu ng dung xoa sp khoi Order
+//     let cartItems = /*[[${cartItems}]]*/ [];
+//
+//     const orderData = {
+//         firstName: firstName,
+//         lastName: lastName,
+//         shippAddress: address,
+//         shippingPhone: phoneNumber,
+//         email: email,
+//         cartItems: cartItems
+//     }
+//
+//     // Fetch data to server
+//     fetch('/order/create', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             // 'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value // Đảm bảo bảo mật với CSRF token
+//         },
+//         body: JSON.stringify(orderData)
+//     })
+//         .then((response) => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 window.location.href = data.url
+//             } else {
+//                 // xu ly loi neu co
+//                 alert('Đặt hàng không thành công, vui lòng thử lại!')
+//             }
+//         })
+//         .catch(error => console.error('Đã có lỗi trong quá trình xử lý đơn hàng', error))
+// })
 
 </script>
 </body>
