@@ -119,4 +119,7 @@ public class VnPayUtil {
         return sb.toString();
     }
 
+    public static String getCodeNumber(int len) {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, len);
+    }
 }
