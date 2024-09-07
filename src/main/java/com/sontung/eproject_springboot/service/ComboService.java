@@ -176,7 +176,8 @@ public class ComboService {
             // Add to the list
             allOrderDetails.addAll(orderDetails);
         }
-        // Sắp xếp danh sách OrderDetail theo comboIdallOrderDetails.sort(Comparator.comparing(orderDetail -> orderDetail.getCombo().getComboId()));
+        // Sắp xếp danh sách OrderDetail theo comboId
+        allOrderDetails.sort(Comparator.comparing(orderDetail -> orderDetail.getCombo().getComboId()));
         // Create a paginated response
         int start = (page - 1) * size;
         int end = Math.min(start + size, allOrderDetails.size());

@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -15,9 +16,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name="account")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "account_id")
     String accountId;
     @Column(length = 100)
     String fullName;
@@ -35,4 +38,11 @@ public class Account {
 
     @OneToMany (mappedBy = "account")
     List<Cart> carts;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "accounts_roles",
+            joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    )
+    private Set<Role> roles;
 }

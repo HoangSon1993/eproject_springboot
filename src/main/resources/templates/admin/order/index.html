@@ -69,7 +69,8 @@
                     <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
                     <td class="text-center" th:text="${item.shippingAddress}"></td>
                     <td class="text-center" th:text="${item.shippingPhone}"></td>
-                    <td class="text-center" th:text="${item.status}==1?'Hoàn thành':'Không hoàn thành'"></td>
+<!--                    <td class="text-center" th:text="${item.status}==1?'Hoàn thành':'Không hoàn thành'"></td>-->
+                    <td class="text-center" th:text="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID ? 'Hoàn thành' : 'Không hoàn thành'}"></td>
                     <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
                     <td class="text-center">
                         <a th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info"><i class="fa-solid fa-circle-info"></i></a>

@@ -28,6 +28,7 @@ public class OrderController {
     public String s3BucketUrl() {
         return s3BucketUrl;
     }
+
     @GetMapping
     public String getOrders(@RequestParam(required = false, defaultValue = "0") int amongPrice,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
