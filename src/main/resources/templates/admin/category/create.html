@@ -42,9 +42,9 @@
     <div th:replace="~{/admin/common/content_footer}"></div>
     <script>
         window.onload = () => {
-            var lschk = document.querySelectorAll("input[type=checkbox]");
-            for(var i = 0; i < lschk.length; i++){
-                var item = lschk[i];
+            const lschk = document.querySelectorAll("input[type=checkbox]");
+            for(let i = 0; i < lschk.length; i++){
+                let item = lschk[i];
                 item.removeAttribute("checked");
             }
         }
