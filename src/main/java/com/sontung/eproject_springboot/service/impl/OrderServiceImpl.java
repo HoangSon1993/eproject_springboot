@@ -405,6 +405,11 @@ public class OrderServiceImpl implements OrderService {
                             Invoice invoiceCreated = invoiceRepository.save(invoice);
 
                             // Tra ket qua ve cho nguoi dung
+                        } else if ("24".equals(request.getParameter("vnp_ResponseCode"))) {
+                            // vnp_ResponseCode == 24; Người dùng hủy thanh toán,
+                            order.setStatus(OrderStatus.CANCELED);
+                            orderRepository.save(order);
+                            return "Giao dịch đã bị hủy, bạn có thể thử lại.";
                         } else {
                             // Here Code update PaymnentStatus = 2 into your Database
                         }
@@ -431,7 +436,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * @Summary: Lấy Order với code
-     * **/
+     **/
     @Override
     public Order findByCodeAndAccountId(String accountId, String code) {
         return orderRepository.findByCodeAndAccount_AccountId(code, accountId);
