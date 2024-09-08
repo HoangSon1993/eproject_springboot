@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -18,7 +19,17 @@ public class CartDetailDTO {
     String name; // name chung có thể là product hoặc combo
     String image;
     BigDecimal price; // price one product/combo
+    BigDecimal currentPrice; // Giá hiện tại từ product/combo
     int quantity;
-    List<ComboDetail> comboDetails;
+    @Builder.Default
+    List<ComboDetail> comboDetails = new ArrayList<>();
     boolean checked;
+
+    public void addComboDetail(ComboDetail comboDetail) {
+        comboDetails.add(comboDetail);
+    }
+
+    public void remobeComboDetail(ComboDetail comboDetail) {
+        comboDetails.remove(comboDetail);
+    }
 }

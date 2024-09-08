@@ -30,6 +30,9 @@
                 <div th:if="${message}" class="alert alert-success" role="alert">
                     <span th:text="${message}"></span>
                 </div>
+                <div th:if="${warning}" class="alert alert-warning" role="alert">
+                    <span th:text="${warning}"></span>
+                </div>
                 <div th:if="${error}" class="alert alert-danger" role="alert">
                     <span th:text="${error}"></span>
                 </div>
@@ -73,7 +76,12 @@
                             </td>
                             <td>
                                 <p class="mb-0 mt-4"
-                                   th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}"></p>
+                                   th:text="${#numbers.formatDecimal(item.currentPrice, 1, 'COMMA', 0, 'POINT')}">
+                                </p>
+                                <del class="mb-0 mt-4 text-danger"
+                                     th:if="${item.currentPrice != item.price}"
+                                     th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">
+                                </del>
                             </td>
                             <td>
                                 <div class="input-group quantity mt-4" style="width: 100px;">
@@ -97,7 +105,7 @@
                             <td>
                                 <p class="mb-0 mt-4 amount-element"
                                    th:attr="data-price=${item.price}"
-                                   th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
+                                   th:text="${#numbers.formatDecimal(item.currentPrice*item.quantity, 1, 'COMMA', 0, 'POINT')}"></p>
                             </td>
                             <td>
                                 <form th:action="@{/cart/remove}" method="post">
@@ -184,7 +192,6 @@
         return allChecked;
     }
 
-
     /**
      * Lấy ra tất cả những item đang được checked trên UI
      * **/
@@ -208,6 +215,12 @@
             : element
 
         let quantity = parseInt(quantityInput.value)
+        // Xử lý trường hợp quantity == NaN
+        if (isNaN(quantity)) {
+            console.log("quantiy is NanN")
+            quantityInput.value = prevQuantity
+            return;
+        }
         let form = element.closest('tr').querySelector('form');
         let cartId = form.querySelector('input[name="id"]').value
         let price = parseFloat(element.closest('tr').querySelector('.amount-element').getAttribute('data-price'));
@@ -254,7 +267,7 @@
             }).then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // cap nhat thanh tien
+                        // Cập nhật thành tiền.
                         let updatedAmount = quantity * price;
                         element.closest('tr').querySelector('.amount-element')
                             .textContent = new Intl.NumberFormat('en-US', {
@@ -262,10 +275,11 @@
                             minimumFractionDigits: 0,
                         }).format(updatedAmount);
 
-                        // Tinh lai tong tien
+                        // Tính lại tổng tiền.
                         updateTotalAmount();
                     } else {
-                        alert("Có lỗi xảy ra khi cập nhật số lượng sản phẩm");
+                        quantityInput.value = prevQuantity;
+                        alert("Đã có lỗi :" + data.message);
                     }
                 }).catch(error => console.error("Lỗi " + error))
         }
@@ -294,8 +308,8 @@
         totalPaymentElement.textContent = totalAmountElement.textContent
     }
 
+    let prevQuantity = 0;  // Biến Global để sử dụng ở các func khác nhau.
     document.addEventListener("DOMContentLoaded", function () {
-        let prevQuantity = 0;
         // khi người dùng thay đổi số lượng bằng nút tăng/giảm
 
         document.querySelectorAll('.btn-minus, .btn-plus').forEach((button) => {
@@ -344,10 +358,10 @@
                         console.error("Có lỗi xảy ra khi cập nhật checked")
                     }
                 }).catch(error => {
-                console.error("Có lỗi từ server: " + error);
+                console.error("Có lỗi từ server: " + error.toString());
             })
         })
-        // khi nguoi dung chon hoac bo chon sp
+        // Khi người dùng chọn hoặc bỏ chọn sản phẩm.
         document.querySelectorAll('.product-checkbox').forEach((element) => {
             element.addEventListener('change', () => {
                     let id = element.getAttribute('data-id');
@@ -401,16 +415,16 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(checkedItems)
-            }).then(response => {
-                if (response.url) {
-                    window.location.href = response.url
-                } else {
-                    alert("Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại!")
-                }
-            }).catch(error => {
-                console.error("Có lỗi từ server" + error)
-            })
+                body: JSON.stringify(checkedItems)  // Gửi danh sách sản phẩm đã chọn
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.url;
+                    } else {
+                        console.log(data.message)
+                        alert(data.message);
+                    }
+                }).catch(error => console.log(error))
         })
     })
 </script>
