@@ -1,7 +1,7 @@
 package com.sontung.eproject_springboot.controller.admin;
 
 import com.sontung.eproject_springboot.service.InvoiceService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin/invoice")
+@RequiredArgsConstructor
 public class InvoiceController {
-    @Autowired
-    InvoiceService invoiceService;
+    private final InvoiceService invoiceService;
+
     @GetMapping("/order-invoice")
     public String getInvoice(@RequestParam String orderId, Model model){
         model.addAttribute("invoice", invoiceService.getInvoice(orderId));

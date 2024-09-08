@@ -2,6 +2,7 @@ package com.sontung.eproject_springboot.controller.user;
 
 import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.service.ComboService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -13,14 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/combo")
+@RequiredArgsConstructor
 public class UserComboController {
     private final ComboService comboService;
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
-
-    public UserComboController(ComboService comboService) {
-        this.comboService = comboService;
-    }
 
     @ModelAttribute("s3BucketUrl")
     public String s3BucketUrl() {

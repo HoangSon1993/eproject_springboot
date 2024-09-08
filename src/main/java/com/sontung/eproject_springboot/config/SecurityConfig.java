@@ -36,7 +36,6 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-                        u
                         .defaultSuccessUrl("/admin/auth/home", true)  // Chuyển hướng sau khi đăng nhập thành công
                         .permitAll()
                 )
@@ -71,7 +70,6 @@ public class SecurityConfig {
 
         return httpSecurity.build();
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {

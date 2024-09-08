@@ -4,7 +4,7 @@ import com.sontung.eproject_springboot.entity.Category;
 import com.sontung.eproject_springboot.entity.Product;
 import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,14 +15,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-@Controller(value = "UserProductController")
+@Controller(value = "userProductController")
 
 @RequestMapping("product")
+@RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -32,11 +30,6 @@ public class ProductController {
     @ModelAttribute("s3BucketUrl")
     public String s3BucketUrl() {
         return s3BucketUrl;
-    }
-
-    public ProductController(ProductService productService, CategoryService categoryService) {
-        this.productService = productService;
-        this.categoryService = categoryService;
     }
 
     @ModelAttribute("categories")
@@ -70,7 +63,20 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sort,
             Model model
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "productName"));
+
+        // Todo: Tối ưu hoá search, sort, filter bằng cách custom query.
+        // productService.getAllProductWithSortByColumnAndSearch(page, size, search, sort);
+
+
+        List<Sort.Order> sorts = new ArrayList<>();
+        if(sort.equals("asc")){
+            sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
+        }else{
+            sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sorts));
+
         int status = 1;
         Page<Product> products;
         if (categoryId == null || categoryId.isEmpty()) {
@@ -87,7 +93,7 @@ public class ProductController {
         model.addAttribute("sort", sort); // Hướng sắp xếp hiện tại
 
         return "/user/product/index";
-    }
+   }
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
