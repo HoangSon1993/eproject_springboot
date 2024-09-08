@@ -28,9 +28,7 @@ public class VnPayUtil {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
-        } catch (UnsupportedEncodingException ex) {
-            digest = "";
-        } catch (NoSuchAlgorithmException e) {
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
             digest = "";
         }
         return digest;
@@ -46,9 +44,7 @@ public class VnPayUtil {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            digest = "";
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             digest = "";
         }
         return digest;

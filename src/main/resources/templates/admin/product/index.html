@@ -112,8 +112,8 @@
 <!-- Thêm script để lấy và sử dụng lựa chọn của người dùng -->
 <script>
     function saveColumnSelection() {
-        var selectedColumns = [];
-        var checkboxes = document.querySelectorAll('input[name="columns"]:checked');
+        const selectedColumns = [];
+        const checkboxes = document.querySelectorAll('input[name="columns"]:checked');
         checkboxes.forEach((checkbox) => {
             selectedColumns.push(checkbox.value);
         });
@@ -138,10 +138,10 @@
         fetch('/admin/getColumnSelection')
             .then(response => response.json())
             .then(data => {
-                var selectedColumns = data;
-                var tableHeaders = document.querySelectorAll('.table thead th');
-                var tableRows = document.querySelectorAll('.table tbody tr');
-                var checkboxes = document.querySelectorAll('input[name="columns"]');
+                const selectedColumns = data;
+                const tableHeaders = document.querySelectorAll('.table thead th');
+                const tableRows = document.querySelectorAll('.table tbody tr');
+                const checkboxes = document.querySelectorAll('input[name="columns"]');
 
                 checkboxes.forEach((checkbox) => {
                     if (selectedColumns.includes(checkbox.value)) {
@@ -152,7 +152,7 @@
                 });
 
                 tableHeaders.forEach((header, index) => {
-                    var columnName = header.getAttribute('data-column');
+                    const columnName = header.getAttribute('data-column');
                     if (!selectedColumns.includes(columnName)) {
                         header.style.display = 'none';
                         tableRows.forEach(row => {

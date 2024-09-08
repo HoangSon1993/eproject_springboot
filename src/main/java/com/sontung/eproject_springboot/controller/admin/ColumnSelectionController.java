@@ -1,7 +1,7 @@
 package com.sontung.eproject_springboot.controller.admin;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,9 +9,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class ColumnSelectionController {
-    @Autowired
-    private HttpSession session;
+    private final HttpSession session;
 
     @PostMapping("/saveColumnSelection")
     public ResponseEntity<?> saveColumnSelection(@RequestParam List<String> columns) {

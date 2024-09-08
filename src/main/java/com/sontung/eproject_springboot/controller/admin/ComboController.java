@@ -1,4 +1,5 @@
 package com.sontung.eproject_springboot.controller.admin;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sontung.eproject_springboot.dto.ComboDTO;
@@ -7,7 +8,7 @@ import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.entity.OrderDetail;
 import com.sontung.eproject_springboot.service.ComboService;
 import com.sontung.eproject_springboot.service.S3Service;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,15 +28,12 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/combo")
+@RequiredArgsConstructor
 public class ComboController {
     private final S3Service s3Service;
-    @Autowired
-    ComboService comboService;
+    private final ComboService comboService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ComboController(S3Service s3Service) {
-        this.s3Service = s3Service;
-    }
 
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
@@ -46,6 +44,7 @@ public class ComboController {
     }
 
     // TODO: 29/07/2024  
+    // TODO: 29/07/2024
     @GetMapping("")
     public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
                             @RequestParam(defaultValue = "1") int page,
@@ -69,17 +68,20 @@ public class ComboController {
         }
         return "/admin/combo/index";
     }
+
     @GetMapping("/expired")
-    public String getExpiringCombo(Model model){
+    public String getExpiringCombo(Model model) {
         model.addAttribute("expiringCombos", comboService.getExpiringCombos());
         return "/admin/combo/expired";
     }
+
     @GetMapping("/create")
-    public String createCombo(Model model){
+    public String createCombo(Model model) {
         model.addAttribute("products", comboService.getProducts());
         model.addAttribute("combo", new ComboDTO());
         return "/admin/combo/create";
     }
+
     @Transactional
     @PostMapping("/createConfirm")
     public String createCombo(@ModelAttribute ComboDTO comboDTO,
@@ -101,7 +103,8 @@ public class ComboController {
                     comboService.createCombo(combo);
                     redirectAttributes.addFlashAttribute("message", "File Successfully Upload");
                     // Chuyển đổi JSON thành danh sách các đối tượng ComboDetailDTO
-                    List<ComboDetailDTO> comboDetailDTOS = objectMapper.readValue(comboDTO.getProductsJson(), new TypeReference<List<ComboDetailDTO>>() {});
+                    List<ComboDetailDTO> comboDetailDTOS = objectMapper.readValue(comboDTO.getProductsJson(), new TypeReference<List<ComboDetailDTO>>() {
+                    });
                     // Tạo DTO mới và xử lý dữ liệu bằng service
                     BigDecimal totalAmount = BigDecimal.ZERO;
                     for (ComboDetailDTO comboDetailDTO : comboDetailDTOS) {
@@ -128,14 +131,16 @@ public class ComboController {
             return "error";
         }
     }
+
     @GetMapping("/detail")
-    public String getCombo(@RequestParam String comboId, Model model){
+    public String getCombo(@RequestParam String comboId, Model model) {
         model.addAttribute("combo", comboService.getCombo(comboId));
         model.addAttribute("comboDetails", comboService.getComboDetails(comboId));
         return "/admin/combo/detail";
     }
+
     @PostMapping("/delete")
-    public String deleteCombo(@RequestParam String comboId){
+    public String deleteCombo(@RequestParam String comboId) {
         comboService.removeCombo(comboId);
         return "redirect:/admin/combo";
     }

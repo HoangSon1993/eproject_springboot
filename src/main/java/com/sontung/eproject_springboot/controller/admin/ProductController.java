@@ -6,7 +6,7 @@ import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
 import com.sontung.eproject_springboot.service.S3Service;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,18 +27,12 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/product")
 @SessionAttributes("categories")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
     private final S3Service s3Service;
-
-    @Autowired
-    public ProductController(ProductService productService, CategoryService categoryService, S3Service s3Service) {
-        this.productService = productService;
-        this.categoryService = categoryService;
-        this.s3Service = s3Service;
-    }
 
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
