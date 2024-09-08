@@ -208,9 +208,8 @@
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(response => {
+                    if (response.ok) {
                         alert("Combo đã được thêm vào giỏ hàng.")
                     }
                 })
