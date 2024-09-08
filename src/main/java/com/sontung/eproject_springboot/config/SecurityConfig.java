@@ -3,16 +3,14 @@ package com.sontung.eproject_springboot.config;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -24,59 +22,41 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity.csrf(csrf -> {
-//            try {
-//                csrf.disable().authorizeHttpRequests((authorize) -> authorize
-//                                .requestMatchers("/admin/**").hasRole("ADMIN")
-//                                .requestMatchers("/**").hasRole("USER")
-//                                .requestMatchers("/home").permitAll()
-//                                .anyRequest().denyAll())
-//                        .formLogin(form -> form
-//                                .loginPage("/admin/auth/login")
-//                                .loginProcessingUrl("/admin/auth/login")
-//                                .defaultSuccessUrl("/admin/auth/home", true)  //phải có tham số thứ 2
-//                                .permitAll()
-//                        )
-//                        .formLogin(form -> form
-//                                .loginPage("/auth/login")
-//                                .loginProcessingUrl("/auth/login")
-//                                .defaultSuccessUrl("/home-page", false)  //phải có tham số thứ 2
-//                                .permitAll()
-//                        )
-//                        .logout(logout -> logout
-//                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                                .permitAll()
-//                        );
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//
-//        return httpSecurity.build();
-//    }
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    @Order(1)
+    public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         // Quyền truy cập cho các URL của admin
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Quyền truy cập cho các URL của user
-                        .requestMatchers("/**").hasRole("USER")
-                        // Quyền truy cập cho trang /home
-                        .requestMatchers("/home-page").permitAll()
-                        // Quyền truy cập cho các URL công cộng
-                        // Quyền truy cập cho các yêu cầu khác
+                        .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll()
                         .anyRequest().denyAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-                        .loginProcessingUrl("/admin/auth/login")
+                        u
                         .defaultSuccessUrl("/admin/auth/home", true)  // Chuyển hướng sau khi đăng nhập thành công
                         .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
+                        .permitAll()
+                );
+        return httpSecurity.build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain userFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/**","/home-page").permitAll()
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/assets/**","/user_assets/**", "/demo/**").permitAll()
+                        .anyRequest().denyAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/auth/login") // Trang đăng nhập cho người dùng
@@ -92,28 +72,9 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
-    //    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity.csrf(csrf -> {
-//            try {
-//                csrf.disable().authorizeHttpRequests((authorize) -> authorize.anyRequest()
-//                                .authenticated()).formLogin(form ->
-//                                form.loginPage("/admin/auth/login")
-//                                        .loginProcessingUrl("/admin/auth/login")
-//                                        .defaultSuccessUrl("/admin/auth/home")
-//                                        .permitAll()).logout(
-//                                logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                                        .permitAll());
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//
-//        return httpSecurity.build();
-//    }
 }
