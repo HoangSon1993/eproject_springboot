@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller("UserAuthenticationController")
-@RequestMapping("/auth")
+@RequestMapping("/user/auth")
 public class AuthenticationController {
     @GetMapping("/login")
     public String login(){

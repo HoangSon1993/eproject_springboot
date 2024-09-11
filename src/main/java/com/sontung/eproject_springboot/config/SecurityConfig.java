@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,16 +23,41 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    @Order(1)
+//    public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
+//        httpSecurity
+//                .securityMatcher("/admin/**")
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/admin/auth/**").permitAll()
+//                        .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll()
+//                        .anyRequest().denyAll()
+//                )
+//                .formLogin(form -> form
+//                        .loginPage("/admin/auth/login") // Trang đăng nhập cho admin
+//                        .defaultSuccessUrl("/admin/auth/home", true)  // Chuyển hướng sau khi đăng nhập thành công
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout
+//                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
+//                        .permitAll()
+//                );
+//        return httpSecurity.build();
+//    }
+
     @Bean
     @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .securityMatcher("/admin/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // Quyền truy cập cho các URL của admin
-                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/auth/**").permitAll()
                         .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll()
+                        //.requestMatchers("/admin/auth/**").permitAll()
                         .anyRequest().denyAll()
                 )
                 .formLogin(form -> form
@@ -45,21 +71,20 @@ public class SecurityConfig {
                 );
         return httpSecurity.build();
     }
-
     @Bean
     @Order(2)
     public SecurityFilterChain userFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**","/home-page").permitAll()
                         .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/user/auth/**","/home-page").permitAll()
                         .requestMatchers("/assets/**","/user_assets/**", "/demo/**").permitAll()
                         .anyRequest().denyAll()
                 )
                 .formLogin(form -> form
-                        .loginPage("/auth/login") // Trang đăng nhập cho người dùng
-                        .loginProcessingUrl("/auth/login")
+                        .loginPage("/user/auth/login") // Trang đăng nhập cho người dùng
+                        .loginProcessingUrl("/user/auth/login")
                         .defaultSuccessUrl("/home-page", true)  // Chuyển hướng sau khi đăng nhập thành công
                         .permitAll()
                 )
