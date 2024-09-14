@@ -173,7 +173,9 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.PENDING)
                 .shippingAddress(orderDtoRequest.getShippAddress())
                 .shippingPhone(orderDtoRequest.getShippingPhone())
-                //.orderDetails(new ArrayList<>()) trong Order đã có @Buider.Default
+                .firstName(orderDtoRequest.getFirstName())
+                .lastName(orderDtoRequest.getLastName())
+                .email(orderDtoRequest.getEmail())
                 .build();
 
         for (Cart cart : carts) {

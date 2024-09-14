@@ -25,7 +25,6 @@ public class OrderDtoRequest {
     @NotBlank(message = "Địa chỉ không được để trống.")
     private String shippAddress;
 
-    // Todo: Kiểm tra Phone hơp lệ với RegExp
     @NotBlank(message = "Số điện thoaị không được để trống.")
     @Pattern(regexp = "^(84|0[3|5|7|8|9])[0-9]{8}$", message = "Số điện thoại không hợp lệ.")
     /**

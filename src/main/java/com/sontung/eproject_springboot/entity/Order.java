@@ -33,7 +33,14 @@ public class Order {
      */
     @Enumerated(EnumType.ORDINAL)
     OrderStatus status;
+    @Column(length = 100)
+    String firstName;
+    @Column(length = 100)
+    String lastName;
+    @Column(length = 150)
+    String email;
     String shippingAddress;
+    @Column(length = 20)
     String shippingPhone;
 
     @Column(length = 8)

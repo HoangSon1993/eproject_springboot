@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đơn Hàng</title>
+    <style th:replace="~{/user/common/head_tag}"></style>
+</head>
+<body>
+<div th:replace="~{/user/common/content_first}"></div>
+<div class="container" style="margin-top: 70px">
+    <!-- Checkout Page Start -->
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <div class="row g-4">
+                <h1>Lịch sử đơn hàng.</h1>
+            </div>
+
+            <div class="col-lg-12">
+                <div class="row g-4">
+                    <!--                form search-->
+                    <div class="col-xl-3 mb-4">
+                        <form id="searchSortForm" method="get" action="/order/index"
+                              class="input-group w-100 mx-auto d-flex">
+                            <input type="hidden" name="pageNo" th:value="${orders.number}">
+                            <input type="hidden" name="pageSize" th:value="${orders.size}"/>
+                            <input type="hidden" name="sortBy" th:value="${sortBy}"/>
+                            <input type="search" class="form-control p-3" placeholder="Tìm kiếm đơn hàng"
+                                   aria-describedby="search-icon-1" name="search" th:value="${search}">
+                            <button type="submit" id="search-icon-2" class="input-group-text p-3"
+                                    style=":hover{ background-color:#ffb524 }"><i
+                                    class="fa fa-search"></i></button>
+                        </form>
+                    </div>
+                    <!--                        thông báo-->
+                    <div class="col xl-6">
+                    </div>
+                    <!--                    sort by order_date-->
+                    <div class="col-xl-3">
+                        <!--                        <div class="bg-light ps-3 rounded d-flex justify-content-between mb-4">-->
+                        <!--                            <label>Default Sorting: </label>-->
+                        <!--                            <select id="status" name="status" class="border-0 form-select-sm bg-light me-3" onchange="this.form.submit()">-->
+                        <!--                                <option th:value="" th:text="All">All</option>-->
+                        <!--                                <option th:value="${T(com.sontung.eproject_springboot.enums.OrderStatus).PAID.toString()}" th:text="Đã thanh toán">Đã thanh toán</option>-->
+                        <!--                                <option th:value="${T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING.toString()}" th:text="Chờ thanh toán">Chờ thanh toán</option>-->
+                        <!--                                <option th:value="${T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED.toString()}" th:text="Hủy thanh toán">Hủy thanh toán</option>-->
+                        <!--                            </select>-->
+                        <!--                        </div>-->
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-3">
+                        <div class="row g-4">
+                            <!--                            custom lai loc theo status-->
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <h4>Trạng thái đơn hàng</h4>
+                                    <ul class="list-unstyled fruite-categorie">
+                                        <li th:each="status : ${statuses}">
+                                            <div class="d-flex justify-content-between order-status-name">
+                                                <a th:if="${status != selectedStatus}"
+                                                   th:href="@{/order/index(status=${status.key}, search=${search}, sort=${sortBy}, size=${orders.size})}"
+                                                   th:text="${status.value}">
+                                                    <i class="fas fa-filter me-2"></i>Status</a>
+                                                <span th:if="${status == selectedStatus}"
+                                                      th:classappend="'text-muted'"
+                                                      th:text="${status}"
+                                                      style="color: #ffb524 !important;">
+                                                        <i class="fas fa-filter me-2"></i>Status</span>
+                                                <!--                                                <span th:text="'('+${statusCounts[status]}+')'">(0)</span>-->
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9">
+                        <div class="row g-4 justify-content-center">
+                            <table class="table table-light col-md-6 col-lg-6 col-xl-4">
+                                <thead class="table table-dark">
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Mã Đơn Hàng</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Địa Chỉ Nhận Hàng</th>
+                                    <th>Ngày đặt hàng</th>
+                                    <th>Trạng Thái</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item, iterStat :${orders}">
+                                    <td th:text="${iterStat.index + 1 + orders.size * orders.number}"></td>
+                                    <td th:text="${item.code}"></td>
+                                    <td th:text="${#numbers.formatDecimal(item.totalAmount,1,'COMMA',0,'POINT')}"></td>
+                                    <td th:text="${item.shippingAddress}"></td>
+                                    <td th:text="${item.orderDate}"></td>
+
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID}"
+                                        th:text="'Đã thanh toán'"></td>
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}"
+                                        th:text="'Chờ thanh toán'"></td>
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}"
+                                        th:text="'Hủy thanh toán'"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- Checkout Page End -->
+</div>
+
+<!-- Pagination -->
+<div class="col-12">
+    <ul class="pagination d-flex justify-content-center mt-5" th:if="${orders.totalPages > 1}">
+        <!--        First-->
+        <li th:class="page-item" th:classappend="${orders.hasPrevious()} ? '' : 'disabled'">
+            <a class="page-link rounded" th:href="@{/order/index(pageNo=0, pageSize=${orders.size})}">First</a>
+        </li>
+
+        <!-- Previous Page Link -->
+        <li class="page-item" th:classappend="${orders.hasPrevious()} ? '' : 'disabled'">
+            <a class="page-link rounded" th:href="@{${pageUrl}(pageNo=${orders.number - 1}, pageSize=${orders.size})}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        <!-- Page Number Links -->
+        <li th:each="pageNumber : ${#numbers.sequence(0, orders.totalPages - 1)}"
+            th:class="page-item"
+            th:classappend="${pageNumber == orders.number} ? 'active'">
+            <a class="page-link rounded" th:href="@{${pageUrl}(pageNo=${pageNumber}, pageSize=${orders.size})}"
+               th:text="${pageNumber + 1}">1</a>
+        </li>
+
+        <!-- Next Page Link -->
+        <li class="page-item" th:classappend="${orders.hasNext()} ? '' : 'disabled'">
+            <a class="page-link rounded" th:href="@{${pageUrl}(pageNo=${orders.number + 1}, pageSize=${orders.size})}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+
+        <!--        Last-->
+        <li th:class="page-item" th:classappend="${orders.hasNext()} ? '' : 'disabled'">
+            <a th:href="@{/order/index(pageNo=${orders.totalPages - 1}, pageSize=${orders.size}) }"
+               class="page-link rounded">Last</a>
+        </li>
+    </ul>
+</div>
+
+<div th:replace="~{/user/common/content_footer}"></div>
+
+<script th:inline="javascript">  //th:inline="javascript" phải có dòng này thì mới dùng biến của thymeleaf được.
+
+
+</script>
+</body>
+</html>
