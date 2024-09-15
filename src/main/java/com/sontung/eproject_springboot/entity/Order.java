@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderId;
-    LocalDate orderDate;
+    LocalDateTime orderDate;
     BigDecimal totalAmount;
 
     /**

@@ -5,24 +5,25 @@ import java.util.Map;
 
 public enum OrderStatus {
 
-
-    PENDING("Chờ thanh toán"), // Chờ thanh toán
+    ORDERED("Đã đặt hàng"),
     PAID("Đã thanh toán"),    // Đã thanh toán
-    CANCELED("Hủy bỏ"); // Hủy bỏ
+    CANCELED("Hủy bỏ"), // Hủy bỏ
+    PENDING("Chờ thanh toán"), // Chờ thanh toán
+    COD("Thanh toán khi nhân hàng.");
 
     private final String description;
 
     OrderStatus(String description) {
-        this.description =description;
+        this.description = description;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public static Map<String, String> toMap(){
+    public static Map<String, String> toMap() {
         Map<String, String> map = new HashMap<String, String>();
-        for(OrderStatus orderStatus : OrderStatus.values()){
+        for (OrderStatus orderStatus : OrderStatus.values()) {
             map.put(orderStatus.name(), orderStatus.getDescription());
         }
         return map;

@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -166,11 +167,11 @@ public class OrderServiceImpl implements OrderService {
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         // 1 Tính tổng tiền dơn hàng, giá lấy trong bảng product.
         BigDecimal totalAmount = BigDecimal.ZERO;
-        // 2 Create Order.
+        // 2 Create Order with status = 0 (ORDERED).
         Order order = Order.builder()
                 .account(accountRepository.findById(userId).get())
-                .orderDate(LocalDate.now())
-                .status(OrderStatus.PENDING)
+                .orderDate(LocalDateTime.now())
+                .status(OrderStatus.ORDERED)
                 .shippingAddress(orderDtoRequest.getShippAddress())
                 .shippingPhone(orderDtoRequest.getShippingPhone())
                 .firstName(orderDtoRequest.getFirstName())
@@ -356,7 +357,7 @@ public class OrderServiceImpl implements OrderService {
             boolean checkAmount = Math.abs(amoutParam - totalAmount) < EPSILON;
             // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in the Your database).
 
-            boolean checkOrderStatus = (order.getStatus() == OrderStatus.PENDING);
+            boolean checkOrderStatus = (order.getStatus() == OrderStatus.ORDERED);
             // PaymnentStatus = 0 (pending)
 
 
@@ -374,8 +375,8 @@ public class OrderServiceImpl implements OrderService {
                             Invoice invoice = Invoice.builder()
                                     .order(order)
                                     .totalAmount(order.getTotalAmount())
-                                    .paymentDate(LocalDate.parse(request.getParameter("vnp_PayDate"), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
-                                    .invoiceDate(LocalDate.now())
+                                    .paymentDate(LocalDateTime.parse(request.getParameter("vnp_PayDate"), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                                    .invoiceDate(LocalDateTime.now())
                                     .paymentStatus(InvoiceStatus.PAID)
                                     .paymentMethod("VNPay")
                                     .bankCode(request.getParameter("vnp_BankCode"))

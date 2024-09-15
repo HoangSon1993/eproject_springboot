@@ -79,7 +79,6 @@ public class OrderController {
 
         // Lấy danh sách các trạng thái đơn hàng
         Map<String, String> statuses = OrderStatus.toMap();
-        int a = OrderStatus.valueOf("PAID").ordinal();
 
         model.addAttribute("statuses", statuses);
         model.addAttribute("selectedStatus", status);
