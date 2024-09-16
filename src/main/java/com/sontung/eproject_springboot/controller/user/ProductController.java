@@ -67,7 +67,7 @@ public class ProductController {
         // Todo: Tối ưu hoá search, sort, filter bằng cách custom query.
         // productService.getAllProductWithSortByColumnAndSearch(page, size, search, sort);
 
-
+        if(page < 0) page = 0;
         List<Sort.Order> sorts = new ArrayList<>();
         if(sort.equals("asc")){
             sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));

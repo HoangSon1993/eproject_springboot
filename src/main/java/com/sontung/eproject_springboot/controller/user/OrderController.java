@@ -3,6 +3,9 @@ package com.sontung.eproject_springboot.controller.user;
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
 import com.sontung.eproject_springboot.dto.request.PaymentResultDto;
 import com.sontung.eproject_springboot.entity.Order;
+import com.sontung.eproject_springboot.entity.OrderDetail;
+import com.sontung.eproject_springboot.enums.OrderStatus;
+import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.CartService;
 import com.sontung.eproject_springboot.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +14,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,9 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.System.out;
 
@@ -31,6 +34,8 @@ import static java.lang.System.out;
 public class OrderController {
     private final OrderService orderService;
     private final CartService cartService;
+    private final SearchRepository searchRepository;
+
 
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
@@ -43,20 +48,62 @@ public class OrderController {
      * @Description:
      * @Param:
      * @Return:
-     * @Exception:
      **/
     @ModelAttribute("s3BucketUrl")
     public String s3BucketUrl() {
         return s3BucketUrl;
     }
 
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     **/
+    @GetMapping("/index")
+    public String index(Model model,
+                        @RequestParam(defaultValue = "0") int pageNo,
+                        @RequestParam(defaultValue = "10") int pageSize,
+                        @RequestParam(defaultValue = "") String search,
+                        @RequestParam(defaultValue = "") String sortBy,
+                        @RequestParam(defaultValue = "") String status) {
+        if (pageNo < 0) pageNo = 0;
+
+//        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearch(pageNo, pageSize, search, sortBy, status, userId);
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status,sortBy, userId);
+        model.addAttribute("orders", orders);
+        // Thêm đường dẫn URL cho phân trang
+        model.addAttribute("pageUrl", "/order/index");
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("search", search);
+
+        // Lấy danh sách các trạng thái đơn hàng
+        Map<String, String> statuses = OrderStatus.toMap();
+
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("selectedStatus", status);
+        return "user/order/index";
+    }
+
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     **/
     @GetMapping("/detail/{code}")
     public String detail(@PathVariable("code") String code, Model model) {
         Order order = orderService.findByCodeAndAccountId(userId, code);
         if (order == null) {
             model.addAttribute("error", "Không tìm thấy đơn hàng.");
         }
+        Set<String> orderItems = new HashSet<>();
+        for (OrderDetail orderDetail : order.getOrderDetails()) {
+            orderItems.add(orderDetail.getOrderDetailId());
+        }
+
         model.addAttribute("order", order);
+        model.addAttribute("orderItems", orderItems);
         return "/user/order/detail";
     }
 
@@ -74,7 +121,7 @@ public class OrderController {
 
         // Valid dữ liệu đầu vào.
         if (bindingResult.hasErrors()) {
-            Map<String, String > errors = new HashMap<>();
+            Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             response.put("success", false);
             response.put("errors", errors);
