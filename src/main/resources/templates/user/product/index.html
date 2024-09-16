@@ -55,10 +55,11 @@
     <!-- Fruits Shop Start-->
     <div class="container-fluid fruite py-5">
         <div class="container py-5">
-            <h1 class="mb-4">Fresh fruits shop</h1>
+            <h1 class="mb-4">Danh sách sản phẩm</h1>
             <div class="row g-4">
                 <div class="col-lg-12">
                     <div class="row g-4">
+                        <!--                        form search-->
                         <div class="col-xl-3">
                             <form id="searchSortForm" method="get" action="/product/index"
                                   class="input-group w-100 mx-auto d-flex">
@@ -72,10 +73,12 @@
                                         class="fa fa-search"></i></button>
                             </form>
                         </div>
+                        <!--                        Thông báo-->
                         <div class="col-6">
                             <span class="alert alert-success" th:if="${message}" th:text="${message}">Thông báo thành công</span>
                             <span class="alert alert-danger" th:if="${error}" th:text="${error}">Thông báo lỗi</span>
                         </div>
+                        <!--                        sort by name-->
                         <div class="col-xl-3">
                             <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
                                 <label for="fruits">Default Sorting:</label>
@@ -85,10 +88,6 @@
                                             th:selected="${sort.equals('asc')}"></option>
                                     <option th:value="desc" th:text="'Name Desc'"
                                             th:selected="${sort.equals('desc')}"></option>
-                                    <!--                                    <option value="volvo">Nothing</option>-->
-                                    <!--                                    <option value="saab">Popularity</option>-->
-                                    <!--                                    <option value="opel">Organic</option>-->
-                                    <!--                                    <option value="audi">Fantastic</option>-->
                                 </select>
                             </div>
                         </div>

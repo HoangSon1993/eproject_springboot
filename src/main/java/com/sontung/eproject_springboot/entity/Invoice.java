@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceId; // invoiceNumber
-    LocalDate invoiceDate; // Ngày hóa đơn dược lạp
+    LocalDateTime invoiceDate; // Ngày hóa đơn dược lạp
     BigDecimal totalAmount; // Tổng tiền
 
     /**
@@ -34,7 +34,7 @@ public class Invoice {
     @Enumerated(EnumType.ORDINAL)
     InvoiceStatus paymentStatus; // Trạng thái thanh toán  (đã thanh toán, chưa thanh toán, hủy bỏ)
     String paymentMethod; // Phương thức thanh toán (chuyển khoản, tín dụng, tiền mặt)
-    LocalDate paymentDate; // Ngày thanh toán
+    LocalDateTime paymentDate; // Ngày thanh toán
 
     String bankCode; // Mã ngân hàng
     String bankTransactionNo; // Mã giao dịch ngân hàng

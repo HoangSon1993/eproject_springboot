@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderId;
-    LocalDate orderDate;
+    LocalDateTime orderDate;
     BigDecimal totalAmount;
 
     /**
@@ -33,7 +33,14 @@ public class Order {
      */
     @Enumerated(EnumType.ORDINAL)
     OrderStatus status;
+    @Column(length = 100)
+    String firstName;
+    @Column(length = 100)
+    String lastName;
+    @Column(length = 150)
+    String email;
     String shippingAddress;
+    @Column(length = 20)
     String shippingPhone;
 
     @Column(length = 8)
