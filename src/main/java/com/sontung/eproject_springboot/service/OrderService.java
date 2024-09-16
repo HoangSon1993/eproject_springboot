@@ -6,6 +6,7 @@ import com.sontung.eproject_springboot.entity.Order;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
@@ -32,4 +33,7 @@ public interface OrderService {
     String handleResult(HttpServletRequest request, String userId) throws UnsupportedEncodingException;
 
     Order findByCodeAndAccountId(String accountId, String code);
+
+    @Scheduled(fixedRate = 3600000) // Lặp lại mỗi giờ (3600000 ms = 1 giờ)
+    void updatePendingOrders();
 }

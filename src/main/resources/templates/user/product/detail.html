@@ -623,13 +623,17 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Hien thi thong bao
+                        // Hiên thị thông báo
                         notification.style.display = 'block';
-                        // An thong bao sau 3s
+                        // Ẩn thông báo sau 3s
                         setTimeout(() => {
                             notification.style.display = 'none';
                         }, 3000);
                         quantityInput.value = "1"
+
+                        // Cập nhật số lượng item trong Cart
+                        const cartCountElement =  document.getElementById('cart-count');
+                        cartCountElement.innerText = data.cartItemCount
                     } else {
                         // Xu ly loi neu co
                         alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');

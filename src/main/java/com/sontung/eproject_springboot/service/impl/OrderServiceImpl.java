@@ -1,5 +1,6 @@
 package com.sontung.eproject_springboot.service.impl;
 
+import com.sontung.eproject_springboot.dto.OrderDTO;
 import com.sontung.eproject_springboot.dto.OrderDetailDTO;
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
 import com.sontung.eproject_springboot.entity.*;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -357,9 +359,8 @@ public class OrderServiceImpl implements OrderService {
             boolean checkAmount = Math.abs(amoutParam - totalAmount) < EPSILON;
             // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in the Your database).
 
-            boolean checkOrderStatus = (order.getStatus() == OrderStatus.ORDERED);
+            boolean checkOrderStatus = (order.getStatus() == OrderStatus.ORDERED || order.getStatus() == OrderStatus.PENDING);
             // PaymnentStatus = 0 (pending)
-
 
             if (checkOrderId) {
                 if (checkAmount) {
@@ -410,7 +411,7 @@ public class OrderServiceImpl implements OrderService {
                             // Tra ket qua ve cho nguoi dung
                         } else if ("24".equals(request.getParameter("vnp_ResponseCode"))) {
                             // vnp_ResponseCode == 24; Người dùng hủy thanh toán,
-                            order.setStatus(OrderStatus.CANCELED);
+                            order.setStatus(OrderStatus.PENDING);
                             orderRepository.save(order);
                             return "Giao dịch đã bị hủy, bạn có thể thử lại.";
                         } else {
@@ -443,5 +444,27 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order findByCodeAndAccountId(String accountId, String code) {
         return orderRepository.findByCodeAndAccount_AccountId(code, accountId);
+    }
+
+    /**
+     * @Summary: Cập nhật trạng thái đơn hàng từ 'Chờ thanh toán' sang 'Thanh toán khi nhận hàng'.
+     * @Description: Func này được gọi định kỳ 1h 1 lần.
+     * */
+    @Scheduled(fixedRate = 3600000) // Lặp lại mỗi giờ (3600000 ms = 3600 s = 1 h)
+    @Override
+    public void updatePendingOrders(){
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threeHoursAgo = now.minusHours(3);
+
+        List<OrderDTO> pendingOrders = orderRepository.findByStatusAndOrderDateBefore(
+                OrderStatus.PENDING,
+                threeHoursAgo);
+        for (OrderDTO orderDTO : pendingOrders) {
+            Order order = orderRepository.findById(orderDTO.getOrderId()).orElse(null);
+            if (order != null) {
+                order.setStatus(OrderStatus.COD);
+                orderRepository.save(order);
+            }
+        }
     }
 }

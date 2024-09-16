@@ -93,17 +93,31 @@
                                 <tbody>
                                 <tr th:each="item, iterStat :${orders}">
                                     <td th:text="${iterStat.index + 1 + orders.size * orders.number}"></td>
-                                    <td th:text="${item.code}"></td>
+                                    <td>
+                                        <a th:href="@{/order/detail(code = ${item.code})}" th:text="${item.code}"></a>
+                                    </td>
                                     <td th:text="${#numbers.formatDecimal(item.totalAmount,1,'COMMA',0,'POINT')}"></td>
                                     <td th:text="${item.shippingAddress}"></td>
-                                    <td th:text="${item.orderDate}"></td>
+                                    <td th:text="${#temporals.format(item.orderDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
 
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED}"
+                                        th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED.getDescription()}"></td>
                                     <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID}"
-                                        th:text="'Đã thanh toán'"></td>
-                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}"
-                                        th:text="'Chờ thanh toán'"></td>
+                                        th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PAID.getDescription()}"></td>
                                     <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}"
-                                        th:text="'Hủy thanh toán'"></td>
+                                        th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED.getDescription()}"></td>
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}">
+                                        <!--                                        Xử lý thanh toán lại-->
+                                        <form th:action="@{/order/re-create}" method="post">
+                                            <input type="hidden" th:name="code" th:value="${item.code}"/>
+                                            <button class="btn btn-warning" type="submit"
+                                                    th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING.getDescription()}"></button>
+                                        </form>
+                                    </td>
+                                    <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
+                                        th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).COD.getDescription()}"></td>
+
+
                                 </tr>
                                 </tbody>
                             </table>
