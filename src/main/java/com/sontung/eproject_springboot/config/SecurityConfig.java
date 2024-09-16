@@ -23,30 +23,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    @Order(1)
-//    public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .securityMatcher("/admin/**")
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/admin/auth/**").permitAll()
-//                        .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll()
-//                        .anyRequest().denyAll()
-//                )
-//                .formLogin(form -> form
-//                        .loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-//                        .defaultSuccessUrl("/admin/auth/home", true)  // Chuyển hướng sau khi đăng nhập thành công
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
-//                        .permitAll()
-//                );
-//        return httpSecurity.build();
-//    }
-
     @Bean
     @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -66,7 +42,9 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout"))
+                        .logoutUrl("/admin/logout") // Xử lý logout tại URL này
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout", "POST")) // Chỉ cho phép phương thức POST
+                        .logoutSuccessUrl("/admin/auth/login") // Chuyển hướng sau khi logout thành công
                         .permitAll()
                 );
         return httpSecurity.build();
@@ -77,8 +55,8 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/user/auth/**","/home-page","/user/register","/**").permitAll()
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/user/auth/**","/home-page").permitAll()
                         .requestMatchers("/assets/**","/user_assets/**", "/demo/**").permitAll()
                         .anyRequest().denyAll()
                 )
@@ -89,7 +67,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                         .permitAll()
                 );
         return httpSecurity.build();
