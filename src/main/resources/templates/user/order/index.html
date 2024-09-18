@@ -57,20 +57,28 @@
                                 <div class="mb-3">
                                     <h4>Trạng thái đơn hàng</h4>
                                     <ul class="list-unstyled fruite-categorie">
-                                        <li th:each="status : ${statuses}">
-                                            <div class="d-flex justify-content-between order-status-name">
-                                                <a th:if="${status != selectedStatus}"
-                                                   th:href="@{/order/index(status=${status.key}, search=${search}, sort=${sortBy}, size=${orders.size})}"
-                                                   th:text="${status.value}">
-                                                    <i class="fas fa-filter me-2"></i>Status</a>
-                                                <span th:if="${status == selectedStatus}"
-                                                      th:classappend="'text-muted'"
-                                                      th:text="${status}"
-                                                      style="color: #ffb524 !important;">
-                                                        <i class="fas fa-filter me-2"></i>Status</span>
-                                                <!--                                                <span th:text="'('+${statusCounts[status]}+')'">(0)</span>-->
-                                            </div>
-                                        </li>
+                                        <th:block th:each="status: ${statuses}">
+                                            <li>
+                                                <div class="d-flex justify-content-between order-status-name">
+                                                    <span th:if="${status.getKey() == selectedStatus}"
+                                                          th:classappend="'text-muted'"
+                                                          th:text="${status.getValue()}"
+                                                          style="color : #ffb524 !important;">
+                                                    </span>
+                                                    <th:block th:unless="${status.getKey() == selectedStatus}">
+                                                        <a th:if="${status.getKey() == 'ORDERED'}"
+                                                           th:href="@{/order/index(status=${''}, search=${search}, sort=${sortBy}, size=${orders.size})}"
+                                                           th:text="All"
+                                                           th:style="${selectedStatus== '' ? 'color : #ffb524 !important;': ''}"
+                                                        ></a>
+                                                        <a th:unless="${status.getKey() == 'ORDERED'}"
+                                                           th:href="@{/order/index(status=${status.key}, search=${search}, sort=${sortBy}, size=${orders.size})}"
+                                                           th:text="${status.value}">
+                                                        </a>
+                                                    </th:block>
+                                                </div>
+                                            </li>
+                                        </th:block>
                                     </ul>
                                 </div>
                             </div>

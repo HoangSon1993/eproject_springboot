@@ -69,7 +69,7 @@ public class OrderController {
         if (pageNo < 0) pageNo = 0;
 
 //        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearch(pageNo, pageSize, search, sortBy, status, userId);
-        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status,sortBy, userId);
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, userId);
         model.addAttribute("orders", orders);
         // Thêm đường dẫn URL cho phân trang
         model.addAttribute("pageUrl", "/order/index");
@@ -78,6 +78,12 @@ public class OrderController {
 
         // Lấy danh sách các trạng thái đơn hàng
         Map<String, String> statuses = OrderStatus.toMap();
+
+        /**
+         * Có thể xử lý ở server thay vì thymeleaf
+         statuses.remove(OrderStatus.ORDERED.name());
+         statuses.put("All","");
+         **/
 
         model.addAttribute("statuses", statuses);
         model.addAttribute("selectedStatus", status);
@@ -154,18 +160,17 @@ public class OrderController {
     @PostMapping("/re-create")
     public String reCreate(@RequestParam String code,
                            HttpServletRequest req,
-                           HttpServletResponse resp){
+                           HttpServletResponse resp) {
         Order order = orderService.findByCodeAndAccountId(userId, code);
-        if(order == null){
+        if (order == null) {
             // Gui kem thong bao.
             return "redirect:/order/index";
         }
         // 2. Call VNPay Service to payment
-        try{
-           String url = orderService.getVnpay(order, req, resp);
-           return "redirect:" + url;
-        }
-        catch(Exception e){
+        try {
+            String url = orderService.getVnpay(order, req, resp);
+            return "redirect:" + url;
+        } catch (Exception e) {
             return "redirect:/order/index";
         }
     }
