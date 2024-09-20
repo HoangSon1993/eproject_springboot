@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,7 +69,7 @@ public class OrderController {
         if (pageNo < 0) pageNo = 0;
 
 //        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearch(pageNo, pageSize, search, sortBy, status, userId);
-        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status,sortBy, userId);
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, userId);
         model.addAttribute("orders", orders);
         // Thêm đường dẫn URL cho phân trang
         model.addAttribute("pageUrl", "/order/index");
@@ -79,6 +78,12 @@ public class OrderController {
 
         // Lấy danh sách các trạng thái đơn hàng
         Map<String, String> statuses = OrderStatus.toMap();
+
+        /**
+         * Có thể xử lý ở server thay vì thymeleaf
+         statuses.remove(OrderStatus.ORDERED.name());
+         statuses.put("All","");
+         **/
 
         model.addAttribute("statuses", statuses);
         model.addAttribute("selectedStatus", status);
@@ -91,8 +96,8 @@ public class OrderController {
      * @Param:
      * @Return:
      **/
-    @GetMapping("/detail/{code}")
-    public String detail(@PathVariable("code") String code, Model model) {
+    @GetMapping("/detail")
+    public String detail(@RequestParam("code") String code, Model model) {
         Order order = orderService.findByCodeAndAccountId(userId, code);
         if (order == null) {
             model.addAttribute("error", "Không tìm thấy đơn hàng.");
@@ -146,6 +151,28 @@ public class OrderController {
             response.put("success", false);
         }
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * @Summary: Xử lý thanh toán lại.
+     * @Description: Tại Page Order_Index, hoặc Order_Detail mà đơn hàng status = PEDDING mà người dùng muốn thanh toán lại.
+     **/
+    @PostMapping("/re-create")
+    public String reCreate(@RequestParam String code,
+                           HttpServletRequest req,
+                           HttpServletResponse resp) {
+        Order order = orderService.findByCodeAndAccountId(userId, code);
+        if (order == null) {
+            // Gui kem thong bao.
+            return "redirect:/order/index";
+        }
+        // 2. Call VNPay Service to payment
+        try {
+            String url = orderService.getVnpay(order, req, resp);
+            return "redirect:" + url;
+        } catch (Exception e) {
+            return "redirect:/order/index";
+        }
     }
 
     /**

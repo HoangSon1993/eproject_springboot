@@ -14,6 +14,19 @@
         .form-control::placeholder {
             opacity: 50%;
         }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
     </style>
 </head>
 <body>
@@ -38,7 +51,10 @@
         </div>
     </div>
     <!-- Modal Search End -->
-
+    <!-- Thông báo xác nhận -->
+    <div id="notification" class="notification" style="display: none;">
+        <p>Sản phẩm đã được thêm vào giỏ hàng!</p>
+    </div>
 
     <!-- Single Page Header start -->
     <div class="container-fluid page-header py-5">
@@ -324,7 +340,8 @@
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
 <script>
-    const addToCartButtons = document.querySelectorAll("#btn-add-to-cart")
+    const notification = document.getElementById("notification");
+    const addToCartButtons = document.querySelectorAll("#btn-add-to-cart");
     addToCartButtons.forEach(button => {
         button.addEventListener('click', function (event) {
             event.preventDefault();
@@ -337,12 +354,23 @@
 
             fetch('/cart/add-product', {
                 method: 'POST',
-                body: formData
+                body: formData,
             })
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data )
                     if (data.success) {
-                        alert("Sản phẩm đã được thêm vào giỏ hàng.")
+                        // Hiển thị thông báo
+                        notification.style.display = 'block'
+                        // Ẩn thông báo sau 3s
+                        setTimeout(()=>{
+                            notification.style.display= 'none';
+                        }, 3000)
+
+
+                        // Cập nhật số lượng item trong Cart
+                        const cartCountElement =  document.getElementById('cart-count');
+                        cartCountElement.innerText = data.cartItemCount
                     }
                 })
                 .catch(error => {

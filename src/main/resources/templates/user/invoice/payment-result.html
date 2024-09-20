@@ -17,7 +17,7 @@
             <h2 th:text="${message}">Thanh toán đơn hàng thành công</h2>
             <p th:if="${code}">
                 Xem chi tiết đơn hàng:
-                <a th:href="@{/order/detail/{code}(code=${code})}" th:text="${code}"></a>
+                <a th:href="@{/order/detail(code=${code})}" th:text="${code}"></a>
             </p>
         </div>
     </div>

@@ -110,15 +110,17 @@ public class UserCartController {
      **/
     @PostMapping("/create")
     public String addComboToCart(
-            RedirectAttributes redirectAttributes,
             @RequestParam String comboId,
             @RequestParam int quantity,
-            @ModelAttribute("checkedItems") List<String> checkedItems) {
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         try {
             Cart cart = cartService.addComboToCart(userId, comboId, quantity);
             // Thêm combo và danh sách checked
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
+                session.setAttribute("checkedItems", checkedItems);
             }
             redirectAttributes.addFlashAttribute("message", "Thêm combo thành công.");
             return "redirect:/cart/index";
@@ -140,18 +142,22 @@ public class UserCartController {
     public ResponseEntity<Map<String, Object>> addProductToCart(
             @RequestParam("productId") String productId,
             @RequestParam("quantity") int quantity,
-            @ModelAttribute("checkedItems") List<String> checkedItems) {
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
             Cart cart = cartService.addProductToCart(userId, productId, quantity);
+            int cartItemCount = cartService.getTotalItem(userId);
 
             // Thêm sản phẩm vào danh sách checked
             // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì thêm vào
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
+                session.setAttribute("checkedItems", checkedItems);
             }
 
             response.put("success", true);
+            response.put("cartItemCount", cartItemCount);
             return ResponseEntity.ok(response);
         } catch (ProductNotFoundException | UserNotFoundException ex) {
             response.put("success", false);
@@ -169,7 +175,8 @@ public class UserCartController {
     public ResponseEntity<Map<String, Object>> addComboToCart(
             @RequestParam("comboId") String comboId,
             @RequestParam("quantity") int quantity,
-            @ModelAttribute("checkedItems") List<String> checkedItems) {
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
             Cart cart = cartService.addComboToCart(userId, comboId, quantity);
@@ -178,8 +185,11 @@ public class UserCartController {
             // Nếu sản Id combo chưa nằm trong checkedItems thì thêm vào
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
+                session.setAttribute("checkedItems", checkedItems);
             }
+            int cartItemCount = cartService.getTotalItem(userId);
 
+            response.put("cartItemCount", cartItemCount);
             response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (ProductNotFoundException | UserNotFoundException ex) {
@@ -268,14 +278,16 @@ public class UserCartController {
     @PostMapping("/remove")
     public String removeFromCart(
             @RequestParam("id") String id,
-            RedirectAttributes redirectAttributes,
-            @ModelAttribute("checkedItems") List<String> checkedItems) {
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         try {
             // Xoá sản phẩm khỏi giỏ hàng
             cartService.removeItemFromCart(id);
 
             // Xoá sản phẩm khỏi danh sách checkedItems
             checkedItems.remove(id);
+            session.setAttribute("checkedItems", checkedItems);
             redirectAttributes.addFlashAttribute("message", "Sản phẩm đã được xoá khỏi giỏ hàng");
         } catch (RuntimeException ex) {
             log.error(ex.getMessage(), ex);
