@@ -17,6 +17,18 @@
             flex-wrap: nowrap; /* Ngăn chặn các phần tử bọc dòng */
         }
 
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
     </style>
 </head>
 <body>
@@ -41,6 +53,10 @@
                             <!--                             Thông báo thành công hoặc lỗi-->
                             <span class="alert alert-success" th:if="${message}" th:text="${message}">Thông báo thành công</span>
                             <span class="alert alert-danger" th:if="${error}" th:text="${error}">Thông báo lỗi</span>
+                            <!-- Thông báo xác nhận -->
+                            <div id="notification" class="notification" style="display: none;">
+                                <p>Combo đã được thêm vào giỏ hàng!</p>
+                            </div>
                         </div>
                         <div class="col-xl-3">
                             <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
@@ -194,6 +210,7 @@
 <script>
     const addToCartButton = document.querySelectorAll("#btn-add-to-cart")
     addToCartButton.forEach(button => {
+        const notification = document.getElementById("notification");
         button.addEventListener('click', function (event) {
             event.preventDefault();
             const comboId = this.getAttribute('data-combo-id');
@@ -207,10 +224,20 @@
             fetch('/cart/add-combo', {
                 method: 'POST',
                 body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert("Combo đã được thêm vào giỏ hàng.")
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.success) {
+                        // Hiển thị thông báo
+                        notification.style.display = 'block'
+                        // Ẩn thông báo sau 3s
+                        setTimeout(()=>{
+                            notification.style.display= 'none';
+                        }, 3000)
+
+                        // Cập nhật số lượng item trong Cart
+                        const cartCountElement =  document.getElementById('cart-count');
+                        cartCountElement.innerText = data.cartItemCount
                     }
                 })
                 .catch(error => {

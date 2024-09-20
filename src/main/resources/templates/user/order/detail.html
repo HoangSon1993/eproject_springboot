@@ -44,15 +44,23 @@
                     </div>
                     <div class="form-item">
                         <label>Trạng thái đơn hàng: </label>
+                        <!--                        handle Status-->
+                        <div th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED}"
+                             th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED.getDescription()}"
+                             class="bg-success text-white rounded px-3 py-1 d-inline-block"></div>
                         <div th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID}"
-                             th:text="'Đã thanh toán'"
+                             th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PAID.getDescription()}"
                              class="bg-success text-white rounded px-3 py-1 d-inline-block"></div>
                         <div th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}"
-                             th:text="Chờ thanh toán"
+                             th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING.getDescription()}"
                              class="bg-warning text-white rounded px-3 py-1 d-inline-block"></div>
                         <div th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}"
-                             th:text="Hủy thanh toán"
+                             th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED.getDescription()}"
                              class="bg-danger text-white rounded px-3 py-1 d-inline-block"></div>
+                        <div th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
+                             th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).COD.getDescription()}"
+                             class="bg-danger text-white rounded px-3 py-1 d-inline-block"></div>
+                        <!--                        end handle Status-->
                     </div>
 
                 </div>
@@ -77,7 +85,7 @@
                                             <div class="d-flex align-items-center mt-2">
                                                 <img th:src="@{${s3BucketUrl} + ${item.product.image}}"
                                                      class="img-fluid rounded-circle"
-                                                     style="width: 90px; height: 90px;" alt="">
+                                                     style="width: 90px; height: 90px; object-fit: cover" alt="">
                                             </div>
                                         </th>
                                         <td class="py-5" th:text="${item.product.productName}">Awesome Brocoli</td>
@@ -138,12 +146,15 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                        <!--                            th:if="${order.status != T(com.sontung.eproject_springboot.enums.OrderStatus).PAID}"-->
-                        <button type="button" id="checkoutButton"
-                                class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">
-                            Thanh Toán Lại.
-                        </button>
+                    <div class="row g-4 text-center align-items-center justify-content-center pt-4"
+                         th:if="${order.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}">
+                        <form th:action="@{/order/re-create}" method="post">
+                            <input type="hidden" th:name="code" th:value="${order.code}">
+                            <button type="submit" id="checkoutButton"
+                                    class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">
+                                Thanh Toán Lại.
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -154,32 +165,7 @@
 <div th:replace="~{/user/common/content_footer}"></div>
 
 <script th:inline="javascript">  //th:inline="javascript" phải có dòng này thì mới dùng biến của thymeleaf được.
-// Todo: Xử lý thanh toán lại khi đơn hàng Cancaled hoặc Pending
-let orderStatus = /*[[${order.status}]]*/ "";
 
-document.querySelector('#checkoutButton').addEventListener('click', () => {
-    let checkedItems =/*[[${orderItems}]]*/ []; // Todo: lấy ra danh sách sản phẩm
-    console.log(checkedItems)
-    if (checkedItems.length === 0) {
-        return;
-    }
-
-    fetch(`/cart/checkout`, {
-        method: 'POST',
-        headers: {
-            'Conten-Type': 'application/json'
-        },
-        body: JSON.stringify(checkedItems)
-    }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.url;
-            } else {
-                console.log(data.message)
-                alert(data.message);
-            }
-        }).catch(error => console.error(error))
-})
 </script>
 </body>
 </html>

@@ -185,6 +185,7 @@ public class CartServiceImpl  implements CartService {
      **/
     @Override
     public int getTotalItem(String userId) {
+//        Todo: dùng hàm count
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         return carts.size();
     }
@@ -237,8 +238,7 @@ public class CartServiceImpl  implements CartService {
         } else {
             // Case Combo
             cart.setQuantity(newQuantity);
-            Combo combo = comboRepository.findById(cart.getComboId())
-                    .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
+            Combo combo = comboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
             cart.setPrice(combo.getFinalAmount());
         }
         cartRepository.save(cart);
@@ -281,8 +281,7 @@ public class CartServiceImpl  implements CartService {
                 CartDetailDTOBuilder.comboDetails(comboDetailList);
             } else {
                 // Case CartDetail is Product
-                Product product = productRepository.findById(cart.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
+                Product product = productRepository.findById(cart.getProductId()).orElseThrow(() -> new RuntimeException("Product không tồn tại"));
                 currentPrice = product.getPrice();
                 CartDetailDTOBuilder.name(product.getProductName());
 //                CartDetailDTOBuilder.price(product.getPrice());

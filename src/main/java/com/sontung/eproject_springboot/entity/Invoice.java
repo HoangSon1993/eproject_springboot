@@ -4,6 +4,7 @@ import com.sontung.eproject_springboot.enums.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceId; // invoiceNumber
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime invoiceDate; // Ngày hóa đơn dược lạp
     BigDecimal totalAmount; // Tổng tiền
 
