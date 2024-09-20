@@ -92,19 +92,19 @@ public class OrderServiceImpl implements OrderService {
 
     // Filter Order by date in OrderManagement
     @Override
-    public Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+    public Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                                   int page,
                                                   int size) {
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         Pageable pageable = PageRequest.of(page - 1, size);
-        return orderRepository.findByOrderDateOrder(filterLocalDate, pageable);
+        return orderRepository.findByOrderDateOrder(filterDate, pageable);
     }
 
     @Override
     // Count order by filterDate
-    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.countOrderByFilterDate(filterLocalDate);
+    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate){
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.countOrderByFilterDate(filterDate);
     }
 
     @Override
@@ -170,16 +170,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.findAll().stream().filter(i -> i.getOrderDate().equals(filterLocalDate)).collect(Collectors.toList());
+    public List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.findAll().stream().filter(i -> i.getOrderDate().equals(filterDate)).collect(Collectors.toList());
     }
 
     @Override
     // Filter Order by date in ComboManagement
-    public List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.findByOrderDateCombo(filterLocalDate);
+    public List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        List<Order> orders = orderRepository.findByOrderDateCombo(filterDate);
+        return orders;
     }
 
     @Override
@@ -216,10 +217,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+    public long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
         BigDecimal minAmount;
         BigDecimal maxAmount;
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         switch (priceValue) {
             case 1 -> {
                 minAmount = BigDecimal.ZERO;
@@ -244,15 +245,15 @@ public class OrderServiceImpl implements OrderService {
             default -> throw new IllegalArgumentException("Invalid price range");
         }
 
-        return orderRepository.countOrderByFilterDateAndPrice(filterLocalDate, minAmount, maxAmount);
+        return orderRepository.countOrderByFilterDateAndPrice(filterDate, minAmount, maxAmount);
     }
 
     @Override
     public Page<Order> getOrdersByPriceAndDate(int priceValue,
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                                int page,
                                                int size) {
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         Pageable pageable = PageRequest.of(page-1, size);
 
         BigDecimal minPrice;
@@ -282,7 +283,7 @@ public class OrderServiceImpl implements OrderService {
             default:
                 throw new IllegalArgumentException("Invalid price range");
         }
-        return orderRepository.findByPriceRangeAndDate(minPrice, maxPrice, filterLocalDate, pageable);
+        return orderRepository.findByPriceRangeAndDate(minPrice, maxPrice, filterDate, pageable);
     }
     /**
      * @Summary: Creat Order.

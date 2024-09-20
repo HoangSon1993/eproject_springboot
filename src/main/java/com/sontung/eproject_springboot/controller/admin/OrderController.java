@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Controller
@@ -33,7 +34,7 @@ public class OrderController {
 
     @GetMapping
     public String getOrders(@RequestParam(required = false, defaultValue = "0") int amongPrice,
-                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "9") int size,
                             Model model) {
@@ -48,7 +49,7 @@ public class OrderController {
             Page<Order> orderList = orderService.getOrdersByFilterDateOrder(filterDate, page, size);
             model.addAttribute("filterDate", filterDate);
             model.addAttribute("orders", orderList);
-            int totalPages = (int) (Math.ceil((double) orderService.countOrderByFilterDate(filterDate) / size));
+            int totalPages = (int) (Math.ceil((double) orderList.getTotalElements() / size));
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("orders", orderList);
         } else {

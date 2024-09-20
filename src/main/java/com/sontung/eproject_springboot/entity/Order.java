@@ -36,6 +36,8 @@ public class Order {
     @Column(length = 100)
     String firstName;
     @Column(length = 100)
+
+
     String lastName;
     @Column(length = 150)
     String email;

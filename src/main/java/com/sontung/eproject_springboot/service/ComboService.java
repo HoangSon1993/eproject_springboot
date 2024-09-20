@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -51,13 +53,13 @@ public interface ComboService {
     // Count combo for admin
     long countAdminComBos();
 
-    Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+    Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                       int page,
                                       int size);
 
-    long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
-    List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
     // Count combo for user
     long countUserComBos();

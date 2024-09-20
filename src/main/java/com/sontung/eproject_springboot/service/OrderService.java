@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -26,12 +28,12 @@ public interface OrderService {
     long countOrder();
 
     // Filter Order by date in OrderManagement
-    Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+    Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                            int page,
                                            int size);
 
     // Count order by filterDate
-    long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
     Page<Order> getOrdersByPrice(int priceValue, int page, int size);
 
@@ -39,18 +41,18 @@ public interface OrderService {
 
     List<Order> getOrdersByPrice(int priceValue);
 
-    List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
     // Filter Order by date in ComboManagement
-    List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
     List<Order> getOrdersByPriceAndDate(int priceValue,
                                         @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
 
-    long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
     Page<Order> getOrdersByPriceAndDate(int priceValue,
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+                                        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                         int page,
                                         int size);
 

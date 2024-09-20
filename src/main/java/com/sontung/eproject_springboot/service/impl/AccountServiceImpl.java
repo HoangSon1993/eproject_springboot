@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService{
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     IAccountRepository accountRepository;
@@ -51,11 +52,11 @@ public class AccountServiceImpl implements AccountService{
         }
         else{
             if(accountRepository.existsByUserName(registerDTO.getUserName())){
-                return 0;
+                return 2;
             }
             else{
                 if(accountRepository.existsByEmail(registerDTO.getEmail())){
-                    return 0;
+                    return 3;
                 }
                 else{
                     Account account = new Account();

@@ -23,6 +23,8 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class ComboController {
     // TODO: 29/07/2024  
     // TODO: 29/07/2024
     @GetMapping("")
-    public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+    public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "9") int size,
                             Model model){
@@ -62,9 +64,11 @@ public class ComboController {
             Page<OrderDetail> orderDetails = comboService.getOrdersByDate(filterDate,page,size);
             model.addAttribute("filterDate", filterDate);
             model.addAttribute("orders", orderDetails);
-            long totalItems = comboService.countOrderDetailInComboMgr(filterDate);
+            //long totalItems = comboService.countOrderDetailInComboMgr(filterDate);
+            long totalItems = orderDetails.getTotalElements();
             int totalPages = (int) (Math.ceil((double)  totalItems/ size));
             model.addAttribute("totalPages", totalPages);
+            System.out.println(filterDate);
         }
         return "/admin/combo/index";
     }

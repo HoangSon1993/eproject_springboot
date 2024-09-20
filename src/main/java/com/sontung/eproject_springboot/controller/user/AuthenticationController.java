@@ -27,7 +27,10 @@ public class AuthenticationController {
     }
     @PostMapping("/registerConfirm")
     public String registerConfirm(@ModelAttribute RegisterDTO registerDTO){
-        accountService.createAccount(registerDTO);
+        var result = accountService.createAccount(registerDTO);
+        if(result==1){
+            return "redirect:/user/home";
+        }
         return "/user/home";
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -143,7 +144,7 @@ public class ComboServiceImpl implements ComboService {
     }
 
     @Override
-    public Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate,
+    public Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                                              int page,
                                              int size) {
         List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
@@ -170,7 +171,7 @@ public class ComboServiceImpl implements ComboService {
     }
 
     @Override
-    public long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+    public long countOrderDetailInComboMgr(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
         List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
         List<String> orderIdList = orders.stream().map(Order::getOrderId).toList();
         List<OrderDetail> allOrderDetails = new ArrayList<>();
@@ -188,7 +189,7 @@ public class ComboServiceImpl implements ComboService {
 //    }
 
     @Override
-    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+    public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
         List<Order> orders = orderService.getOrdersByFilterDate(filterDate);
         List<String> orderIdList = new ArrayList<>();
         for (Order order : orders) {
