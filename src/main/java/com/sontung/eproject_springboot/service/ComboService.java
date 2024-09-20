@@ -49,4 +49,6 @@ public interface ComboService {
     Combo getComboById(String comboId);
 
     List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+
+    Page<Combo> getCombosTypical(int pageNo, int pageSize);
 }

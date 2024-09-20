@@ -28,4 +28,6 @@ public interface IComboRepository extends JpaRepository<Combo, String> {
      * **/
     @Query("select c.finalAmount from Combo c where c.comboId = :comboId")
     BigDecimal getFinalAmountByComboId(@Param("comboId") String comboId);
+
+    Page<Combo> findByStatus(Pageable pageable, int status);
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
@@ -152,6 +153,21 @@ public class ComboServiceImpl implements ComboService {
             orderDetailList = orderDetailService.getOrderDetails(orderId);
         }
         return orderDetailList;
+    }
+
+    /**
+     * @Summary: Lấy các combo tiêu biểu.
+     * @Description: Được sử dụng ở page Home_page.
+     **/
+    @Override
+    public Page<Combo> getCombosTypical(int pageNumber, int pageSize) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(new Sort.Order(Sort.Direction.DESC, "createdDate"));
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
+        int status = 2;
+        Page<Combo> combos = iComboRepository.findByStatus(pageable, status);
+        return combos;
     }
 
 }

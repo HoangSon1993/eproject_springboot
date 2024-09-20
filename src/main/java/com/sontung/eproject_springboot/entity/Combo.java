@@ -33,4 +33,12 @@ public class Combo {
     LocalDate endDate;
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<ComboDetail> comboDetails;
+
+    @Transient
+    public String getImageUrl() {
+        if (image == null || image.isEmpty()) {
+            return "";
+        }
+        return "https://images-xoi-che-co-luyen.s3.ap-southeast-1.amazonaws.com/" + image;
+    }
 }

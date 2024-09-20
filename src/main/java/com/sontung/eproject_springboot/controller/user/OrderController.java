@@ -35,23 +35,8 @@ public class OrderController {
     private final CartService cartService;
     private final SearchRepository searchRepository;
 
-
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
     @Value("${user.id}")
     private String userId; // userId tạm
-
-    /**
-     * @Summary:
-     * @Description:
-     * @Param:
-     * @Return:
-     **/
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
 
     /**
      * @Summary:

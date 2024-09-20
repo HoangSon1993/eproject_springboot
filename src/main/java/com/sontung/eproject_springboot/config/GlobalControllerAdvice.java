@@ -29,4 +29,18 @@ public class GlobalControllerAdvice {
         }
         return 0;
     }
+
+    @Value("${aws.s3.bucket.url}")
+    String s3BucketUrl;
+
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     **/
+    @ModelAttribute("s3BucketUrl")
+    public String s3BucketUrl() {
+        return s3BucketUrl;
+    }
 }

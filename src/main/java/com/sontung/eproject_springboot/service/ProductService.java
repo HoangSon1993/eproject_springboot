@@ -12,13 +12,13 @@ public interface ProductService {
     List<Product> findAll();
     Optional<Product> findById(String id);
     Product save(Product product);
-    void deleteById(String id);
 
+    void deleteById(String id);
     void getAllProductWithSortByColumnAndSearch(int pageNo, int pageSize, String search, String sort);
 
     Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable);
-
     Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable);
+    Page<Product> getProductsTypical(int pageNumber, int pageSize);
 
     int countByCategory(String categoryId);
 }
