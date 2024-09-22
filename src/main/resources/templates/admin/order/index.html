@@ -8,100 +8,192 @@
     <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
-    <div th:replace="~{/admin/common/content_first}"></div>
-    <div class="container">
-        <h1 class="text-center">Quản Lý Đơn Hàng</h1> <hr/>
-        <div class="row">
-            <div class="col-md-8">
-                <form th:action="@{/admin/order}" method="get">
-                    <div class="row">
-                        <div class="form-group col-4">
-                            <label for="amongPrice">Theo giá</label>
-                            <select id="amongPrice" name="amongPrice" class="form-control" onchange="this.form.submit()">
-                                <option value="0">Tất cả</option>
-                                <option value="1" th:selected="${amongPrice == 1}">Dưới 100k</option>
-                                <option value="2" th:selected="${amongPrice == 2}">100k -> 200k</option>
-                                <option value="3" th:selected="${amongPrice == 3}">200k -> 300k</option>
-                                <option value="4" th:selected="${amongPrice == 4}">300k -> 500k</option>
-                                <option value="5" th:selected="${amongPrice == 5}">500k Trở Lên</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-4">
-                            <label class="form-label" for="filterDate">Tìm theo ngày</label>
-                            <input type="date"
-                                   id="filterDate"
-                                   name="filterDate"
-                                   class="form-control"
-                                   th:value="${filterDate != null} ? ${#dates.format(filterDate, 'yyyy-MM-dd')} : ''"
-                                   onchange="this.form.submit()">
-                        </div>
+<div th:replace="~{/admin/common/content_first}"></div>
+<div class="container">
+    <h1 class="text-center">Quản Lý Đơn Hàng</h1>
+    <hr/>
+    <div class="row">
+        <div class="col-md-8">
+            <!--            Form filter-->
+            <form th:action="@{/admin/order}" method="get">
+                <div class="row">
+                    <!--                    Filter-->
+
+                    <!--                    Theo giá-->
+                    <div class="form-group col-4">
+                        <label for="amongPrice">Theo giá</label>
+                        <select id="amongPrice" name="amongPrice" class="form-control">
+                            <option value="0">Tất cả</option>
+                            <option value="1" th:selected="${amongPrice == 1}">Dưới 100k</option>
+                            <option value="2" th:selected="${amongPrice == 2}">100k -> 200k</option>
+                            <option value="3" th:selected="${amongPrice == 3}">200k -> 300k</option>
+                            <option value="4" th:selected="${amongPrice == 4}">300k -> 500k</option>
+                            <option value="5" th:selected="${amongPrice == 5}">500k Trở Lên</option>
+                        </select>
                     </div>
-                </form>
-            </div>
-            <div class="col-md-4">
-                <form action="">
-                    <div class="form-group">
-                        <input type="text"
-                               name="searchName"
-                               id="searchName"
-                               placeholder="Số điện thoại">
-                        <button class="btn btn-outline-primary">Tìm kiếm</button>
+                    <!--                    Theo ngày-->
+                    <div class="form-group col-4">
+                        <label class="form-label" for="filterDate">Tìm theo ngày</label>
+                        <input type="date"
+                               id="filterDate"
+                               name="filterDate"
+                               class="form-control"
+                                th:value="${(filterDate) == null ? '' : filterDate}"
+                        >
+<!--                        <input type="date"-->
+<!--                               id="filterDate2"-->
+<!--                               name="filterDate2"-->
+<!--                               class="form-control"-->
+<!--                                th:value="${(filterDate2) == null ? '' : filterDate2}">-->
                     </div>
-                </form>
-            </div>
+                    <!--                    Theo status-->
+                    <div class="form-group col-4">
+                        <label for="status" style="display: block">Trạng thái đơn hàng</label>
+                        <select name="status" id="status" class="form-control">
+                            <th:block th:each="item : ${statuses}">
+                                <option th:if="${item.getKey() == 'ORDERED'}"
+                                        th:value="''"
+                                        th:selected="${item.getKey() == status}"
+                                        th:text="'Tất cả đơn hàng'">
+                                </option>
+                                <option th:unless="${item.getKey() == 'ORDERED'}"
+                                        th:value="${item.getKey()}"
+                                        th:selected="${item.getKey() == status}"
+                                        th:text="${item.getValue()}">
+                                </option>
+                            </th:block>
+                        </select>
+                    </div>
+                </div>
+            </form>
         </div>
-        <th:block th:if="${orders!=null}">
-            <table class="table table-light table-striped table-bordered">
-                <thead class="table-dark">
-                <tr>
-                    <th class="text-center">Mã đơn hàng</th>
-                    <th class="text-center">Ngày tạo</th>
-                    <th class="text-center">Địa chỉ giao</th>
-                    <th class="text-center">Số điện thoại</th>
-                    <th class="text-center">Trạng thái</th>
-                    <th class="text-center">Tồng tiền</th>
-                    <th class="text-center">Xem chi tiết</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item: ${orders}">
-                    <td class="text-center" th:text="${item.code}"></td>
-                    <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
-                    <td class="text-center" th:text="${item.shippingAddress}"></td>
-                    <td class="text-center" th:text="${item.shippingPhone}"></td>
-<!--                    <td class="text-center" th:text="${item.status}==1?'Hoàn thành':'Không hoàn thành'"></td>-->
-                    <td class="text-center" th:text="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID ? 'Hoàn thành' : 'Không hoàn thành'}"></td>
-                    <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
-                    <td class="text-center">
-                        <a th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info"><i class="fa-solid fa-circle-info"></i></a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
-        </th:block>
-        <th:block th:if="${orders==null}">
-            <h2 th:text="'Không có đơn hàng nào trong ngày' + ${filterDate}"></h2>
-        </th:block>
-        <th:block th:if="${filterDate == null} and ${amongPrice} == null">
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order', ${currentPage}, ${totalPages}, ${size})"></div>
-        </th:block>
-        <th:block th:if="${filterDate != null} and ${amongPrice} == null">
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
-        </th:block>
-        <th:block th:if="${filterDate == null} and ${amongPrice} != null">
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?amongPrice=' + ${amongPrice}, ${currentPage}, ${totalPages}, ${size})"></div>
-        </th:block>
-        <th:block th:if="${filterDate != null} and ${amongPrice} != null">
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/order?amongPrice='+ ${amongPrice} + '&filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
-        </th:block>
-
+        <!--        form search-->
+        <div class="col-md-4 d-flex align-items-end mb-3">
+            <form id="formSearch" action="" class="mb-0">
+                <div class="row">
+                    <div class="d-flex align-items-end">
+                        <div class="col-8">
+                            <input type="text"
+                                   name="search"
+                                   id="searchName"
+                                   th:value="${search}"
+                                   placeholder="Số điện thoại"
+                                   class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <button id="btnSearch" class="btn btn-outline-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-    <div th:replace="~{/admin/common/content_footer}"></div>
-    <script th:inline="javascript">
-        console.log(/*[[${filterDate}]]*/);
-        console.log(/*[[${amongPrice}]]*/);
-    </script>
+    <table class="table table-light table-striped table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th class="text-center">Mã đơn hàng</th>
+            <th class="text-center">Ngày tạo</th>
+            <th class="text-center">Địa chỉ giao</th>
+            <th class="text-center">Số điện thoại</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">Tồng tiền</th>
+            <th class="text-center">Chi tiết</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item: ${orders}">
+            <td class="text-center" th:text="${item.code}"></td>
+            <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
+            <td class="text-center" th:text="${item.shippingAddress}"></td>
+            <td class="text-center" th:text="${item.shippingPhone}"></td>
+            <!--Status-->
+            <td class="text-center"
+                th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED}"
+                th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED.getDescription()}"></td>
+            <td class="text-center"
+                th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID}"
+                th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PAID.getDescription()}"></td>
+            <td class="text-center"
+                th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}"
+                th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED.getDescription()}"></td>
+            <td class="text-center"
+                th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}"
+                th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING.getDescription()}"></td>
+            <td class="text-center"
+                th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
+                th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).COD.getDescription()}"></td>
 
+            <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
+            <td class="text-center">
+                <a th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info"><i
+                        class="fa-solid fa-circle-info"></i></a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div th:replace="~{/admin/common/content_footer}"></div>
+<script>
+    let fileterDate = "";
+    let searchString = "";
+    let amongPrice = ""
+    let status = "";
+    const fileterDateElement = document.getElementById('filterDate');
+    fileterDateElement.addEventListener('change', function (e) {
+        e.preventDefault();
+        fileterDate = e.target.value;
+        console.log(typeof(fileterDate))
+    })
+
+    const searchNameElement = document.getElementById('searchName')
+    searchNameElement.addEventListener('change', function (e) {
+        searchString = e.target.value;
+        console.log(searchString)
+    })
+
+    const amongPriceElement = document.getElementById('amongPrice')
+    amongPriceElement.addEventListener('change', function (e) {
+        amongPrice = e.target.value;
+        console.log(amongPrice)
+    })
+
+    const statusElement = document.getElementById('status')
+    statusElement.addEventListener('change', function (e) {
+        status = e.target.value;
+        console.log(status)
+    })
+
+    const buttonSearch = document.getElementById('btnSearch')
+    buttonSearch.addEventListener('click', function (e) {
+        e.preventDefault()
+        console.log('seachButton')
+
+       const newForm = document.createElement('form')
+        newForm.method ='GET'
+        newForm.action = '/admin/order'
+
+        const searchInputForm = searchNameElement;
+        searchInputForm.type='hidden'
+        newForm.appendChild(searchInputForm)
+
+        const amongPriceForm = amongPriceElement
+        amongPriceForm.type='hidden'
+        newForm.appendChild(amongPriceForm)
+
+        const statusForm = statusElement
+        statusForm.type='hidden'
+        newForm.appendChild(statusForm)
+
+        const filterDateForm= fileterDateElement
+        filterDateForm.defaultValue = fileterDate;
+        filterDateForm.type='hidden'
+        newForm.appendChild(filterDateForm)
+
+        document.body.appendChild(newForm);
+
+        console.log(newForm)
+        newForm.submit()
+    })
+</script>
 </body>
 </html>

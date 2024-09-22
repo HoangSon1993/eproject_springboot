@@ -17,13 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class UserComboController {
     private final ComboService comboService;
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
 
     @GetMapping("/index")
     public String getCombos(Model model,

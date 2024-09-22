@@ -30,27 +30,10 @@ import java.util.Map;
 @SessionAttributes("checkedItems")
 @RequiredArgsConstructor
 public class UserCartController {
-
     private final CartService cartService;
-
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
 
     @Value("${user.id}")
     private String userId; // userId tạm
-
-
-    /**
-     * @Summary:
-     * @Description:
-     * @Param:
-     * @Return:
-     * @Exception:
-     **/
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
 
     /**
      * @Summary:
@@ -200,6 +183,43 @@ public class UserCartController {
             response.put("success", false);
             response.put("message", "Đã xảy ra lỗi không mong muốn");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/add-item-to-cart")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> addItemToCart(
+            @RequestParam(value = "comboId", required = false) String comboId,
+            @RequestParam(value = "productId", required = false) String productId,
+            @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        if (comboId == null && productId == null) {
+            response.put("success", false);
+            response.put("message", "Product ID và Combo ID không được phép cả 2 null");
+            return ResponseEntity.ok(response);
+        }
+        try {
+            Cart cart = cartService.addItemToCart(userId,comboId,productId,quantity);
+
+            int cartItemCount = cartService.getTotalItem(userId);
+
+            // Thêm sản phẩm vào danh sách checked
+            // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì thêm vào
+            if (!checkedItems.contains(cart.getCartId())) {
+                checkedItems.add(cart.getCartId());
+                session.setAttribute("checkedItems", checkedItems);
+            }
+
+            response.put("success", true);
+            response.put("cartItemCount", cartItemCount);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            response.put("success", false);
+            response.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 

@@ -1,6 +1,8 @@
 package com.sontung.eproject_springboot.controller.admin;
 
 import com.sontung.eproject_springboot.entity.Order;
+import com.sontung.eproject_springboot.enums.OrderStatus;
+import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.OrderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -13,18 +15,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/order")
 public class OrderController {
     private final OrderService orderService;
+    private final SearchRepository searchRepository;
 
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, SearchRepository searchRepository) {
         this.orderService = orderService;
+        this.searchRepository = searchRepository;
     }
 
     @ModelAttribute("s3BucketUrl")
@@ -35,39 +41,45 @@ public class OrderController {
     @GetMapping
     public String getOrders(@RequestParam(required = false, defaultValue = "0") int amongPrice,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                            @RequestParam(defaultValue = "1") int page,
-                            @RequestParam(defaultValue = "9") int size,
+                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate2,
+                            @RequestParam(defaultValue = "0") int pageNo,
+                            @RequestParam(defaultValue = "10") int pageSize,
+                            @RequestParam(defaultValue = "") String search,
+                            @RequestParam(defaultValue = "") String status,
                             Model model) {
-        model.addAttribute("currentPage", page);
-        model.addAttribute("size", size);
-        if (amongPrice == 0 && filterDate==null) {
-            Page<Order> orderList = orderService.getOrders(page, size);
-            int totalPages = (int) (Math.ceil((double) orderService.countOrder() / size));
-            model.addAttribute("totalPages", totalPages);
-            model.addAttribute("orders", orderList);
-        } else if(amongPrice == 0){
-            Page<Order> orderList = orderService.getOrdersByFilterDateOrder(filterDate, page, size);
-            model.addAttribute("filterDate", filterDate);
-            model.addAttribute("orders", orderList);
-            int totalPages = (int) (Math.ceil((double) orderList.getTotalElements() / size));
-            model.addAttribute("totalPages", totalPages);
-            model.addAttribute("orders", orderList);
-        } else {
-            if(filterDate==null){
-                model.addAttribute("orders", orderService.getOrdersByPrice(amongPrice, page, size));
-                int totalPages = (int) (Math.ceil((double) orderService.countOrderByPrice(amongPrice) / size));
-                model.addAttribute("totalPages", totalPages);
-                model.addAttribute("amongPrice", amongPrice);
-            }
-            else{
-                model.addAttribute("filterDate", filterDate);
-                model.addAttribute("amongPrice", amongPrice);
-                long totalItems =  orderService.countOrderByPriceAndFilterDate(amongPrice, filterDate);
-                int totalPages = (int) (Math.ceil((double)  totalItems/ size));
-                model.addAttribute("totalPages", totalPages);
-                model.addAttribute("orders", orderService.getOrdersByPriceAndDate(amongPrice, filterDate, page, size));
+        LocalDateTime timeStart = null;
+        LocalDateTime timeEnd = null;
+
+        if (filterDate != null) {
+            timeStart = filterDate.atStartOfDay();
+            if (filterDate2 != null) {
+                timeEnd = LocalDateTime.of(filterDate2, LocalTime.MAX);
+            } else {
+                timeEnd = LocalDateTime.of(filterDate, LocalTime.MAX);
             }
         }
+        Page<Order> orders = searchRepository.getAllOrderWithFilterDateAmongPriceAndSearchCriteriaBuider(
+                pageNo,
+                pageSize,
+                search,
+                amongPrice,
+                status,
+                timeStart,
+                timeEnd);
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("amongPrice", amongPrice);
+        model.addAttribute("filterDate", filterDate != null ? filterDate : "");
+        model.addAttribute("filterDate2", filterDate2);
+        model.addAttribute("status", status);
+        model.addAttribute("search", search);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("pageNo", pageNo);
+
+        // Lấy danh sách các trạng thái đơn hàng
+        Map<String, String> statuses = OrderStatus.toMap();
+
+        model.addAttribute("statuses", statuses);
         return "/admin/order/index";
     }
 

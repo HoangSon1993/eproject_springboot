@@ -15,12 +15,26 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalControllerAdvice {
-    @Autowired
-    AccountService accountService;
+    private final AccountService accountService;
     private final
     CartService cartService;
+
     @Value("${user.id}")
     private String userId; // userId tạm
+
+    @Value("${aws.s3.bucket.url}")
+    String s3BucketUrl;
+
+    /**
+     * @Summary:
+     * @Description:
+     * @Param:
+     * @Return:
+     **/
+    @ModelAttribute("s3BucketUrl")
+    public String s3BucketUrl() {
+        return s3BucketUrl;
+    }
 
     /**
      * @Summary: Đếm số item có trong Cart.
@@ -30,17 +44,17 @@ public class GlobalControllerAdvice {
     public int getCartItemCount() {
         // Lấy ra user_id (sau khi đã áp dung Spring Security)
         // Hiện tại đang dùng User Tạm
-        if(userId != null) {
+        if (userId != null) {
             return cartService.getTotalItem(userId);
         }
         return 0;
     }
 
     @ModelAttribute("loggedInUser")
-    public Account addUserToModel(){
+    public Account addUserToModel() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication != null && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken)){
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
             String username = authentication.getName();
             Account account = accountService.findByUserNameOrEmail(username);
             return account;

@@ -281,9 +281,8 @@
                                                    th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">
                                                     $4.99 / kg</p>
                                                 <a href="#"
-                                                   id="btn-add-to-cart"
+                                                   th:classappend="btn-add-to-cart"
                                                    th:data-product-id="${item.productId}"
-                                                   th:data-quantity="1"
                                                    class="btn border border-secondary rounded-pill px-3 text-primary"><i
                                                         class="fa fa-shopping-bag me-2 text-primary"></i>Giỏ hàng</a>
                                             </div>
@@ -341,35 +340,42 @@
 <div th:replace="~{/user/common/content_footer}"></div>
 <script>
     const notification = document.getElementById("notification");
-    const addToCartButtons = document.querySelectorAll("#btn-add-to-cart");
+
+    const addToCartButtons = document.querySelectorAll('.btn-add-to-cart');
     addToCartButtons.forEach(button => {
         button.addEventListener('click', function (event) {
             event.preventDefault();
+
             const productId = this.getAttribute('data-product-id');
-            const quantity = this.getAttribute('data-quantity')
+            const comboId = this.getAttribute('data-combo-id');
 
             const formData = new FormData();
-            formData.append('productId', productId);
-            formData.append('quantity', quantity);
+            formData.append('quantity', '1');
+            if (productId) {
+                formData.append('productId', productId);
+            }
+            if (comboId) {
+                formData.append('comboId', comboId)
+            }
 
-            fetch('/cart/add-product', {
+            fetch('/cart/add-item-to-cart', {
                 method: 'POST',
                 body: formData,
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data )
+                    console.log(data)
                     if (data.success) {
                         // Hiển thị thông báo
                         notification.style.display = 'block'
                         // Ẩn thông báo sau 3s
-                        setTimeout(()=>{
-                            notification.style.display= 'none';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
                         }, 3000)
 
 
                         // Cập nhật số lượng item trong Cart
-                        const cartCountElement =  document.getElementById('cart-count');
+                        const cartCountElement = document.getElementById('cart-count');
                         cartCountElement.innerText = data.cartItemCount
                     }
                 })

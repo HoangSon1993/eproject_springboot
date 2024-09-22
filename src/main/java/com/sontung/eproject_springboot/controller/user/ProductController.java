@@ -24,13 +24,6 @@ import java.util.*;
 public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
 
     @ModelAttribute("categories")
     public List<Category> populateCategories() {
@@ -67,11 +60,11 @@ public class ProductController {
         // Todo: Tối ưu hoá search, sort, filter bằng cách custom query.
         // productService.getAllProductWithSortByColumnAndSearch(page, size, search, sort);
 
-        if(page < 0) page = 0;
+        if (page < 0) page = 0;
         List<Sort.Order> sorts = new ArrayList<>();
-        if(sort.equals("asc")){
+        if (sort.equals("asc")) {
             sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
-        }else{
+        } else {
             sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
         }
 
@@ -93,7 +86,7 @@ public class ProductController {
         model.addAttribute("sort", sort); // Hướng sắp xếp hiện tại
 
         return "/user/product/index";
-   }
+    }
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {

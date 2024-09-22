@@ -6,19 +6,14 @@ import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.service.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -214,6 +209,19 @@ public class ComboServiceImpl implements ComboService {
         //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
     }
 
+    /**
+     * @Summary: Lấy các combo tiêu biểu.
+     * @Description: Được sử dụng ở page Home_page.
+     **/
+    @Override
+    public Page<Combo> getCombosTypical(int pageNumber, int pageSize) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(new Sort.Order(Sort.Direction.DESC, "createdDate"));
 
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
+        int status = 2;
+        Page<Combo> combos = iComboRepository.findByStatus(pageable, status);
+        return combos;
+    }
 
 }

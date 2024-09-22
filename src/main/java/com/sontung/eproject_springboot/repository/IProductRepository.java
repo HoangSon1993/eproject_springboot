@@ -20,8 +20,9 @@ public interface IProductRepository extends JpaRepository<Product, String> {
 
     /**
      * get only Product_ProductPrice
-     * **/
+     **/
     @Query("select c.price from Product c where c.productId = :productId")
     BigDecimal getPriceByProductId(@Param("productId") String productId);
 
+    Page<Product> findByStatus(Pageable pageable, int status);
 }

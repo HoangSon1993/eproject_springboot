@@ -37,4 +37,6 @@ public interface IComboRepository extends JpaRepository<Combo, String> {
     // Count combo for admin
     @Query("SELECT COUNT(c) FROM Combo c")
     long countCombo();
+
+    Page<Combo> findByStatus(Pageable pageable, int status);
 }

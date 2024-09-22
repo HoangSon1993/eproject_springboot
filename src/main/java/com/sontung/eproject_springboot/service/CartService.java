@@ -26,4 +26,5 @@ public interface CartService {
 
     List<CartDetailDTO> getCartByIds(String userId, List<String> cartItems);
 
+    Cart addItemToCart(String userId, String comboId, String productId, int quantity);
 }

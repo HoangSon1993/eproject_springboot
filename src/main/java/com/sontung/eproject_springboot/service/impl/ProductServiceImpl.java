@@ -6,9 +6,12 @@ import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,15 +52,32 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable) {
-        return productRepository.findByStatusAndProductNameContaining(status,productName,pageable);
+        return productRepository.findByStatusAndProductNameContaining(status, productName, pageable);
     }
+
     @Override
     public Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable) {
-        return productRepository.findByStatusAndCategory_CategoryIdAndProductNameContaining(status,categoryId,search,pageable);
+        return productRepository.findByStatusAndCategory_CategoryIdAndProductNameContaining(status, categoryId, search, pageable);
     }
 
     @Override
     public int countByCategory(String categoryId) {
         return productRepository.countByCategoryId(categoryId);
+    }
+
+    /**
+     * @Summary: Lấy các sản phẩm tiêu biểu.
+     * @Description: Được sử dụng ở page Home_page.
+     **/
+    @Override
+    public Page<Product> getProductsTypical(int pageNumber, int pageSize) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(new Sort.Order(Sort.Direction.ASC, "createdDate"));
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
+        int status = 1;
+
+        Page<Product> products = productRepository.findByStatus(pageable, status);
+        return products;
     }
 }

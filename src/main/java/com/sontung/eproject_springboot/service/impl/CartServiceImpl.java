@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CartServiceImpl  implements CartService {
+public class CartServiceImpl implements CartService {
 
     private final ICartRepository cartRepository;
     private final IComboRepository comboRepository;
@@ -37,7 +37,7 @@ public class CartServiceImpl  implements CartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
         Account account = accountRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Người dùng không tồn tại"));
-        Cart cartItem = cartRepository.findByProductIdAndAccount_AccountId(productId, userId);
+        Cart cartItem = cartRepository.findByAccountIdAndProductIdOrComboId(userId, productId, null);
         if (cartItem != null) {
             // Update quantity and amount
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
@@ -62,13 +62,13 @@ public class CartServiceImpl  implements CartService {
                 .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
         Account account = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
-        Cart cart = cartRepository.findByAccountAndComboId(account, comboId);
+        Cart cart = cartRepository.findByAccountIdAndProductIdOrComboId(userId, null, comboId);
         if (cart == null) {
             cart = new Cart();
             cart.setComboId(comboId);
             cart.setQuantity(quantity);
             cart.setAccount(account);
-            cart.setPrice(combo.getFinalAmount()); // Tung xem lai vi da change amount -> price
+            cart.setPrice(combo.getFinalAmount());
             cartRepository.save(cart);
         } else {
             int newQuantity = cart.getQuantity() + quantity;
@@ -152,14 +152,14 @@ public class CartServiceImpl  implements CartService {
 
         for (CartDetailDTO cartDetailDTO : cartDetailDTOList) {
             // Kiểm tra nếu giá thay đổi.
-                if(cartDetailDTO.getPrice().compareTo(cartDetailDTO.getCurrentPrice()) != 0){
-                    priceChanged = true;
-                    updateCartPrices(cartDetailDTO);
-                }
-                BigDecimal amount = cartDetailDTO.getCurrentPrice().multiply(new BigDecimal(cartDetailDTO.getQuantity()));
-                totalAmount = totalAmount.add(amount);
+            if (cartDetailDTO.getPrice().compareTo(cartDetailDTO.getCurrentPrice()) != 0) {
+                priceChanged = true;
+                updateCartPrices(cartDetailDTO);
+            }
+            BigDecimal amount = cartDetailDTO.getCurrentPrice().multiply(new BigDecimal(cartDetailDTO.getQuantity()));
+            totalAmount = totalAmount.add(amount);
         }
-        if(priceChanged){
+        if (priceChanged) {
             throw new PriceChangedException("Giá sản phẩm đã thay đổi giá bán.");
         }
         return totalAmount;
@@ -168,11 +168,10 @@ public class CartServiceImpl  implements CartService {
     private void updateCartPrices(CartDetailDTO cartDetailDTO) {
         Cart cart = cartRepository.findById(cartDetailDTO.getId()).orElse(null);
         if (cart != null) {
-            if(cart.getProductId() != null){
+            if (cart.getProductId() != null) {
                 Product product = productRepository.findById(cart.getProductId()).orElse(null);
                 cart.setPrice(product.getPrice());
-            }
-            else {
+            } else {
                 Combo combo = comboRepository.findById(cart.getComboId()).orElse(null);
                 cart.setPrice(combo.getFinalAmount());
             }
@@ -185,9 +184,7 @@ public class CartServiceImpl  implements CartService {
      **/
     @Override
     public int getTotalItem(String userId) {
-//        Todo: dùng hàm count
-        List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
-        return carts.size();
+        return cartRepository.countCartsByAccount_AccountId(userId);
     }
 
     /**
@@ -292,5 +289,51 @@ public class CartServiceImpl  implements CartService {
             cartDetailDTOList.add(CartDetailDTOBuilder.build());
         }
         return cartDetailDTOList;
+    }
+
+    /**
+     * @Summary: Add item to cart
+     * @Description: Xử lý cho cả 2 th combo và product
+     * @Param String userId
+     * @Param String comboId
+     * @Param String productId
+     * @Param int quantity
+     * @Return Cart
+     * @Exceiption ProductNotFoundException
+     * @Exceiption RuntimeException
+     **/
+    @Override
+    public Cart addItemToCart(String userId, String comboId, String productId, int quantity) {
+        Account currentAccount = accountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        Product currentProduct = null;
+        Cart cart = null;
+        if (productId != null) {
+            currentProduct = productRepository.findById(productId)
+                    .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
+            cart = cartRepository.findByProductIdAndAccount_AccountId(productId, userId);
+        }
+        Combo currentCombo = null;
+        if (comboId != null) {
+            currentCombo = comboRepository.findById(comboId)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            cart = cartRepository.findByAccountAndComboId(currentAccount, comboId);
+        }
+
+        if (cart == null) {
+            cart = new Cart();
+            cart.setAccount(currentAccount);
+            cart.setComboId(comboId);
+            cart.setProductId(productId);
+            cart.setQuantity(quantity);
+            cart.setPrice(comboId != null ? currentCombo.getFinalAmount() : currentProduct.getPrice());
+
+            cartRepository.save(cart);
+        } else {
+            int newQuantity = quantity + cart.getQuantity();
+            cart.setQuantity(newQuantity);
+            cartRepository.save(cart);
+        }
+        return cart;
     }
 }

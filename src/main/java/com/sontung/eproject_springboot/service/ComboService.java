@@ -65,4 +65,6 @@ public interface ComboService {
     long countUserComBos();
 
     Page<Combo> getCombos(int page, int size);
+
+    Page<Combo> getCombosTypical(int pageNumber, int pageSize);
 }
