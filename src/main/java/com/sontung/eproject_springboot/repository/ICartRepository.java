@@ -20,10 +20,14 @@ public interface ICartRepository extends JpaRepository<Cart, String> {
     Cart findByAccountAndComboId(Account account, String comboId);
     Cart findByProductIdAndAccount_AccountId(String productId, String userId);
 
-    @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId AND ((:productId IS NULL AND c.comboId = :comboId) OR(:comboId IS NULL AND c.productId = :productId))")
+    // Todo: ket qua tra ve khong chinh xac
+    @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId " +
+            "AND ((:productId IS NOT NULL AND c.productId = :productId) " +
+            "OR (:comboId IS NOT NULL AND c.comboId = :comboId))")
     Cart findByAccountIdAndProductIdOrComboId(@Param("accountId") String accountId,
                                               @Param("productId") String productId,
                                               @Param("comboId") String comboId);
+
 
     Cart findByCartIdAndAccount_AccountId(String cartId, String accountId);
 

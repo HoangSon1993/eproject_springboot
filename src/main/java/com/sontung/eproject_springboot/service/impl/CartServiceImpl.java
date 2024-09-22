@@ -307,16 +307,18 @@ public class CartServiceImpl implements CartService {
         Account currentAccount = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
         Product currentProduct = null;
+        Cart cart = null;
         if (productId != null) {
             currentProduct = productRepository.findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
+            cart = cartRepository.findByProductIdAndAccount_AccountId(productId, userId);
         }
         Combo currentCombo = null;
         if (comboId != null) {
             currentCombo = comboRepository.findById(comboId)
                     .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            cart = cartRepository.findByAccountAndComboId(currentAccount, comboId);
         }
-        Cart cart = cartRepository.findByAccountIdAndProductIdOrComboId(userId, comboId, productId);
 
         if (cart == null) {
             cart = new Cart();

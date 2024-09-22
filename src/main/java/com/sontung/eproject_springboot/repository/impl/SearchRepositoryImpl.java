@@ -1,12 +1,13 @@
 package com.sontung.eproject_springboot.repository.impl;
 
-import com.sontung.eproject_springboot.entity.Account;
+import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.entity.Order;
 import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -241,4 +243,112 @@ public class SearchRepositoryImpl implements SearchRepository {
         // Trả về kết quả dưới dạng Page
         return new PageImpl<>(paginatedOrders, PageRequest.of(pageNo, pageSize), totalElements);
     }
+
+    @Override
+    public Page<Order> getAllOrderWithFilterDateAmongPriceAndSearchCriteriaBuider(int pageNo, int pageSize, String search, int amongPrice, String status, LocalDateTime filterDate, LocalDateTime filterDate2) {
+        // Khởi tạo CriteriaBuilder và CriteriaQuery
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+        Root<Order> root = cq.from(Order.class);
+
+    // Join với bảng OrderDetail
+    Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.INNER);
+
+        // Join với bảng Product từ OrderDetail
+        Join<OrderDetail, Product> productJoin = orderDetailJoin.join("product", JoinType.INNER);
+
+
+        // Join với bảng Combo từ OrderDetail
+        Join<OrderDetail, Combo>  comboJoin = orderDetailJoin.join("combo", JoinType.LEFT);
+
+        // Join với comboDetail từt Combo
+        Join<Combo,ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.LEFT);
+        // Join với bảng product từ comboDetail
+        Join<ComboDetail, Product> productJoinCombodetail= comboDetailJoin.join("product", JoinType.LEFT);
+
+        // Xây dựng điều kiện tìm kiếm
+        List<Predicate> predicates = new ArrayList<>();
+
+        // Điều kiện tìm kiếm chính xác
+        if (StringUtils.hasLength(search)) {
+            String searchPattern = "%" + search.toLowerCase() + "%";
+            predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("code")), searchPattern),
+                    cb.like(cb.lower(root.get("shippingAddress")), searchPattern),
+                    cb.like(cb.lower(root.get("shippingPhone")), searchPattern),
+                    cb.like(cb.lower(root.get("email")), searchPattern),
+                    cb.like(cb.lower(root.get("firstName")), searchPattern),
+                    cb.like(cb.lower(root.get("lastName")), searchPattern),
+                    cb.like(cb.lower(productJoin.get("productName")), searchPattern),
+                    cb.like(cb.lower(productJoinCombodetail.get("productName")), searchPattern)
+            ));
+        }
+
+        // Điều kiện lọc theo status
+        if (StringUtils.hasLength(status)) {
+            int statusValue = OrderStatus.valueOf(status).ordinal();
+            predicates.add(cb.equal(root.get("status"), statusValue));
+        }
+
+        // Điều kiện lọc theo ngày
+        if (filterDate != null && filterDate2 != null) {
+            predicates.add(cb.between(root.get("orderDate").as(LocalDateTime.class), filterDate, filterDate2));
+        }
+
+        // Điều kiện lọc theo giá (giả sử amongPrice là giá lớn nhất)
+        switch (amongPrice) {
+            case 1:
+                // <=100.000
+                predicates.add(cb.lessThanOrEqualTo(root.get("totalAmount"), 100000));
+                break;
+            case 2:
+                // 100.000 - 200.000
+                predicates.add(cb.between(root.get("totalAmount"), 100000,200000));
+                break;
+            case 3:
+                // 200.000 -300.000
+                predicates.add(cb.between(root.get("totalAmount"), 200000,300000));
+
+                break;
+            case 4:
+                // 300.000 - 500.000
+                predicates.add(cb.between(root.get("totalAmount"), 300000,500000));
+
+                break;
+            case 5:
+                // > 500.000
+                predicates.add(cb.greaterThanOrEqualTo(root.get("totalAmount"), 500000));
+                break;
+        }
+
+
+        // Kết hợp tất cả điều kiện bằng AND
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // Thêm sắp xếp nếu cần
+        cq.orderBy(cb.desc(root.get("orderDate")));
+
+        // Áp dụng phân trang và thực hiện truy vấn
+        TypedQuery<Order> query = entityManager.createQuery(cq);
+        query.setFirstResult(pageNo * pageSize);
+        query.setMaxResults(pageSize);
+
+        // Thực hiện truy vấn và trả về kết quả đã phân trang
+        List<Order> orders = query.getResultList();
+
+        // Tính toán tổng số bản ghi
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Order> countRoot = countQuery.from(Order.class);
+        countQuery.select(cb.count(countRoot)).where(cb.and(predicates.toArray(new Predicate[0])));
+        Long totalElements;
+        try {
+            totalElements = entityManager.createQuery(countQuery).getSingleResult();
+        } catch (Exception e) {
+            totalElements = 0L;
+        }
+
+        return new PageImpl<>(orders, PageRequest.of(pageNo, pageSize), totalElements);
+    }
+
+
 }

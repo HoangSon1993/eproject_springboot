@@ -176,10 +176,9 @@
                                                       method="post">
                                                     <input type="hidden" name="quantity" th:value="1">
                                                     <button class="btn border border-secondary rounded-pill px-3 text-primary"
-                                                            id="btn-add-to-cart"
-                                                            th:data-combo-id="${item.comboId}"
-                                                            th:data-quantity="1">
-                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng
+                                                            th:classappend="btn-add-to-cart"
+                                                            th:data-combo-id="${item.comboId}">
+                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> + Giỏ Hàng
                                                     </button>
                                                 </form>
                                                 <!--                                                    <a th:href="@{/cart/create(comboId=${item.comboId})}" class="btn border border-secondary rounded-pill px-3 text-primary">-->
@@ -208,20 +207,25 @@
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
 <script>
-    const addToCartButton = document.querySelectorAll("#btn-add-to-cart")
+    const addToCartButton = document.querySelectorAll('.btn-add-to-cart')
     addToCartButton.forEach(button => {
         const notification = document.getElementById("notification");
         button.addEventListener('click', function (event) {
             event.preventDefault();
+
             const comboId = this.getAttribute('data-combo-id');
-            const quantity = this.getAttribute('data-quantity');
-            console.log(comboId, quantity)
+            const productId = this.getAttribute('data-product-id');
 
             const formData = new FormData();
-            formData.append('comboId', comboId)
-            formData.append('quantity', quantity)
+            formData.append('quantity', '1')
+            if(productId){
+                formData.append('productId', productId)
+            }
+            if(comboId){
+                formData.append('comboId', comboId)
+            }
 
-            fetch('/cart/add-combo', {
+            fetch('/cart/add-item-to-cart', {
                 method: 'POST',
                 body: formData
             }).then(response => response.json())
@@ -231,12 +235,12 @@
                         // Hiển thị thông báo
                         notification.style.display = 'block'
                         // Ẩn thông báo sau 3s
-                        setTimeout(()=>{
-                            notification.style.display= 'none';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
                         }, 3000)
 
                         // Cập nhật số lượng item trong Cart
-                        const cartCountElement =  document.getElementById('cart-count');
+                        const cartCountElement = document.getElementById('cart-count');
                         cartCountElement.innerText = data.cartItemCount
                     }
                 })

@@ -9,7 +9,7 @@ public enum OrderStatus {
     PAID("Đã thanh toán"),    // Đã thanh toán
     CANCELED("Hủy bỏ"), // Hủy bỏ
     PENDING("Chờ thanh toán"), // Chờ thanh toán
-    COD("Thanh toán khi nhân hàng.");
+    COD("Thanh toán khi nhân hàng");
 
     private final String description;
 
