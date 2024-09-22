@@ -5,8 +5,12 @@ import com.sontung.eproject_springboot.entity.Account;
 import com.sontung.eproject_springboot.service.AccountService;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller("UserAuthenticationController")
 @RequestMapping("/user")
@@ -31,6 +35,17 @@ public class AuthenticationController {
         if(result==1){
             return "redirect:/user/home";
         }
+//        else(){
+//            return "redirect:/register";
+//        }
         return "/user/home";
+    }
+
+    @GetMapping("/checkUsername")
+    public ResponseEntity<Map<String, Boolean>> checkUserNameExists(@RequestParam("username") String username){
+        boolean exists = accountService.exitUsername(username);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
     }
 }

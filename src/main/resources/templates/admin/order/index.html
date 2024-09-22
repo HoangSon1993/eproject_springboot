@@ -66,7 +66,7 @@
                 <tbody>
                 <tr th:each="item: ${orders}">
                     <td class="text-center" th:text="${item.code}"></td>
-                    <td class="text-center" th:text="${#temporals.format(filterDate, 'dd/MM/yyyy')}"></td>
+                    <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
                     <td class="text-center" th:text="${item.shippingAddress}"></td>
                     <td class="text-center" th:text="${item.shippingPhone}"></td>
 <!--                    <td class="text-center" th:text="${item.status}==1?'Hoàn thành':'Không hoàn thành'"></td>-->
@@ -98,5 +98,10 @@
 
     </div>
     <div th:replace="~{/admin/common/content_footer}"></div>
+    <script th:inline="javascript">
+        console.log(/*[[${filterDate}]]*/);
+        console.log(/*[[${amongPrice}]]*/);
+    </script>
+
 </body>
 </html>

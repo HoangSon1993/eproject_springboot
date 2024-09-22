@@ -13,4 +13,6 @@ public interface AccountService extends UserDetailsService {
     Account findByUserNameOrEmail(String username);
 
     int createAccount(RegisterDTO registerDTO);
+
+    boolean exitUsername(String username);
 }
