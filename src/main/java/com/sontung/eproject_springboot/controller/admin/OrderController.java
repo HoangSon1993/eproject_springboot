@@ -7,16 +7,15 @@ import com.sontung.eproject_springboot.service.OrderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -43,7 +42,7 @@ public class OrderController {
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate2,
                             @RequestParam(defaultValue = "0") int pageNo,
-                            @RequestParam(defaultValue = "10") int pageSize,
+                            @RequestParam(defaultValue = "9") int pageSize,
                             @RequestParam(defaultValue = "") String search,
                             @RequestParam(defaultValue = "") String status,
                             Model model) {
@@ -70,7 +69,7 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("amongPrice", amongPrice);
         model.addAttribute("filterDate", filterDate != null ? filterDate : "");
-        model.addAttribute("filterDate2", filterDate2);
+        model.addAttribute("filterDate2", filterDate2 != null ? filterDate2 : "");
         model.addAttribute("status", status);
         model.addAttribute("search", search);
         model.addAttribute("pageSize", pageSize);
@@ -81,6 +80,20 @@ public class OrderController {
 
         model.addAttribute("statuses", statuses);
         return "/admin/order/index";
+    }
+
+    @PatchMapping("/confirm-payment-cod/{orderId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> confirmPaymentCod(@PathVariable String orderId) {
+        Map<String, String> response = new HashMap<>();
+        try{
+            orderService.confirmPaymentCOD(orderId);
+            response.put("success", "true");
+            return ResponseEntity.ok(response);
+        }catch (Exception e){
+            response.put("success", "false");
+            return ResponseEntity.ok(response);
+        }
     }
 
     @GetMapping("/detail")
