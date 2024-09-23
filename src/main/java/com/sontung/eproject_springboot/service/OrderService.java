@@ -67,4 +67,6 @@ public interface OrderService {
 
     @Scheduled(fixedRate = 3600000) // Lặp lại mỗi giờ (3600000 ms = 1 giờ)
     void updatePendingOrders();
+
+    void confirmPaymentCOD(String orderId);
 }
