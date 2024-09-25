@@ -32,15 +32,15 @@
 <body>
 <div th:replace="~{/user/common/content_first}"></div>
 <div class="container" style="margin-top: 200px">
-    <th:block th:if="${loggedInUser}!=null">
-        <h3 th:text="'Chào mừng ' + ${loggedInUser.fullName} + ' đã đến với website của chúng tôi'"></h3>
-    </th:block>
-    <th:block th:if="${loggedInUser}==null">
-        <h3>Chào mừng đến với website</h3>
-    </th:block>
+
     <div th:replace="~{/user/common/content_first}"></div>
     <div class="container" style="margin-top: 200px">
-        <h1>This is home page</h1>
+        <th:block th:if="${loggedInUser}!=null">
+            <h3 th:text="'Chào mừng ' + ${loggedInUser.fullName} + ' đã đến với website của chúng tôi'"></h3>
+        </th:block>
+        <th:block th:if="${loggedInUser}==null">
+            <h3>Chào mừng đến với website</h3>
+        </th:block>
         <!-- Thông báo xác nhận -->
         <div id="notification" class="notification" style="display: none;">
             <p>Sản phẩm đã được thêm vào giỏ hàng!</p>
