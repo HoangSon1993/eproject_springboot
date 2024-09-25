@@ -1,11 +1,13 @@
 package com.sontung.eproject_springboot.service.impl;
 
 import com.sontung.eproject_springboot.dto.RegisterDTO;
+import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
 import com.sontung.eproject_springboot.entity.Account;
+import com.sontung.eproject_springboot.entity.Role;
 import com.sontung.eproject_springboot.repository.IAccountRepository;
+import com.sontung.eproject_springboot.repository.IRoleRepository;
 import com.sontung.eproject_springboot.service.AccountService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,11 +15,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,8 +32,9 @@ public class AccountServiceImpl implements AccountService{
     private PasswordEncoder passwordEncoder;
     @Autowired
     IAccountRepository accountRepository;
+    @Autowired
+    IRoleRepository roleRepository;
 
-    AuthenticationManager authenticationManager;
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         Account account = accountRepository.findByUserNameOrEmail(usernameOrEmail, usernameOrEmail)
@@ -53,7 +58,7 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public int createAccount(RegisterDTO registerDTO) {
-        if(!registerDTO.getPassword().equals(registerDTO.getPasswordConfirm())){
+        if(!registerDTO.getPassword().equals(registerDTO.getPasswordConfirm())){;
             return 0;
         }
         else{
@@ -78,6 +83,14 @@ public class AccountServiceImpl implements AccountService{
                         account.setAvatar(registerDTO.getAvatar());
                         account.setAddress(registerDTO.getAddress());
                         account.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+                        var rolesOptional = roleRepository.findByRoleName("USER");
+                        if (rolesOptional.isPresent()) {
+                            Set<Role> roles = new HashSet<>();
+                            roles.add(rolesOptional.get());
+                            account.setRoles(roles);
+                        } else {
+                            throw new RuntimeException("Role USER not found");
+                        }
                         accountRepository.save(account);
                     }
                 }
@@ -91,8 +104,39 @@ public class AccountServiceImpl implements AccountService{
         return accountRepository.existsByUserName(username);
     }
 
-    public void autoLogin(String username, String password, HttpServletRequest request){
+    @Override
+    public void autoLogin(String username, String password, AuthenticationManager authenticationManager){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    // Hàm lấy thông báo lỗi dựa trên mã lỗi
+    @Override
+    public String getErrorMessage(int result) {
+        switch (result) {
+            case 0:
+                return "Mật khẩu và mật khẩu xác nhận không khớp.";
+            case -1:
+                return "Tên đăng nhập đã tồn tại.";
+            case -2:
+                return "Email đã tồn tại.";
+            case -3:
+                return "Tên đăng nhập không được chứa từ 'admin'.";
+            default:
+                return "Đã xảy ra lỗi không xác định.";
+        }
+    }
+
+    @Override
+    public Account updateAccount(UpdatedAccountDTO accountDTO){
+        Account updateAccount = accountRepository.findByUserNameOrEmail(accountDTO.getUserName(), accountDTO.getEmail()).orElseThrow();
+        updateAccount.setEmail(accountDTO.getEmail());
+        updateAccount.setPhone(accountDTO.getPhone());
+        updateAccount.setAddress(accountDTO.getAddress());
+        updateAccount.setDob(accountDTO.getDob());
+        updateAccount.setFullName(accountDTO.getFullName());
+        updateAccount.setAvatar(accountDTO.getAvatar());
+        return  accountRepository.save(updateAccount);
     }
 }

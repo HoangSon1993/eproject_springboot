@@ -17,46 +17,54 @@
                         <div class="card" style="border-radius: 15px;">
                             <div class="card-body p-5">
                                 <h2 class="text-uppercase text-center mb-5">Tạo Tài Khoản</h2>
-
                                 <form th:action="@{/user/registerConfirm}" method="post">
                                     <div data-mdb-input-init class="form-outline mb-4">
                                         <input type="text"
                                                id="fullName"
                                                name="fullName"
-                                               class="form-control form-control-lg" />
+                                               class="form-control form-control-lg"
+                                               required/>
                                         <label class="form-label" for="fullName">Tên Đầy Đủ</label>
                                     </div>
-
                                     <div data-mdb-input-init class="form-outline mb-4">
                                         <input type="email"
                                                id="email"
                                                name="email"
-                                               class="form-control form-control-lg" />
+                                               class="form-control form-control-lg"
+                                               required/>
                                         <label class="form-label" for="email">Email</label>
+                                        <div id="emailError" class="text-danger"></div>
                                     </div>
+
 
                                     <div data-mdb-input-init class="form-outline mb-4">
                                         <input type="text"
                                                id="userName"
                                                name="userName"
-                                               class="form-control form-control-lg" />
+                                               class="form-control form-control-lg"
+                                               required/>
                                         <label class="form-label" for="userName">Tên Đăng Nhập</label>
+                                        <div id="usernameError" class="text-danger"></div>
                                     </div>
-                                    <div id="usernameError" class="text-danger"></div>
+
 
                                     <div data-mdb-input-init class="form-outline mb-4">
                                         <input type="password"
                                                id="password"
                                                name="password"
-                                               class="form-control form-control-lg" />
+                                               class="form-control form-control-lg"
+                                               required/>
                                         <label class="form-label" for="password">Mật Khẩu</label>
+                                        <div id="passwordError" class="text-danger"></div>
                                     </div>
                                     <div data-mdb-input-init class="form-outline mb-4">
                                         <input type="password"
                                                id="passwordConfirm"
                                                name="passwordConfirm"
-                                               class="form-control form-control-lg" />
+                                               class="form-control form-control-lg"
+                                               required/>
                                         <label class="form-label" for="passwordConfirm">Xác Nhận Lại Mật Khẩu</label>
+                                        <div id="passwordConfirmError" class="text-danger"></div>
                                     </div>
 
                                     <div class="d-flex justify-content-center">
@@ -66,7 +74,8 @@
 
                                     <p class="text-center text-muted mt-5 mb-0">Bạn đã có tài khoản?
                                         <a th:href="@{/user/auth/login}" class="fw-bold text-body"><u>Đăng nhập tại đây</u></a></p>
-
+                                    <div class="text-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+                                    <div class="text-success" th:if="${successMessage}" th:text="${successMessage}"></div>
                                 </form>
 
                             </div>
@@ -76,20 +85,96 @@
             </div>
         </div>
     </section>
+
     <script>
+        const submitButton = document.querySelector("button[type='submit']");
+        const inputs = document.querySelectorAll("input");
+        function validateForm(){
+            let allFieldsFilled = true;
+            inputs.forEach(function(input){
+                if(input.value.trim()===""){
+                    allFieldsFilled=false;
+                }
+            });
+            if(!allFieldsFilled){
+                submitButton.disabled=true;
+            }else{
+                submitButton.disabled=false;
+            }
+        }
+        inputs.forEach(function(input){
+           input.addEventListener("input", function(){
+              validateForm();
+           });
+        });
+        document.getElementById("password").addEventListener("input", function(){
+            const password = this.value;
+            const passwordError = document.getElementById("passwordError");
+            if (password.length <= 6) {
+                passwordError.textContent = "Mật khẩu phải dài hơn 6 ký tự";
+                submitButton.disabled = true;
+                return;
+            }
+            if(password.includes(" ")) {
+                passwordError.textContent = "Mật khẩu không được có khoảng trắng";
+                submitButton.disabled = true; // Disable the submit button
+            }
+            else{
+                passwordError.textContent="";
+                submitButton.disabled = false;
+                validateForm();
+            }
+        });
+        document.getElementById("passwordConfirm").addEventListener("input", function(){
+            const passwordConfirm = this.value;
+            const passwordConfirmError = document.getElementById("passwordConfirmError");
+            const password = document.getElementById("password");
+            if(passwordConfirm!==password.value) {
+                passwordConfirmError.textContent = "Mật khẩu không khớp";
+                submitButton.disabled = true; // Disable the submit button
+            }
+            else{
+                passwordConfirmError.textContent="";
+                submitButton.disabled = false;
+            }
+        });
+
+        document.getElementById("email").addEventListener("input", function(){
+            const email = this.value;
+            const emailError = document.getElementById("emailError");
+            if(email.includes(" ")) {
+                emailError.textContent = "Email không được có khoảng trắng";
+                submitButton.disabled = true; // Disable the submit button
+            }
+            else{
+                emailError.textContent="";
+                submitButton.disabled = false;
+            }
+        });
+
         document.getElementById("userName").addEventListener("input", function (){
             const username = this.value;
             const usernameError = document.getElementById("usernameError");
+            if (username.length <= 6) {
+                usernameError.textContent = "Tên đăng nhập phải dài hơn 6 ký tự";
+                submitButton.disabled = true;
+                return;
+            }
             //check word "admin" in userName input
+            if (username.includes(" ")) {
+                usernameError.textContent = "Tên đăng nhập không được có khoảng trắng";
+                submitButton.disabled = true; // Disable the submit button
+                return;
+            }
+
             if(username.toLowerCase().includes("admin")){
                 usernameError.textContent = "Tên đăng nhập không được chứa từ 'admin'";
             }
             else{
                 usernameError.textContent = "";
-
                 checkUsernameExits(username);
             }
-        })
+        });
 
         function checkUsernameExits(username){
             const xhr = new XMLHttpRequest();
@@ -100,12 +185,15 @@
                     const usernameError = document.getElementById("usernameError");
                     if(response.exists){
                         usernameError.textContent = "Tài khoản đã tồn tại";
+                        submitButton.disabled=true;
+                    }else{
+                        submitButton.disabled=false;
                     }
                 }
             }
             xhr.send();
         }
+        validateForm();
     </script>
-
 </body>
 </html>
