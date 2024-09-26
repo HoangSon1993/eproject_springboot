@@ -1,7 +1,7 @@
 package com.sontung.eproject_springboot.repository.impl;
 
-import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.entity.Order;
+import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import jakarta.persistence.EntityManager;
@@ -9,13 +9,12 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +147,145 @@ public class SearchRepositoryImpl implements SearchRepository {
         return new PageImpl<>(orders, pageable, totalElement);
     }
 
+    @Override
+    public Page<Product> getAllProductWithSortByColumAndSearch(int pageNo, int pageSize, String search, int amongPrice, String status, String sortBy, LocalDate timeStart, LocalDate timeEnd) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        // Query chính để lấy danh sách Product
+        StringBuilder hqlQuery = new StringBuilder("SELECT p FROM Product p WHERE 1 = 1");
+
+        // Thêm điều kiện tìm kiếm
+        if (StringUtils.hasLength(search)) {
+            hqlQuery.append(" AND LOWER(p.productName) like lower (:productName)");
+            //  hqlQuery.append(" AND LOWER(p.description) like lower (:discription)");
+        }
+
+        // Thêm điều kiện lọc status
+        if (StringUtils.hasLength(status)) {
+            hqlQuery.append(" AND p.status = :status");
+        }
+
+        // Thêm điều kiện lọc theo khoảng thời gian
+        if (timeEnd != null && timeStart != null) {
+            hqlQuery.append(" AND p.createdDate BETWEEN :timeStart AND :timeEnd");
+        }
+
+        // Điều kiện lọc theo gias
+        switch (amongPrice) {
+            case 1:
+                // <= 100.000
+                hqlQuery.append(" AND p.price <= 100000");
+                break;
+            case 2:
+                // 100.000 - 200.000
+                hqlQuery.append(" AND p.price BETWEEN 100000 AND 200000");
+                break;
+            case 3:
+                // 200.000 -300.000
+                hqlQuery.append(" AND p.price BETWEEN 200000 AND 300000");
+                break;
+            case 4:
+                // 300.000 - 500.000
+                hqlQuery.append(" AND p.price BETWEEN 300000 AND 400000");
+                break;
+            case 5:
+                // > 500.000
+                hqlQuery.append(" AND p.price > 500000");
+                break;
+        }
+
+        // Thêm điều kiện sắp xếp
+        if (StringUtils.hasLength(sortBy)) {
+            hqlQuery.append(" order by p.createdDate asc");
+        } else {
+            hqlQuery.append(" order by p.createdDate desc");
+        }
+
+        // Tạo truy vấn
+        Query selectQuery = entityManager.createQuery(hqlQuery.toString());
+
+        // Gán giá trị vào tham số tìm kiếm nếu có.
+        if (StringUtils.hasLength(search)) {
+            selectQuery.setParameter("productName", String.format("%%%s%%", search));
+            // selectQuery.setParameter("discription", String.format("%%%s%%", search));
+        }
+
+        // Gán gía trị vào tham số 'status' nếu có.
+        if (StringUtils.hasLength(status)) {
+            selectQuery.setParameter("status", status);
+        }
+
+        // Gán giá trị vào tham số 'timeStart' và 'timeEnd' nếu có.
+        if (timeEnd != null && timeStart != null) {
+            selectQuery.setParameter("timeStart", timeStart); // String.format("%%%s%%", timeStart)
+            selectQuery.setParameter("timeEnd", timeEnd); // String.format("%%%s%%", timeEnd)
+        }
+
+        // Phân trang
+        selectQuery.setFirstResult((int) pageable.getOffset());
+        selectQuery.setMaxResults(pageable.getPageSize());
+
+        // Lấy kết quả.
+        List orders = selectQuery.getResultList();
+
+        // ====== QUERY ĐỂ ĐẾM SỐ BẢN GHI ======
+        // Query chính để đếm số bản ghi.
+        StringBuilder sqlCountQuery = new StringBuilder("select count(*) from Product p where 1=1");
+
+        // Thêm điều kiện tìm kiếm
+        if (StringUtils.hasLength(search)) {
+            sqlCountQuery.append(" AND LOWER(p.productName) like lower (:search)");
+        }
+
+        if (StringUtils.hasLength(status)) {
+            sqlCountQuery.append(" AND p.status = :status");
+        }
+
+        // Thêm điều kiện lọc theo khoảng thời gian.
+        if (timeEnd != null && timeStart != null) {
+            sqlCountQuery.append(" AND p.createdDate BETWEEN :timeStart AND :timeEnd");
+        }
+
+        // Thêm điều kiện lọc theo giá
+        switch (amongPrice) {
+            case 1:
+                sqlCountQuery.append(" AND p.price <= 100000");
+                break;
+            case 2:
+                sqlCountQuery.append(" AND p.price BETWEEN 100000 AND 200000");
+                break;
+            case 3:
+                sqlCountQuery.append(" AND p.price BETWEEN 200000 AND 300000");
+                break;
+            case 4:
+                sqlCountQuery.append(" AND p.price BETWEEN 300000 AND 400000");
+                break;
+            case 5:
+                sqlCountQuery.append(" AND p.price > 500000");
+                break;
+        }
+
+        //Tạo truy vấn.
+        Query selectCountQuery = entityManager.createQuery(sqlCountQuery.toString());
+
+        // Gán giá trị vào tham số tìm kiếm nếu có.
+        if (StringUtils.hasLength(search)) {
+            selectCountQuery.setParameter("search", String.format("%%%s%%", search));
+        }
+
+        if (StringUtils.hasLength(status)) {
+            selectCountQuery.setParameter("status", status);
+        }
+
+        if (timeEnd != null && timeStart != null) {
+            selectCountQuery.setParameter("timeStart", timeStart); // String.format("%%%s%%", timeStart)
+            selectCountQuery.setParameter("timeEnd", timeEnd); //String.format("%%%s%%", timeEnd)
+        }
+
+        Long totalElement = (Long) selectCountQuery.getSingleResult();
+        return new PageImpl<>(orders, pageable, totalElement);
+    }
+
     /**
      * @Summary:
      * @Description: Func này được thực hiện bằng cách dùng CriteriaBuider, đay chưa phải là cách tôí ưu.
@@ -251,20 +389,20 @@ public class SearchRepositoryImpl implements SearchRepository {
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
         Root<Order> root = cq.from(Order.class);
 
-    // Join với bảng OrderDetail
-    Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.INNER);
+        // Join với bảng OrderDetail
+        Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.INNER);
 
         // Join với bảng Product từ OrderDetail
         Join<OrderDetail, Product> productJoin = orderDetailJoin.join("product", JoinType.INNER);
 
 
         // Join với bảng Combo từ OrderDetail
-        Join<OrderDetail, Combo>  comboJoin = orderDetailJoin.join("combo", JoinType.LEFT);
+        Join<OrderDetail, Combo> comboJoin = orderDetailJoin.join("combo", JoinType.LEFT);
 
         // Join với comboDetail từt Combo
-        Join<Combo,ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.LEFT);
+        Join<Combo, ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.LEFT);
         // Join với bảng product từ comboDetail
-        Join<ComboDetail, Product> productJoinCombodetail= comboDetailJoin.join("product", JoinType.LEFT);
+        Join<ComboDetail, Product> productJoinCombodetail = comboDetailJoin.join("product", JoinType.LEFT);
 
         // Xây dựng điều kiện tìm kiếm
         List<Predicate> predicates = new ArrayList<>();
@@ -303,16 +441,16 @@ public class SearchRepositoryImpl implements SearchRepository {
                 break;
             case 2:
                 // 100.000 - 200.000
-                predicates.add(cb.between(root.get("totalAmount"), 100000,200000));
+                predicates.add(cb.between(root.get("totalAmount"), 100000, 200000));
                 break;
             case 3:
                 // 200.000 -300.000
-                predicates.add(cb.between(root.get("totalAmount"), 200000,300000));
+                predicates.add(cb.between(root.get("totalAmount"), 200000, 300000));
 
                 break;
             case 4:
                 // 300.000 - 500.000
-                predicates.add(cb.between(root.get("totalAmount"), 300000,500000));
+                predicates.add(cb.between(root.get("totalAmount"), 300000, 500000));
 
                 break;
             case 5:
@@ -350,5 +488,100 @@ public class SearchRepositoryImpl implements SearchRepository {
         return new PageImpl<>(orders, PageRequest.of(pageNo, pageSize), totalElements);
     }
 
+
+    @Override
+    public Page<Product> findByStatusAndProductNameContainingAndPriceFilter(
+            int status, String categoryId, String search, int amongPrice, Pageable pageable) {
+        // Tạo truy vấn cơ bản
+        StringBuilder hqlQuery = new StringBuilder("SELECT p FROM Product p WHERE p.status = :status");
+
+        if (StringUtils.hasLength(categoryId)) {
+            hqlQuery.append(" AND p.category.id = :categoryId");
+        }
+
+        if (StringUtils.hasLength(search)) {
+            hqlQuery.append(" AND LOWER(p.productName) LIKE LOWER(:search)");
+        }
+
+        // Điều kiện lọc theo amongPrice
+        if (amongPrice > 0) {
+            hqlQuery.append(" AND p.price <= :amongPrice");
+        }
+
+        // Áp dụng sắp xếp dựa trên Pageable
+        Sort sort = pageable.getSort();
+        if (sort.isSorted()) {
+            hqlQuery.append(" ORDER BY ");
+            sort.forEach(order -> {
+                hqlQuery.append("p.")
+                        .append(order.getProperty())
+                        .append(" ")
+                        .append(order.getDirection().name())
+                        .append(", ");
+            });
+            // Xóa dấu phẩy cuối cùng
+            hqlQuery.setLength(hqlQuery.length() - 2);
+        }
+
+        // Tạo query với EntityManager
+        Query query = entityManager.createQuery(hqlQuery.toString());
+        query.setParameter("status", status);
+
+        if (StringUtils.hasLength(search)) {
+            query.setParameter("search", String.format("%%%s%%", search));
+        }
+
+        if (StringUtils.hasLength(categoryId)) {
+            query.setParameter("categoryId", categoryId);
+        }
+
+        if (amongPrice > 0) {
+            query.setParameter("amongPrice", BigDecimal.valueOf(amongPrice * 1000));
+        }
+
+        // Phân trang: Thiết lập vị trí bắt đầu và số lượng kết quả tối đa
+        query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+        query.setMaxResults(pageable.getPageSize());
+
+        List<Product> resultList = query.getResultList();
+
+        // Đếm tổng số sản phẩm phù hợp
+        long total = countTotalProducts(status, categoryId, search, amongPrice);
+
+        return new PageImpl<>(resultList, pageable, total);
+    }
+
+    private long countTotalProducts(int status, String categoryId, String search, int amongPrice) {
+        StringBuilder countQuery = new StringBuilder("SELECT COUNT(p) FROM Product p WHERE p.status = :status");
+
+        if (StringUtils.hasLength(categoryId)) {
+            countQuery.append(" AND p.category.id = :categoryId");
+        }
+
+        if (StringUtils.hasLength(search)) {
+            countQuery.append(" AND LOWER(p.productName) LIKE LOWER(:search)");
+        }
+
+        if (amongPrice > 0) {
+            countQuery.append(" AND p.price <= :amongPrice");
+        }
+
+        Query query = entityManager.createQuery(countQuery.toString());
+        query.setParameter("status", status);
+
+        if (StringUtils.hasLength(search)) {
+            query.setParameter("search", String.format("%%%s%%", search));
+        }
+
+        if (StringUtils.hasLength(categoryId)) {
+            query.setParameter("categoryId", categoryId);
+        }
+
+        if (amongPrice > 0) {
+            query.setParameter("amongPrice", BigDecimal.valueOf(amongPrice * 1000));
+        }
+
+        return (long) query.getSingleResult();
+    }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,13 +71,15 @@ public class ProductServiceImpl implements ProductService {
      * @Description: Được sử dụng ở page Home_page.
      **/
     @Override
-    public Page<Product> getProductsTypical(int pageNumber, int pageSize) {
+    public Page<Product> getProductsTypical(int pageNumber, int pageSize, String categoryId) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(new Sort.Order(Sort.Direction.ASC, "createdDate"));
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
         int status = 1;
-
+        if (StringUtils.hasLength(categoryId)) {
+            Page<Product> products = productRepository.findByStatusAndCategory_CategoryId(pageable, status, categoryId);
+        }
         Page<Product> products = productRepository.findByStatus(pageable, status);
         return products;
     }

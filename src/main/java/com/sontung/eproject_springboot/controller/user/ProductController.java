@@ -2,10 +2,10 @@ package com.sontung.eproject_springboot.controller.user;
 
 import com.sontung.eproject_springboot.entity.Category;
 import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +24,7 @@ import java.util.*;
 public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final SearchRepository searchRepository;
 
     @ModelAttribute("categories")
     public List<Category> populateCategories() {
@@ -42,48 +43,38 @@ public class ProductController {
         return categoryProductCounts;
     }
 
-//    @ModelAttribute("search")
-//    public String search(@RequestParam(required = false, defaultValue = "") String search) {
-//        return search;
-//    }
-
     @GetMapping("/index")
     public String index(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "9") int size,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "9") int pageSize,
+            @RequestParam(defaultValue = "500") int amongPrice,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) String categoryId,
-            @RequestParam(defaultValue = "asc") String sort,
+            @RequestParam(defaultValue = "asc") String sortBy,
             Model model
     ) {
-
-        // Todo: Tối ưu hoá search, sort, filter bằng cách custom query.
-        // productService.getAllProductWithSortByColumnAndSearch(page, size, search, sort);
-
-        if (page < 0) page = 0;
+        if (pageNo < 0) pageNo = 0;
         List<Sort.Order> sorts = new ArrayList<>();
-        if (sort.equals("asc")) {
+        if (sortBy.equals("asc")) {
             sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
         } else {
             sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sorts));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sorts));
 
         int status = 1;
         Page<Product> products;
-        if (categoryId == null || categoryId.isEmpty()) {
-            products = productService.findByStatusAndProductNameContaining(status, search, pageable);
-        } else {
-            products = productService.findByStatusAndCategory_CategoryIdAndProductNameContaining(status, categoryId, search, pageable);
-        }
 
-        model.addAttribute("pageNumber", page); // Trang hiện tại, bắt đầu từ 0
-        model.addAttribute("itemsPerpage", size); // Số mục trên mỗi trang
+        products = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(status, categoryId, search, amongPrice, pageable);
+
+        model.addAttribute("pageNumber", pageNo); // Trang hiện tại, bắt đầu từ 0
+        model.addAttribute("itemsPerpage", pageSize); // Số mục trên mỗi trang
         model.addAttribute("products", products);
         model.addAttribute("search", search); // Từ khoá tìm kiếm hiện tại
         model.addAttribute("categoryId", categoryId); // ID danh mục hiện tại
-        model.addAttribute("sort", sort); // Hướng sắp xếp hiện tại
+        model.addAttribute("sortBy", sortBy); // Hướng sắp xếp hiện tại
+        model.addAttribute("amongPrice", amongPrice);
 
         return "/user/product/index";
     }
@@ -94,6 +85,11 @@ public class ProductController {
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
             model.addAttribute("product", product);
+
+            // Lấy danh sách sản phẩm tương tự dựa vào categoryId.
+            Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "productName"));
+            Page<Product> productsSimilar = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(1, product.getCategory().getCategoryId(), "", 500, pageable);
+            model.addAttribute("productsSimilar", productsSimilar);
             return "user/product/detail";
         } else {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm");

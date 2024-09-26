@@ -6,21 +6,29 @@
                 <div class="col-lg-3">
                     <a href="#">
                         <h1 class="text-primary mb-0">Xôi Chè Cô&nbsp;Luyên</h1>
-<!--                        <p class="text-secondary mb-0">Fresh products</p>-->
+                        <!--                        <p class="text-secondary mb-0">Fresh products</p>-->
                     </a>
                 </div>
                 <div class="col-lg-6">
                     <div class="position-relative mx-auto">
-                        <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Nhập Email của bạn">
-                        <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Đăng kí ngay</button>
+                        <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number"
+                               placeholder="Nhập Email của bạn">
+                        <button type="submit"
+                                class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white"
+                                style="top: 0; right: 0;">Đăng kí ngay
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-3">
                     <div class="d-flex justify-content-end pt-3">
-                        <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-youtube"></i></a>
-                        <a class="btn btn-outline-secondary btn-md-square rounded-circle" href=""><i class="fab fa-linkedin-in"></i></a>
+                        <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i
+                                class="fab fa-twitter"></i></a>
+                        <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i
+                                class="fab fa-youtube"></i></a>
+                        <a class="btn btn-outline-secondary btn-md-square rounded-circle" href=""><i
+                                class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
@@ -72,7 +80,8 @@
 
 
 <!-- Back to Top -->
-<a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>
+<a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i
+        class="fa fa-arrow-up"></i></a>
 
 
 <!-- JavaScript Libraries -->
@@ -85,3 +94,20 @@
 
 <!-- Template Javascript -->
 <script src="/user_assets/js/main.js"></script>
+<script>
+    // Lấy đường dẫn hiện tại của trang
+    let currentPath = window.location.pathname;
+
+    // Lấy tất cả các link trong navbar
+    let navLinks = document.querySelectorAll('#main-nav a');
+
+    // Duyệt qua từng link và kiểm tra
+    navLinks.forEach(function (link) {
+        // Nếu href của link trùng với đường dẫn hiện tại, thêm class 'active'
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active')
+        } else {
+            link.classList.remove('active') // Đảm bảo các link khác không có class 'active'
+        }
+    })
+</script>

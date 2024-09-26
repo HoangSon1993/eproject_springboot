@@ -4,7 +4,7 @@ import com.sontung.eproject_springboot.entity.Order;
 import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.OrderService;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +20,10 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/order")
+@RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
     private final SearchRepository searchRepository;
-
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
-    public OrderController(OrderService orderService, SearchRepository searchRepository) {
-        this.orderService = orderService;
-        this.searchRepository = searchRepository;
-    }
-
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
 
     @GetMapping
     public String getOrders(@RequestParam(required = false, defaultValue = "0") int amongPrice,
@@ -46,6 +34,13 @@ public class OrderController {
                             @RequestParam(defaultValue = "") String search,
                             @RequestParam(defaultValue = "") String status,
                             Model model) {
+        if (pageNo < 0) {
+            pageNo = 0;
+        }
+        if (pageSize < 0) {
+            pageSize = 9;
+        }
+
         LocalDateTime timeStart = null;
         LocalDateTime timeEnd = null;
 
@@ -86,11 +81,11 @@ public class OrderController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> confirmPaymentCod(@PathVariable String orderId) {
         Map<String, String> response = new HashMap<>();
-        try{
+        try {
             orderService.confirmPaymentCOD(orderId);
             response.put("success", "true");
             return ResponseEntity.ok(response);
-        }catch (Exception e){
+        } catch (Exception e) {
             response.put("success", "false");
             return ResponseEntity.ok(response);
         }
