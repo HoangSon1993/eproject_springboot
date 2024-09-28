@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/auth/**","/home-page","/user/register","/**").permitAll()
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/assets/**","/user_assets/**", "/demo/**").permitAll()
-                        .requestMatchers("/user/**").not().hasRole("ADMIN")
+                        //.requestMatchers("/user/**").not().hasRole("ADMIN")
                         .anyRequest().denyAll()
                 )
                 .formLogin(form -> form
