@@ -15,12 +15,13 @@ import java.util.List;
 public interface ICartRepository extends JpaRepository<Cart, String> {
     @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId")
     List<Cart> getCartsByAccount_AccountId(@Param("accountId") String accountId);
-    List<Cart> getCartsByCartIdAndAccount_AccountId(@Param("cartId") String cartId,@Param("accountId") String accountId);
+
+    List<Cart> getCartsByCartIdAndAccount_AccountId(@Param("cartId") String cartId, @Param("accountId") String accountId);
 
     Cart findByAccountAndComboId(Account account, String comboId);
+
     Cart findByProductIdAndAccount_AccountId(String productId, String userId);
 
-    // Todo: ket qua tra ve khong chinh xac
     @Query("SELECT c FROM Cart c WHERE c.account.accountId = :accountId " +
             "AND ((:productId IS NOT NULL AND c.productId = :productId) " +
             "OR (:comboId IS NOT NULL AND c.comboId = :comboId))")
@@ -41,5 +42,5 @@ public interface ICartRepository extends JpaRepository<Cart, String> {
     @Transactional
     @Modifying
     @Query("DELETE FROM Cart c WHERE c.comboId = :comboId AND c.account.accountId = :accountId")
-    void removeComboFromCart(@Param("comboId") String comboId,@Param("accountId") String accountId);
+    void removeComboFromCart(@Param("comboId") String comboId, @Param("accountId") String accountId);
 }

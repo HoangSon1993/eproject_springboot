@@ -84,10 +84,11 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable = PageRequest.of(page - 1, size);
         return orderRepository.findAll(pageable);
     }
+
     // ========================== Count order: Admin site==============//
     // Count all order
     @Override
-    public long countOrder(){
+    public long countOrder() {
         return orderRepository.countOrder();
     }
 
@@ -104,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     // Count order by filterDate
-    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate){
+    public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
         //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return orderRepository.countOrderByFilterDate(filterDate);
     }
@@ -121,6 +122,7 @@ public class OrderServiceImpl implements OrderService {
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
+
     @Override
     public long countOrderByPrice(int priceValue) {
         return switch (priceValue) {
@@ -132,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
             default -> throw new IllegalArgumentException("Invalid price range");
         };
     }
+
     @Override
     public List<Order> getOrdersByPrice(int priceValue) {
         List<Order> orders = new ArrayList<>();
@@ -256,7 +259,7 @@ public class OrderServiceImpl implements OrderService {
                                                int page,
                                                int size) {
         //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         BigDecimal minPrice;
         BigDecimal maxPrice;
@@ -287,6 +290,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderRepository.findByPriceRangeAndDate(minPrice, maxPrice, filterDate, pageable);
     }
+
     /**
      * @Summary: Creat Order.
      * @Description: Tạo Order và OrderDetails với những CartItems, quantity mà người dùng chọn.
@@ -459,7 +463,7 @@ public class OrderServiceImpl implements OrderService {
         // Get order from DB
         String vnpOrderInfo = request.getParameter("vnp_OrderInfo");
         String code = vnpOrderInfo.substring(vnpOrderInfo.length() - 8);
-        Order order = orderRepository.findByCodeAndAccount_AccountId(code,userId);
+        Order order = orderRepository.findByCodeAndAccount_AccountId(code, userId);
 
 
         Map fields = new HashMap();
@@ -516,7 +520,7 @@ public class OrderServiceImpl implements OrderService {
                                     .cardType(request.getParameter("vnp_CardType"))
                                     .transactionStatus(request.getParameter("vnp_TransactionStatus"))
                                     .bankTransactionNo(request.getParameter("vnp_TransactionNo"))
-                                  //  .invoiceDetails(new ArrayList<>()) // không cần phải có dòng này vì trong Invoice đã có @Buider.Default
+                                    //  .invoiceDetails(new ArrayList<>()) // không cần phải có dòng này vì trong Invoice đã có @Buider.Default
                                     .build();
 
                             // Create OrderDetail
@@ -579,23 +583,74 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * @Summary: Cập nhật trạng thái đơn hàng từ 'Chờ thanh toán' sang 'Thanh toán khi nhận hàng'.
+     * Cập nhật trạng thái đơn hàng từ 'Thanh toán khi nhận hàng' sang 'Hủy bỏ'.
      * @Description: Func này được gọi định kỳ 1h 1 lần.
-     * */
+     */
     @Scheduled(fixedRate = 3600000) // Lặp lại mỗi giờ (3600000 ms = 3600 s = 1 h)
     @Override
-    public void updatePendingOrders(){
+    public void updatePendingOrders() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threeHoursAgo = now.minusHours(3);
+        LocalDateTime twelveHoursAgo = now.minusHours(12);
 
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Cập nhật trạng thái đơn hàng từ 'Chờ thanh toán' sang 'Thanh toán khi nhận hàng'.//
+        //////////////////////////////////////////////////////////////////////////////////////
         List<OrderDTO> pendingOrders = orderRepository.findByStatusAndOrderDateBefore(
                 OrderStatus.PENDING,
                 threeHoursAgo);
         for (OrderDTO orderDTO : pendingOrders) {
             Order order = orderRepository.findById(orderDTO.getOrderId()).orElse(null);
             if (order != null) {
-                order.setStatus(OrderStatus.COD);
+                // Check oderDate quá 12h thì chuyển status thành 'Cancel'
+                if (order.getOrderDate().isBefore(twelveHoursAgo)) {
+                    order.setStatus(OrderStatus.CANCELED);
+                } else {
+                    order.setStatus(OrderStatus.COD);
+                }
                 orderRepository.save(order);
             }
+        }
+        /////////////////////////////////////////////////////////////////////////////
+        //Cập nhật trạng thái đơn hàng từ 'Thanh toán khi nhận hàng' sang 'Hủy bỏ'.//
+        /////////////////////////////////////////////////////////////////////////////
+        List<OrderDTO> codOrders = orderRepository.findByStatusAndOrderDateBefore(
+                OrderStatus.COD,
+                twelveHoursAgo
+        );
+        for (OrderDTO orderDTO : codOrders) {
+            Order order = orderRepository.findById(orderDTO.getOrderId()).orElse(null);
+            if (order != null) {
+                order.setStatus(OrderStatus.CANCELED);
+            }
+        }
+    }
+
+    /**
+     * @Summary: Change Status of Order from 'COD' to 'PAID'
+     * @Description: Sử dụng với quyền admin, thay đổi trạng thái đơn hàng.
+     */
+    @Override
+    public void confirmPaymentCOD(String orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() ->
+                new RuntimeException("Order không tôn tai."));
+        if (order.getStatus() == OrderStatus.COD) {
+            order.setStatus(OrderStatus.PAID);
+            orderRepository.save(order);
+        }
+    }
+
+    /**
+     * @Summary: Change Status of Order from 'COD' or 'Pending' to 'PAID'
+     * @Description: Sử dụng với quyền admin, thay đổi trạng thái đơn hàng.
+     */
+    @Override
+    public void cancelOrderCodOrPendding(String orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() ->
+                new RuntimeException("Order không tôn tai."));
+        if (order.getStatus() == OrderStatus.COD || order.getStatus() == OrderStatus.PENDING) {
+            order.setStatus(OrderStatus.CANCELED);
+            orderRepository.save(order);
         }
     }
 }

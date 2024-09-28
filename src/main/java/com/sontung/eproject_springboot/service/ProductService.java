@@ -9,16 +9,22 @@ import java.util.Optional;
 
 public interface ProductService {
     Page<Product> findAll(Pageable pageable);
+
     List<Product> findAll();
+
     Optional<Product> findById(String id);
+
     Product save(Product product);
 
     void deleteById(String id);
+
     void getAllProductWithSortByColumnAndSearch(int pageNo, int pageSize, String search, String sort);
 
     Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable);
+
     Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable);
-    Page<Product> getProductsTypical(int pageNumber, int pageSize);
+
+    Page<Product> getProductsTypical(int pageNumber, int pageSize, String categoryId);
 
     int countByCategory(String categoryId);
 }

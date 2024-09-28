@@ -2,15 +2,15 @@ package com.sontung.eproject_springboot.controller.admin;
 
 import com.sontung.eproject_springboot.entity.Category;
 import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
 import com.sontung.eproject_springboot.service.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -21,6 +21,7 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +34,7 @@ public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final S3Service s3Service;
-
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
+    private final SearchRepository searchRepository;
 
     @ModelAttribute("categories")
     public List<Category> populateCategories() {
@@ -48,14 +42,46 @@ public class ProductController {
     }
 
     @GetMapping
-    public String index(@RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "5") int size,
-                        Model model) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = productService.findAll(pageable);
-        model.addAttribute("pageNumber", page); // Trang hiện tại, bắt đầu từ 0
-        model.addAttribute("itemsPerPage", size); // Số mục trên mỗi trang
+    public String index(
+            @RequestParam(required = false, defaultValue = "0") int amongPrice,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate2,
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String sortBy,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "5") int pageSize,
+            Model model, Sort sort) {
+        if (pageSize < 0) {
+            pageSize = 5;
+        }
+        if (pageNo < 0) {
+            pageNo = 0;
+        }
+
+        if (filterDate2 == null) {
+            filterDate2 = filterDate;
+        }
+        Page<Product> products = searchRepository.getAllProductWithSortByColumAndSearch(
+                pageNo,
+                pageSize,
+                search,
+                amongPrice,
+                status,
+                sortBy,
+                filterDate,
+                filterDate2
+        );
+
         model.addAttribute("products", products);
+        model.addAttribute("amongPrice", amongPrice);
+        model.addAttribute("filterDate", filterDate);
+        model.addAttribute("filterDate2", filterDate2);
+        model.addAttribute("status", status);
+        model.addAttribute("search", search);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("pageNo", pageNo);
+
         return "admin/product/index";
     }
 

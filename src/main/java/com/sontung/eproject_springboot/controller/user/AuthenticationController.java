@@ -3,7 +3,7 @@ package com.sontung.eproject_springboot.controller.user;
 import com.sontung.eproject_springboot.dto.RegisterDTO;
 import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
 import com.sontung.eproject_springboot.service.AccountService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
@@ -14,11 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@Controller("UserAuthenticationController")
+@Controller("userAuthenticationController")
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class AuthenticationController {
-    @Autowired
-    AccountService accountService;
+    private final AccountService accountService;
+    private final AuthenticationManager authenticationManager;
+
     @GetMapping("/auth/login")
     public String login(){
         return "/user/authentication/login";
@@ -55,7 +57,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("/my-info")
-    public String getMyInfo(@RequestParam String username, Model model){
+    public String getMyInfo(@RequestParam String username, Model model) {
         model.addAttribute("user", accountService.findByUserNameOrEmail(username));
         return "/user/authentication/my-info";
     }

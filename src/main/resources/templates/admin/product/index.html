@@ -18,20 +18,56 @@
     <h1 class="text-center position-sticky">QUẢN LÝ SẢN PHẨM</h1>
     <hr/>
     <a th:href="@{/admin/product/create}" class="btn btn-outline-primary btn-lg mb-4 mt-4">Tạo Sản Phẩm</a>
-
-    <!-- Form để người dùng chọn cột hiển thị -->
-    <form id="columnSelectionForm">
-        <label><input type="checkbox" name="columns" value="image" checked> Hình ảnh</label>
-        <label><input type="checkbox" name="columns" value="productName" checked> Tên sản phẩm</label>
-        <label><input type="checkbox" name="columns" value="price" checked> Giá</label>
-        <label><input type="checkbox" name="columns" value="category" checked> Danh mục</label>
-        <label><input type="checkbox" name="columns" value="status" checked> Trạng thái</label>
-        <label><input type="checkbox" name="columns" value="createdDate" checked> Ngày tạo</label>
-        <label><input type="checkbox" name="columns" value="updatedDate" checked> Ngày cập nhật</label>
-        <label><input type="checkbox" name="columns" value="actions" checked> Hành động</label>
-        <button class="btn btn-warning" type="button" onclick="saveColumnSelection()">Lưu lựa chọn</button>
-    </form>
-
+    <div class="row">
+        <!--    Form filter-->
+        <!--Theo giá-->
+        <div class="form-group col-md-3">
+            <label>Theo giá</label>
+            <select id="amongPrice" name="amongPrice" class="form-control">
+                <option value="0">Tất cả</option>
+                <option value="1" th:selected="${amongPrice == 1}">Dưới 100k</option>
+                <option value="2" th:selected="${amongPrice == 2}">100k -> 200k</option>
+                <option value="3" th:selected="${amongPrice == 3}">200k -> 300k</option>
+                <option value="4" th:selected="${amongPrice == 4}">300k -> 500k</option>
+                <option value="5" th:selected="${amongPrice == 5}">500k Trở Lên</option>
+            </select>
+        </div>
+        <!--        Theo ngaỳ-->
+        <div class="form-group col-md-2">
+            <label class="form-label">Từ ngày</label>
+            <input type="date" name="filterDate" id="filterDate" class="form-control"
+                   th:value="${filterDate == null ? '' : filterDate}">
+        </div>
+        <div class="form-group col-md-2">
+            <label for="filterDate2" class="form-label">Đến ngày</label>
+            <input type="date" name="filterDate2" id="filterDate2" class="form-control"
+                   th:value="${filterDate2 == null ? '' : filterDate2}">
+        </div>
+        <!--        theo status-->
+        <div class="form-group col-md-2">
+            <label for="status" class="form-label">Trạng thái</label><br>
+            <select name="status" id="status" class="form-control"
+                    style="height: calc(1.5em + .75rem + 2px);padding-left:5px">
+                <option th:value="'1'" th:selected="${status == '1'}">active</option>
+                <option th:value="'0'" th:selected="${status} == '0'">unactive</option>
+            </select>
+        </div>
+        <!--        Form Search-->
+        <div class="d-flex align-items-center mb-3 col-md-3">
+            <div class="row" style="margin-top: 1.75rem">
+                <div class="d-flex align-item-center">
+                    <div>
+                        <input type="text" name="search" id="searchName"
+                               th:value="${search}"
+                               placeholder="Tìm kiếm" class="form-control">
+                    </div>
+                    <div>
+                        <button id="btnSearch" class="btn btn-outline-primary">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Hiển thị thông báo -->
     <div class="text-blue" th:if="${message}" th:text="${message}"></div>
     <div class="text-danger" th:if="${error}" th:text="${error}"></div>
@@ -48,13 +84,15 @@
             <th data-column="status">Trạng thái</th>
             <th data-column="createdDate">Ngày tạo</th>
             <th data-column="updatedDate">Ngày cập&nbsp;nhật</th>
-            <th data-column="actions">Hành động</th></tr>
+            <th data-column="actions">Hành động</th>
+        </tr>
         </thead>
         <tbody>
-        <tr th:each="item, iterStat: ${products.content}">
-            <td th:text="${(itemsPerPage * pageNumber) + iterStat.index + 1}" class="text-left"></td>
+        <tr th:each="item, iterStat: ${products}">
+            <td th:text="${iterStat.index + 1 + products.size * products.number}" class="text-left"></td>
             <td class="text-left">
-                <img style="object-fit: cover;width: 320px; height: 240px" th:src="${item.getImageUrl}" th:alt="${item.image}">
+                <img style="object-fit: cover;width: 320px; height: 240px" th:src="${item.getImageUrl}"
+                     th:alt="${item.image}">
             </td>
             <td th:text="${item.productName}" class="text-left"></td>
             <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}" class="text-left"></td>
@@ -85,22 +123,29 @@
         </tbody>
     </table>
     <!-- Pagination -->
-    <div class ="d-flex justify-content-center" th:if="${products.totalPages > 1}">
+    <div class="d-flex justify-content-center" th:if="${products.totalPages > 1}">
         <ul class="pagination">
             <li th:class="page-item" th:classappend="${products.hasPrevious()} ? '' : 'disabled'">
-                <a th:class="page-link" th:href="@{/admin/product(page=0,size=${products.size})}">First</a>
+                <a th:class="page-link"
+                   th:href="@{/admin/product(pageNo=0, pageSize=${products.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">First</a>
             </li>
             <li th:class="page-item" th:classappend="${products.hasPrevious()} ? '' : 'disabled'">
-                <a th:class="page-link" th:href="@{/admin/product(page=${products.hasPrevious()} ? ${products.previousPageable().pageNumber} : ${products.number},size=${products.size})}">Previous</a>
+                <a th:class="page-link"
+                   th:href="@{/admin/product(pageNo=${products.hasPrevious()} ? ${products.previousPageable().pageNumber} : ${products.number},pageSize=${products.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">Previous</a>
             </li>
-            <li th:each="pageNumber : ${#numbers.sequence(0, products.totalPages - 1)}" th:classappend="${products.number == pageNumber} ? 'page-item active ' : 'page-item'">
-                <a th:class="page-link" th:href="@{/admin/product(page=${pageNumber},size=${products.size})}" th:text="${pageNumber + 1}"></a>
+            <li th:each="pageNumber : ${#numbers.sequence(0, products.totalPages - 1)}"
+                th:classappend="${products.number == pageNumber} ? 'page-item active' : 'page-item'">
+                <a th:class="page-link"
+                   th:href="@{/admin/product(pageNo=${pageNumber},pageSize=${products.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}"
+                   th:text="${pageNumber + 1}"></a>
             </li>
             <li th:class="page-item" th:classappend="${products.hasNext()} ? '' : 'disabled'">
-                <a th:class="page-link"  th:href="@{/admin/product(page=${products.hasNext()} ? ${products.nextPageable().pageNumber} : ${products.number},size=${products.size})}">Next</a>
+                <a th:class="page-link"
+                   th:href="@{/admin/product(pageNo=${products.hasNext()} ? ${products.nextPageable().pageNumber} : ${products.number},pageSize=${products.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">Next</a>
             </li>
             <li th:class="page-item" th:classappend="${products.last} ? 'disabled' : ''">
-                <a th:class="page-link"  th:href="@{/admin/product(page=${products.totalPages - 1},size=${products.size})}">Last</a>
+                <a th:class="page-link"
+                   th:href="@{/admin/product(pageNo=${products.totalPages - 1},pageSize=${products.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">Last</a>
             </li>
         </ul>
     </div>
@@ -110,62 +155,119 @@
 </body>
 
 <!-- Thêm script để lấy và sử dụng lựa chọn của người dùng -->
-<script>
-    function saveColumnSelection() {
-        const selectedColumns = [];
-        const checkboxes = document.querySelectorAll('input[name="columns"]:checked');
-        checkboxes.forEach((checkbox) => {
-            selectedColumns.push(checkbox.value);
-        });
+<script th:inline="javascript">
+    let filterDate = /*[[${filterDate}]]*/"";
+    let filterDate2 = /*[[${filterDate2}]]*/"";
+    let searchString = /*[[${search}]]*/"";
+    let amongPrice = /*[[${amongPrice}]]*/"";
+    let status = /*[[${status}]]*/"";
 
-        fetch('/admin/saveColumnSelection', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({ 'columns': selectedColumns })
-        }).then(response => {
-            if (response.ok) {
-                alert('Lựa chọn đã được lưu.');
-                location.reload();
-            } else {
-                alert('Đã xảy ra lỗi khi lưu lựa chọn.');
+    const filterDateElement = document.getElementById('filterDate');
+    filterDateElement.addEventListener('change', function (e) {
+        e.preventDefault();
+        filterDate = e.target.value;
+        if (filterDate != "") {
+            filterDateElement2.disabled = false
+            filterDateElement2.min = filterDate
+            if (filterDate > filterDate2) {
+                filterDate2 = filterDate;
+                filterDateElement2.value = filterDate2
             }
-        });
+        } else {
+            filterDateElement2.value = ""
+            filterDateElement2.disabled = true
+            filterDate2 = ""
+
+        }
+    })
+
+    const filterDateElement2 = document.getElementById('filterDate2');
+    if (filterDate == "") {
+        filterDateElement2.disabled = true
     }
+    filterDateElement2.addEventListener('change', function (e) {
+        e.preventDefault();
+        if (e.target.value == "") {
+            filterDate2 = filterDate;
+            filterDateElement2.value = filterDate;
+        } else {
+            filterDate2 = e.target.value;
+            filterDateElement2.value = e.target.value;
+        }
+    })
 
-    document.addEventListener("DOMContentLoaded", function() {
-        fetch('/admin/getColumnSelection')
-            .then(response => response.json())
-            .then(data => {
-                const selectedColumns = data;
-                const tableHeaders = document.querySelectorAll('.table thead th');
-                const tableRows = document.querySelectorAll('.table tbody tr');
-                const checkboxes = document.querySelectorAll('input[name="columns"]');
+    const searchNameElement = document.getElementById('searchName')
+    searchNameElement.addEventListener('change', function (e) {
+        searchString = e.target.value;
+        console.log(searchString)
+    })
 
-                checkboxes.forEach((checkbox) => {
-                    if (selectedColumns.includes(checkbox.value)) {
-                        checkbox.checked = true;
-                    } else {
-                        checkbox.checked = false;
-                    }
-                });
+    const amongPriceElement = document.getElementById('amongPrice')
+    amongPriceElement.addEventListener('change', function (e) {
+        amongPrice = e.target.value;
+        console.log(amongPrice)
+    })
 
-                tableHeaders.forEach((header, index) => {
-                    const columnName = header.getAttribute('data-column');
-                    if (!selectedColumns.includes(columnName)) {
-                        header.style.display = 'none';
-                        tableRows.forEach(row => {
-                            row.cells[index].style.display = 'none';
-                        });
-                    } else {
-                        header.style.display = '';
-                        tableRows.forEach(row => {
-                            row.cells[index].style.display = '';
-                        });
-                    }
-                });
-            });
-    });
+    const statusElement = document.getElementById('status')
+    statusElement.addEventListener('change', function (e) {
+        status = e.target.value;
+        console.log(status)
+    })
+
+    const buttonSearch = document.getElementById('btnSearch')
+    buttonSearch.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const formSubmit = document.createElement('form')
+        formSubmit.method = 'GET'
+        formSubmit.action = '';
+        formSubmit.style.display = 'none'
+
+        const inputSearchString = document.createElement('input')
+        inputSearchString.type = 'hidden';
+        inputSearchString.name = 'search';
+        inputSearchString.value = searchString;
+        formSubmit.appendChild(inputSearchString)
+
+        const selectPrice = document.createElement('input')
+        selectPrice.type = 'hidden'
+        selectPrice.name = 'amongPrice'
+        selectPrice.value = amongPrice
+        formSubmit.appendChild(selectPrice)
+        const selectStatus = document.createElement('input')
+        selectStatus.type = 'hidden'
+        selectStatus.name = 'status'
+        selectStatus.value = status
+        formSubmit.appendChild(selectStatus)
+
+        const filterDateForm = document.createElement('input')
+        filterDateForm.value = filterDate;
+        filterDateForm.type = 'hidden'
+        filterDateForm.name = 'filterDate'
+        formSubmit.appendChild(filterDateForm)
+
+        const filterDateForm2 = document.createElement('input');
+        filterDateForm2.value = filterDate2;
+        filterDateForm2.type = 'hidden'
+        filterDateForm2.name = 'filterDate2'
+        formSubmit.appendChild(filterDateForm2)
+
+        const pageNoForm = document.createElement('input');
+        pageNoForm.value = /*[[${pageNo}]]*/"";
+        pageNoForm.type = 'hidden'
+        pageNoForm.name = 'pageNo'
+        formSubmit.appendChild(pageNoForm)
+
+        const pageSizeForm = document.createElement('input');
+        pageSizeForm.value = /*[[${pageSize}]]*/"";
+        pageSizeForm.type = 'hidden'
+        pageSizeForm.name = 'pageSize'
+        formSubmit.appendChild(pageSizeForm)
+
+        document.body.appendChild(formSubmit);
+
+        console.log(formSubmit)
+        formSubmit.submit()
+    })
 </script>
 </html>
