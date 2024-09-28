@@ -528,7 +528,7 @@ public class SearchRepositoryImpl implements SearchRepository {
         query.setParameter("status", status);
 
         if (StringUtils.hasLength(search)) {
-            query.setParameter("search", String.format("%%%s%%", search));
+            query.setParameter("search", String.format("%%%s%%", removeDiacritics(search)));
         }
 
         if (StringUtils.hasLength(categoryId)) {
@@ -570,7 +570,7 @@ public class SearchRepositoryImpl implements SearchRepository {
         query.setParameter("status", status);
 
         if (StringUtils.hasLength(search)) {
-            query.setParameter("search", String.format("%%%s%%", search));
+            query.setParameter("search", String.format("%%%s%%", removeDiacritics(search)));
         }
 
         if (StringUtils.hasLength(categoryId)) {
@@ -584,4 +584,13 @@ public class SearchRepositoryImpl implements SearchRepository {
         return (long) query.getSingleResult();
     }
 
+    /**
+     * @Summary: Chuyển đổi chuỗi sang chuỗi Unicode
+     * @Description: Dùng để loại bỏ ký tự có dấu trong tiếng việt trước khi search.
+     * @Param: String s
+     */
+    public static String removeDiacritics(String s) {
+        return java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
 }

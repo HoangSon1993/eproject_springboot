@@ -93,7 +93,7 @@
             <th class="text-center">Số điện thoại</th>
             <th class="text-center">Trạng thái</th>
             <th class="text-center">Tồng tiền</th>
-            <th class="text-center">Chi tiết</th>
+            <th class="text-center" style="min-width: 160px">Chi tiết</th>
         </tr>
         </thead>
         <tbody>
@@ -124,14 +124,24 @@
 
             <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
             <td class="text-center">
-                <a th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}" href="#"
-                   class="btn btn-success"
-                   th:data-order-id="${item.orderId}"
-                   id="btnCod">
-                    <i class="fa-regular fa-money-bill-1"></i></a>
+                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}">
+                    <a href="#"
+                       class="btn btn-success"
+                       th:data-order-id="${item.orderId}"
+                       th:classappend="btnCod">
+                        <i class="fa-regular fa-money-bill-1"></i></a>
+                </th:block>
                 <a th:unless="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
-                   th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info"><i
+                   th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info btnDetail"><i
                         class="fa-solid fa-circle-info"></i></a>
+                <th:block
+                        th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD || item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}">
+                    <a href="#"
+                       class="btn btn-danger"
+                       th:data-order-id="${item.orderId}"
+                       th:classappend="btnCancel"
+                    ><i class="fa-solid fa-ban"></i></a>
+                </th:block>
             </td>
         </tr>
         </tbody>
@@ -293,40 +303,103 @@
         newForm.submit()
     })
 
-    const btnCodElement = document.getElementById('btnCod');
-    btnCodElement.addEventListener('click', function (e) {
-        e.preventDefault()
-        const orderId = this.getAttribute('data-order-id');
+    // Handle Change order status from 'Cod' to 'Paid'
+    const btnCodElements = document.querySelectorAll('.btnCod');
+    btnCodElements.forEach((btnCodElement, key, parent) => {
+        btnCodElement.addEventListener('click', function (e) {
+            e.preventDefault()
+            const orderId = this.getAttribute('data-order-id');
 
-        fetch(`/admin/order/confirm-payment-cod/${orderId}`, {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            method: 'PATCH'
-        }).then(response => response.json())
-            .then(data => {
-                console.log(data)
-                if (data.success) {
-                    // Nếu xác nhận thanh toán thành công, cập nhật giao diện
-                    const parentTd = btnCodElement.parentElement;
+            fetch(`/admin/order/confirm-payment-cod/${orderId}`, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                method: 'PATCH'
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.success) {
+                        // Nếu xác nhận thanh toán thành công, cập nhật giao diện
+                        const parentTd = btnCodElement.parentElement;
+                        const grandParentTr = parentTd.parentElement;
+                        const statusElement = grandParentTr.cells[4]
 
-                    // Xóa nút thanh toán COD
-                    btnCodElement.remove();
+                        // Xóa nút thanh toán COD
+                        btnCodElement.remove();
 
-                    // Thêm nút chi tiết đơn hàng
-                    const detailButton = document.createElement('a');
-                    detailButton.setAttribute('href', `/admin/order/detail?orderId=${orderId}`);
-                    detailButton.className = 'btn btn-info';
-                    detailButton.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
-                    parentTd.appendChild(detailButton);
+                        // Xóa nút Cancel
+                        let btnCancelElement = parentTd.querySelector('.btnCancel')
+                        if (btnCancelElement) {
+                            btnCancelElement.remove()
+                        }
 
-                    alert("Xác nhận thanh toán thành công.")
-                }
-            })
-            .catch(error => {
-                console.log(error)
-            })
+                        // Thêm nút chi tiết đơn hàng
+                        const detailButton = document.createElement('a');
+                        detailButton.setAttribute('href', `/admin/order/detail?orderId=${orderId}`);
+                        detailButton.className = 'btn btn-info';
+                        detailButton.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+                        parentTd.appendChild(detailButton);
+
+                        statusElement.innerText = 'Đã thanh toán'
+
+                        alert("Xác nhận thanh toán thành công.")
+                    }
+                })
+                .catch(error => {
+                    console.error(`Đã có lỗi xảy ra:  ${error}`)
+                })
+        })
     })
+
+    // Handle change Order status from 'Cod' or 'Pendding' to 'Cancel'
+    const btnCancelElements = document.querySelectorAll('.btnCancel')
+    btnCancelElements.forEach((btnCancelElement, key, parent) => {
+        btnCancelElement.addEventListener('click', function (e) {
+            e.preventDefault()
+            const orderId = this.getAttribute('data-order-id');
+
+            fetch(`/admin/order/cancel-order/${orderId}`, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                method: 'PATCH'
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Nếu xác nhận 'Cancel' thành công, cập nhật giao diện.
+                        const parentTd = btnCancelElement.parentElement;
+                        const grandParentTr = parentTd.parentElement;
+                        const statusElement = grandParentTr.cells[4]
+
+                        // Delete button 'btnCancel'
+                        btnCancelElement.remove()
+
+                        // Delete button 'btnCod'
+                        let btnCodElement = parentTd.querySelector('.btnCod');
+                        if (btnCodElement) {
+                            btnCodElement.remove()
+                        }
+
+                        // Thêm nút chi tiết đơn hàng
+                        let detailButton = parentTd.querySelector('.btnDetail');
+                        if (detailButton === null) {
+                            detailButton = document.createElement('a');
+                            detailButton.setAttribute('href', `/admin/order/detail?orderId=${orderId}`);
+                            detailButton.className = 'btn btn-info';
+                            detailButton.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+                            parentTd.appendChild(detailButton);
+                        }
+
+                        statusElement.innerHTML = 'Hủy bỏ'
+                        alert("Xác nhận hủy đơn hàng thành công.")
+                    }
+                })
+                .catch(error => {
+                    console.error(`Đã có lỗi xảy ra:  ${error}`)
+                })
+        })
+    })
+
 </script>
 </body>
 </html>
