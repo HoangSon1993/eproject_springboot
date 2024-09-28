@@ -19,8 +19,6 @@ import java.util.Map;
 public class AuthenticationController {
     @Autowired
     AccountService accountService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
     @GetMapping("/auth/login")
     public String login(){
         return "/user/authentication/login";
