@@ -91,6 +91,20 @@ public class OrderController {
         }
     }
 
+    @PatchMapping("/cancel-order/{orderId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> cancelOrder(@PathVariable String orderId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            orderService.cancelOrderCodOrPendding(orderId);
+            response.put("success", "true");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", "false");
+            return ResponseEntity.ok(response);
+        }
+    }
+
     @GetMapping("/detail")
     public String getOrderDetails(@RequestParam String orderId, Model model) {
         model.addAttribute("order", orderService.getOrder(orderId));

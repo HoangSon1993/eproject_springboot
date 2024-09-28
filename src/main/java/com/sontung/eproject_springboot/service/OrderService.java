@@ -69,4 +69,6 @@ public interface OrderService {
     void updatePendingOrders();
 
     void confirmPaymentCOD(String orderId);
+
+    void cancelOrderCodOrPendding(String orderId);
 }
