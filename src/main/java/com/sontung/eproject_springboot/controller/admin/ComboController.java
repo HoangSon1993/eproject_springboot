@@ -9,7 +9,6 @@ import com.sontung.eproject_springboot.entity.OrderDetail;
 import com.sontung.eproject_springboot.service.ComboService;
 import com.sontung.eproject_springboot.service.S3Service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -24,8 +23,6 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -36,37 +33,34 @@ public class ComboController {
     private final ComboService comboService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-
-    @Value("${aws.s3.bucket.url}")
-    String s3BucketUrl;
-
-    @ModelAttribute("s3BucketUrl")
-    public String s3BucketUrl() {
-        return s3BucketUrl;
-    }
-
-    // TODO: 29/07/2024  
+    // TODO: 29/07/2024
     // TODO: 29/07/2024
     @GetMapping("")
     public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "9") int size,
-                            Model model){
+                            Model model) {
         model.addAttribute("currentPage", page);
+        if (page < 1) {
+            page = 1;
+        }
+        if (size < 1) {
+            size = 9;
+        }
         model.addAttribute("size", size);
-        if(filterDate==null){
+        if (filterDate == null) {
             Page<Combo> comboList = comboService.getCombos(page, size);
             model.addAttribute("combos", comboList);
             long totalItems = comboService.countAdminComBos();
             int totalPages = (int) (Math.ceil((double) totalItems / size));
             model.addAttribute("totalPages", totalPages);
-        }else{
-            Page<OrderDetail> orderDetails = comboService.getOrdersByDate(filterDate,page,size);
+        } else {
+            Page<OrderDetail> orderDetails = comboService.getOrdersByDate(filterDate, page, size);
             model.addAttribute("filterDate", filterDate);
             model.addAttribute("orders", orderDetails);
             //long totalItems = comboService.countOrderDetailInComboMgr(filterDate);
             long totalItems = orderDetails.getTotalElements();
-            int totalPages = (int) (Math.ceil((double)  totalItems/ size));
+            int totalPages = (int) (Math.ceil((double) totalItems / size));
             model.addAttribute("totalPages", totalPages);
             System.out.println(filterDate);
         }

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @Repository
 public interface IProductRepository extends JpaRepository<Product, String> {
     Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable);
+
     Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String productName, Pageable pageable);
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category.categoryId = :categoryId")
@@ -25,4 +26,6 @@ public interface IProductRepository extends JpaRepository<Product, String> {
     BigDecimal getPriceByProductId(@Param("productId") String productId);
 
     Page<Product> findByStatus(Pageable pageable, int status);
+
+    Page<Product> findByStatusAndCategory_CategoryId(Pageable pageable, int status, String categoryId);
 }

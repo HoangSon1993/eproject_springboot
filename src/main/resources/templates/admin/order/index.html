@@ -143,7 +143,8 @@
     <ul class="pagination d-flex justify-content-center mt-5" th:if="${orders.totalPages > 1}">
         <!--        First-->
         <li th:class="page-item" th:classappend="${orders.hasPrevious()} ? '': 'disabled'">
-            <a class="page-link rounded" th:href="@{/admin/order(pageNo=0, pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">First</a>
+            <a class="page-link rounded"
+               th:href="@{/admin/order(pageNo=0, pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}">First</a>
         </li>
         <!--        Previous Page Link-->
         <li th:class="page-item" th:classappend="${orders.hasPrevious()} ? '':'disabled'">
@@ -154,13 +155,15 @@
         <!--        Page Number Links-->
         <li th:class="page-item" th:classappend="${pageNumber == orders.number} ? 'active': ''"
             th:each="pageNumber : ${#numbers.sequence(0, orders.totalPages -1)}">
-            <a class="page-link rounded" th:href="@{/admin/order(pageNo =${pageNumber},pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}"
+            <a class="page-link rounded"
+               th:href="@{/admin/order(pageNo =${pageNumber},pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}"
                th:text="${pageNumber + 1}">1</a>
         </li>
         <!--        Next Number Link-->
         <li th:class="page-item" th:classappend="${orders.hasNext()} ? '' : 'disabled'">
             <a class="page-link rounded"
-               th:href="@{/admin/order(pageNo=${orders.number + 1},pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}" aria-label="Next">
+               th:href="@{/admin/order(pageNo=${orders.number + 1},pageSize=${orders.size},amongPrice=${amongPrice},filterDate=${filterDate},filterDate2=${filterDate2},search=${search},status=${status})}"
+               aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
@@ -303,7 +306,6 @@
         }).then(response => response.json())
             .then(data => {
                 console.log(data)
-                //todo: xu ly tren giao dien
                 if (data.success) {
                     // Nếu xác nhận thanh toán thành công, cập nhật giao diện
                     const parentTd = btnCodElement.parentElement;

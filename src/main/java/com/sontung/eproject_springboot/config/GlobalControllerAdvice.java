@@ -4,7 +4,6 @@ import com.sontung.eproject_springboot.entity.Account;
 import com.sontung.eproject_springboot.service.AccountService;
 import com.sontung.eproject_springboot.service.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,8 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @RequiredArgsConstructor
 public class GlobalControllerAdvice {
     private final AccountService accountService;
-    private final
-    CartService cartService;
+    private final CartService cartService;
 
     @Value("${user.id}")
     private String userId; // userId tạm
