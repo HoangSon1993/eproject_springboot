@@ -35,6 +35,8 @@
             </div>
             <div class="col-md-6">
                 <dl>
+                    <dt>Người nhận</dt>
+                    <dd th:text="${order.firstName + ' ' +order.lastName}"></dd>
                     <dt>Địa chỉ giao hàng</dt>
                     <dd th:text="${order.shippingAddress}"></dd>
                     <dt>Số điện thoại người nhận</dt>

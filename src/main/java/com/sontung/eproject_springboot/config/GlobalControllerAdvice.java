@@ -17,9 +17,6 @@ public class GlobalControllerAdvice {
     private final AccountService accountService;
     private final CartService cartService;
 
-    @Value("${user.id}")
-    private String userId; // userId tạm
-
     @Value("${aws.s3.bucket.url}")
     String s3BucketUrl;
 
@@ -39,11 +36,11 @@ public class GlobalControllerAdvice {
      * @Description: Dùng để hiển thị số lượng item ở icon Cart.
      **/
     @ModelAttribute("cartItemCount")
-    public int getCartItemCount() {
-        // Lấy ra user_id (sau khi đã áp dung Spring Security)
-        // Hiện tại đang dùng User Tạm
-        if (userId != null) {
-            return cartService.getTotalItem(userId);
+    public int getCartItemCount(
+            @ModelAttribute("loggedInUser") Account account
+    ) {
+        if (account != null) {
+            return cartService.getTotalItem(account.getAccountId());
         }
         return 0;
     }

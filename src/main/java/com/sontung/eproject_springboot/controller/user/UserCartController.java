@@ -2,6 +2,7 @@ package com.sontung.eproject_springboot.controller.user;
 
 import com.sontung.eproject_springboot.dto.CartDetailDTO;
 import com.sontung.eproject_springboot.dto.request.CartUpdateRequest;
+import com.sontung.eproject_springboot.entity.Account;
 import com.sontung.eproject_springboot.entity.Cart;
 import com.sontung.eproject_springboot.exception.PriceChangedException;
 import com.sontung.eproject_springboot.exception.ProductNotFoundException;
@@ -10,7 +11,6 @@ import com.sontung.eproject_springboot.service.CartService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,8 +32,7 @@ import java.util.Map;
 public class UserCartController {
     private final CartService cartService;
 
-    @Value("${user.id}")
-    private String userId; // userId tạm
+//    private final Account loggedAccount;
 
     /**
      * @Summary:
@@ -57,7 +56,8 @@ public class UserCartController {
     @GetMapping("/index")
     public String getCarts(Model model,
                            @ModelAttribute("checkedItems") List<String> checkedItems,
-                           HttpSession session) {
+                           HttpSession session,
+                           @ModelAttribute("loggedInUser") Account account) {
         List<CartDetailDTO> cartDetailDTOS = (List<CartDetailDTO>) session.getAttribute("cartItems");
         if (cartDetailDTOS != null) {
             session.removeAttribute("cartItems");
@@ -69,7 +69,7 @@ public class UserCartController {
             session.removeAttribute("warning");
         }
         if (cartDetailDTOS == null) {
-            cartDetailDTOS = cartService.getCarts(userId, null);
+            cartDetailDTOS = cartService.getCarts(account.getAccountId(), null);
         }
 
         // Cập nhật trạng thái checked cho các sản phẩm đã chọn
@@ -96,10 +96,11 @@ public class UserCartController {
             @RequestParam String comboId,
             @RequestParam int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems,
+            @ModelAttribute("loggedInUser") Account account,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-            Cart cart = cartService.addComboToCart(userId, comboId, quantity);
+            Cart cart = cartService.addComboToCart(account.getAccountId(), comboId, quantity);
             // Thêm combo và danh sách checked
             if (!checkedItems.contains(cart.getCartId())) {
                 checkedItems.add(cart.getCartId());
@@ -126,11 +127,12 @@ public class UserCartController {
             @RequestParam("productId") String productId,
             @RequestParam("quantity") int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems,
+            @ModelAttribute("loggedInUser") Account account,
             HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Cart cart = cartService.addProductToCart(userId, productId, quantity);
-            int cartItemCount = cartService.getTotalItem(userId);
+            Cart cart = cartService.addProductToCart(account.getAccountId(), productId, quantity);
+            int cartItemCount = cartService.getTotalItem(account.getAccountId());
 
             // Thêm sản phẩm vào danh sách checked
             // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì thêm vào
@@ -159,10 +161,11 @@ public class UserCartController {
             @RequestParam("comboId") String comboId,
             @RequestParam("quantity") int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems,
+            @ModelAttribute("loggedInUser") Account account,
             HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Cart cart = cartService.addComboToCart(userId, comboId, quantity);
+            Cart cart = cartService.addComboToCart(account.getAccountId(), comboId, quantity);
 
             // Thêm combo vào danh sách checked
             // Nếu sản Id combo chưa nằm trong checkedItems thì thêm vào
@@ -170,7 +173,7 @@ public class UserCartController {
                 checkedItems.add(cart.getCartId());
                 session.setAttribute("checkedItems", checkedItems);
             }
-            int cartItemCount = cartService.getTotalItem(userId);
+            int cartItemCount = cartService.getTotalItem(account.getAccountId());
 
             response.put("cartItemCount", cartItemCount);
             response.put("success", true);
@@ -193,6 +196,7 @@ public class UserCartController {
             @RequestParam(value = "productId", required = false) String productId,
             @RequestParam(value = "quantity", defaultValue = "1") int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems,
+            @ModelAttribute("loggedInUser") Account account,
             HttpSession session
     ) {
         Map<String, Object> response = new HashMap<>();
@@ -202,9 +206,9 @@ public class UserCartController {
             return ResponseEntity.ok(response);
         }
         try {
-            Cart cart = cartService.addItemToCart(userId,comboId,productId,quantity);
+            Cart cart = cartService.addItemToCart(account.getAccountId(), comboId, productId, quantity);
 
-            int cartItemCount = cartService.getTotalItem(userId);
+            int cartItemCount = cartService.getTotalItem(account.getAccountId());
 
             // Thêm sản phẩm vào danh sách checked
             // Nếu sản Id sản phẩm chưa nằm trong checkedItems thì thêm vào
@@ -324,7 +328,8 @@ public class UserCartController {
     @GetMapping("/checkout")
     public String checkout_form(Model model,
                                 HttpSession session,
-                                @RequestParam(required = false) List<String> cartItems) {
+                                @RequestParam(required = false) List<String> cartItems,
+                                @ModelAttribute("loggedInUser") Account account) {
 
         // Nếu không có sản phẩm nào được chọn, điều hướng về trang giỏ hàng
         if (cartItems == null || cartItems.isEmpty()) {
@@ -332,7 +337,7 @@ public class UserCartController {
             return "redirect:/cart/index";
         }
         // Lấy thông tin sản phẩm từ các ID được chọn
-        List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(userId, cartItems);
+        List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(account.getAccountId(), cartItems);
 
         BigDecimal totalAmount = (BigDecimal) session.getAttribute("totalAmount");
         if (totalAmount != null) {
@@ -353,7 +358,10 @@ public class UserCartController {
      * @Param: List <String> cartItems
      **/
     @PostMapping("/checkout")
-    public ResponseEntity<Map<String, Object>> checkout(@RequestBody List<String> cartItems, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> checkout(
+            @RequestBody List<String> cartItems,
+            @ModelAttribute("loggedInUser") Account account,
+            HttpSession session) {
         // Chuyển hướng sang GET để hiển thị trang checkout với các sản phẩm được chọn
         Map<String, Object> response = new HashMap<>();
         if (cartItems == null || cartItems.isEmpty()) {
@@ -361,7 +369,7 @@ public class UserCartController {
             response.put("message", "Không có sản phẩm nào được chọn.");
         } else {
             // Lấy thông tin sản phẩm từ các ID được chọn
-            List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(userId, cartItems);
+            List<CartDetailDTO> cartDetailDTOS = cartService.getCartByIds(account.getAccountId(), cartItems);
 
             try {
                 // Trường hợp giá không đổi.

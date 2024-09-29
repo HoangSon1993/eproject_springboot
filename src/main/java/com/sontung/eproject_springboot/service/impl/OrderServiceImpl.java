@@ -634,7 +634,7 @@ public class OrderServiceImpl implements OrderService {
     public void confirmPaymentCOD(String orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() ->
                 new RuntimeException("Order không tôn tai."));
-        if (order.getStatus() == OrderStatus.COD) {
+        if (order.getStatus() == OrderStatus.COD || order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.PAID);
             orderRepository.save(order);
         }

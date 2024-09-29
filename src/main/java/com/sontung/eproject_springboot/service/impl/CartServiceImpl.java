@@ -303,15 +303,15 @@ public class CartServiceImpl implements CartService {
      * @Exceiption RuntimeException
      **/
     @Override
-    public Cart addItemToCart(String userId, String comboId, String productId, int quantity) {
-        Account currentAccount = accountRepository.findById(userId)
+    public Cart addItemToCart(String accountId, String comboId, String productId, int quantity) {
+        Account currentAccount = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
         Product currentProduct = null;
         Cart cart = null;
         if (productId != null) {
             currentProduct = productRepository.findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
-            cart = cartRepository.findByProductIdAndAccount_AccountId(productId, userId);
+            cart = cartRepository.findByProductIdAndAccount_AccountId(productId, accountId);
         }
         Combo currentCombo = null;
         if (comboId != null) {

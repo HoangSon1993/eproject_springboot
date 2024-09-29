@@ -33,7 +33,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         // Search
         if (StringUtils.hasLength(search)) {
             sqlQuery.append(" and lower(p.productName) like lower(:name)");
-            //sqlQuery.append(" or lower(p.description) like lower(:description)");
         }
         // Sort
         if (StringUtils.hasLength(sortBy)) {
@@ -45,7 +44,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         selectQuery.setMaxResults(pageSize);
         if (StringUtils.hasLength(search)) {
             selectQuery.setParameter("name", String.format("%%%s%%", search)); //"%" + search + "%" thay the bang String.format("%%%s%%", search)
-            //  selectQuery.setParameter("description", "%" + search + "%");
         }
 
         List products = selectQuery.getResultList();
@@ -383,7 +381,14 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     @Override
-    public Page<Order> getAllOrderWithFilterDateAmongPriceAndSearchCriteriaBuider(int pageNo, int pageSize, String search, int amongPrice, String status, LocalDateTime filterDate, LocalDateTime filterDate2) {
+    public Page<Order> getAllOrderWithFilterDateAmongPriceAndSearchCriteriaBuider(
+            int pageNo,
+            int pageSize,
+            String search,
+            int amongPrice,
+            String status,
+            LocalDateTime filterDate,
+            LocalDateTime filterDate2) {
         // Khởi tạo CriteriaBuilder và CriteriaQuery
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
