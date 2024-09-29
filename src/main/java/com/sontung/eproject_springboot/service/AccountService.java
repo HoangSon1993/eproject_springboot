@@ -3,11 +3,11 @@ package com.sontung.eproject_springboot.service;
 import com.sontung.eproject_springboot.dto.RegisterDTO;
 import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
 import com.sontung.eproject_springboot.entity.Account;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+
 @Service
 public interface AccountService extends UserDetailsService {
     @Override

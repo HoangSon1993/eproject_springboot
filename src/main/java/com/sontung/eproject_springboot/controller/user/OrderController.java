@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,11 +35,6 @@ public class OrderController {
     private final CartService cartService;
     private final SearchRepository searchRepository;
 
-    @Value("${user.id}")
-    private String userId; // userId tạm
-
-
-
     /**
      * @Summary:
      * @Description:
@@ -54,12 +48,10 @@ public class OrderController {
                         @RequestParam(defaultValue = "") String search,
                         @RequestParam(defaultValue = "") String sortBy,
                         @RequestParam(defaultValue = "") String status,
-                        @ModelAttribute("loggedInUser") Account loggedInUser
-                        ) {
+                        @ModelAttribute("loggedInUser") Account account) {
         if (pageNo < 0) pageNo = 0;
 
-//        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearch(pageNo, pageSize, search, sortBy, status, userId);
-        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, loggedInUser.getAccountId());
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, account.getAccountId());
         model.addAttribute("orders", orders);
         // Thêm đường dẫn URL cho phân trang
         model.addAttribute("pageUrl", "/order/index");
@@ -87,8 +79,10 @@ public class OrderController {
      * @Return:
      **/
     @GetMapping("/detail")
-    public String detail(@RequestParam("code") String code, Model model) {
-        Order order = orderService.findByCodeAndAccountId(userId, code);
+    public String detail(@RequestParam("code") String code,
+                         Model model,
+                         @ModelAttribute("loggedInUser") Account account) {
+        Order order = orderService.findByCodeAndAccountId(account.getAccountId(), code);
         if (order == null) {
             model.addAttribute("error", "Không tìm thấy đơn hàng.");
         }
@@ -111,7 +105,8 @@ public class OrderController {
     public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody OrderDtoRequest orderDtoRequest,
                                                       BindingResult bindingResult,
                                                       HttpServletRequest req, HttpServletResponse resp,
-                                                      HttpSession session) throws UnsupportedEncodingException {
+                                                      HttpSession session,
+                                                      @ModelAttribute("loggedInUser") Account account) throws UnsupportedEncodingException {
         Map<String, Object> response = new HashMap<>();
 
         // Valid dữ liệu đầu vào.
@@ -123,7 +118,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body(response); // Trả về lỗi
         }
         // 1. Create Order and OrderDetail in Transaction.
-        Order order = orderService.createOrder(orderDtoRequest, userId);
+        Order order = orderService.createOrder(orderDtoRequest, account.getAccountId());
 
         // 2. Delete cartItems from cart and Session.
         List<String> checkedItems = (List<String>) session.getAttribute("checkedItems");
@@ -150,8 +145,9 @@ public class OrderController {
     @PostMapping("/re-create")
     public String reCreate(@RequestParam String code,
                            HttpServletRequest req,
-                           HttpServletResponse resp) {
-        Order order = orderService.findByCodeAndAccountId(userId, code);
+                           HttpServletResponse resp,
+                           @ModelAttribute("loggedInUser") Account account) {
+        Order order = orderService.findByCodeAndAccountId(account.getAccountId(), code);
         if (order == null) {
             // Gui kem thong bao.
             return "redirect:/order/index";
@@ -173,13 +169,14 @@ public class OrderController {
     @GetMapping("/payment-result")
     public String paymentResult(Model model,
                                 HttpServletRequest request,
-                                @ModelAttribute PaymentResultDto paymentResultDto) {
+                                @ModelAttribute PaymentResultDto paymentResultDto,
+                                @ModelAttribute("loggedInUser") Account account) {
         // Merchant/website TMĐT thực hiện kiểm tra sự toàn vẹn của dữ liệu (checksum) trước khi thực hiện các thao tác khác
         String result = "";
         try {
             String orderInfo = request.getParameter("vnp_OrderInfo");
             String code = orderInfo.substring(orderInfo.length() - 8);
-            result = orderService.handleResult(request, userId);
+            result = orderService.handleResult(request, account.getAccountId());
             model.addAttribute("message", result);
             model.addAttribute("code", code);
 
