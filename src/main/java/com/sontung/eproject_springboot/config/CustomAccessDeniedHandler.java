@@ -20,7 +20,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         if (request.isUserInRole("ADMIN")) {
             System.out.println("Access denied for ADMIN, redirecting to /admin/order");
-            response.sendRedirect("/admin/order");
+            response.sendRedirect("/admin/home");
         } else {
             System.out.println("Access denied, redirecting to /user/auth/login");
             response.sendRedirect("/user/auth/login");
