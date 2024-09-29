@@ -202,33 +202,33 @@
                                         <li th:class="page-item"
                                             th:classappend="${products.hasPrevious()} ? '' : 'disabled'">  <!-- first-->
                                             <a th:class="page-link"
-                                               th:href="@{/product/index(page=0, pageSize=${products.size}, search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}">First</a>
+                                               th:href="@{/product/index(page=0, pageSize=${products.size}, amongPrice=${amongPrice}, search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}">First</a>
                                         </li>
 
                                         <li th:class="page-item"
                                             th:classappend="${products.hasPrevious()} ? '' : 'disabled' ">
                                             <!-- previous-->
                                             <a th:class="page-link"
-                                               th:href="@{/product/index(pageNo=${products.hasPrevious()} ? ${products.previousPageable().pageNumber} : ${products.number}, pageSize=${products.size},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
+                                               th:href="@{/product/index(pageNo=${products.hasPrevious()} ? ${products.previousPageable().pageNumber} : ${products.number}, pageSize=${products.size}, amongPrice=${amongPrice},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
                                                class="page-link rounded">&laquo;</a>
                                         </li>
 
                                         <li th:each="pageNumber : ${#numbers.sequence(0, products.totalPages -1)}"
                                             th:class="page-item"
                                             th:classappend="${products.number == pageNumber} ? 'active'">
-                                            <a th:href="@{/product/index(pageNo=${pageNumber}, pageSize=${products.size},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
+                                            <a th:href="@{/product/index(pageNo=${pageNumber}, pageSize=${products.size}, amongPrice=${amongPrice},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
                                                class="page-link rounded" th:text="${pageNumber + 1}">1</a>
                                         </li>
 
 
                                         <li th:class="page-item"
                                             th:classappend="${products.hasNext()} ? '' : 'disabled'">  <!-- next -->
-                                            <a th:href="@{/product/index(pageNo=${products.hasNext()} ? ${products.nextPageable().pageNumber} : ${products.number}, pageSize=${products.size},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
+                                            <a th:href="@{/product/index(pageNo=${products.hasNext()} ? ${products.nextPageable().pageNumber} : ${products.number}, pageSize=${products.size}, amongPrice=${amongPrice},  search=${search}, categoryId=${categoryId}, sortBy =${sortBy})}"
                                                class="page-link rounded">&raquo;</a>
                                         </li>
                                         <li th:class="page-item"
                                             th:classappend="${products.hasNext()} ? '' : 'disabled'">  <!-- last -->
-                                            <a th:href="@{/product/index(pageNo=${products.totalPages - 1}, pageSize=${products.size},  search=${search}, categoryId=${categoryId}, sortBy=${sortBy}) }"
+                                            <a th:href="@{/product/index(pageNo=${products.totalPages - 1}, pageSize=${products.size}, amongPrice=${amongPrice}, search=${search}, categoryId=${categoryId}, sortBy=${sortBy}) }"
                                                class="page-link rounded">Last</a>
                                         </li>
                                     </ul>
@@ -267,9 +267,14 @@
                 method: 'POST',
                 body: formData,
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url
+                    } else {
+                        return response.json()
+                    }
+                })
                 .then(data => {
-                    console.log(data)
                     if (data.success) {
                         // Hiển thị thông báo
                         notification.style.display = 'block'
@@ -286,7 +291,7 @@
                 })
                 .catch(error => {
                     console.error('Đã xảy ra lỗi không mong muốn: ', error);
-                    alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
+                   // alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
                 })
         })
     })

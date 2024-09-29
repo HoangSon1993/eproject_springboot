@@ -47,7 +47,7 @@ public class ProductController {
     public String index(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "9") int pageSize,
-            @RequestParam(defaultValue = "500") int amongPrice,
+            @RequestParam(defaultValue = "0") int amongPrice,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) String categoryId,
             @RequestParam(defaultValue = "asc") String sortBy,
