@@ -22,16 +22,15 @@
                     <a th:href="@{/product/index}" class="nav-item nav-link">Sản phẩm</a>
                     <a th:href="@{/combo/index}" class="nav-item nav-link">Combo</a>
                     <a th:href="'#!'" class="nav-item nav-link">Liên hệ</a>
-                    <a th:href="@{/order/index}" class="nav-item nav-link">Đơn hàng</a>
+                    <th:block th:if="${loggedInUser}!=null">
+                        <a th:href="@{/order/index}" class="nav-item nav-link">Đơn hàng</a>
+                    </th:block>
                     <th:block th:if="${loggedInUser}!=null">
                         <a th:href="@{/user/my-info(username=${loggedInUser.userName})}" class="nav-item nav-link">Thông
                             tin của bạn</a>
                     </th:block>
                 </div>
                 <div class="d-flex m-3 me-0">
-                    <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
-                            data-bs-toggle="modal" data-bs-target="#searchModal"><i
-                            class="fas fa-search text-primary"></i></button>
                     <a th:href="@{/cart/index}" class="position-relative me-4 my-auto">
                         <i class="fa fa-shopping-bag fa-2x"></i>
                         <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"

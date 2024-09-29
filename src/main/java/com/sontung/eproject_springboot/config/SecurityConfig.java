@@ -38,7 +38,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-                        .defaultSuccessUrl("/admin/auth/home", true)  // Chuyển hướng sau khi đăng nhập thành công
+                        .defaultSuccessUrl("/admin/home", true)  // Chuyển hướng sau khi đăng nhập thành công
                         .permitAll()
                 )
                 .logout(logout -> logout

@@ -2,6 +2,7 @@ package com.sontung.eproject_springboot.controller.user;
 
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
 import com.sontung.eproject_springboot.dto.request.PaymentResultDto;
+import com.sontung.eproject_springboot.entity.Account;
 import com.sontung.eproject_springboot.entity.Order;
 import com.sontung.eproject_springboot.entity.OrderDetail;
 import com.sontung.eproject_springboot.enums.OrderStatus;
@@ -38,6 +39,8 @@ public class OrderController {
     @Value("${user.id}")
     private String userId; // userId tạm
 
+
+
     /**
      * @Summary:
      * @Description:
@@ -50,11 +53,13 @@ public class OrderController {
                         @RequestParam(defaultValue = "10") int pageSize,
                         @RequestParam(defaultValue = "") String search,
                         @RequestParam(defaultValue = "") String sortBy,
-                        @RequestParam(defaultValue = "") String status) {
+                        @RequestParam(defaultValue = "") String status,
+                        @ModelAttribute("loggedInUser") Account loggedInUser
+                        ) {
         if (pageNo < 0) pageNo = 0;
 
 //        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearch(pageNo, pageSize, search, sortBy, status, userId);
-        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, userId);
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, loggedInUser.getAccountId());
         model.addAttribute("orders", orders);
         // Thêm đường dẫn URL cho phân trang
         model.addAttribute("pageUrl", "/order/index");
