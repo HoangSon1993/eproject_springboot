@@ -35,7 +35,7 @@ public class ComboController {
 
     // TODO: 29/07/2024
     // TODO: 29/07/2024
-    @GetMapping("")
+    @GetMapping
     public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "9") int size,

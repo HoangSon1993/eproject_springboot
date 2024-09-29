@@ -1,6 +1,7 @@
 package com.sontung.eproject_springboot.config;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -25,16 +26,36 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
+    private final String[] ADMIN_PUBLIC_ENDPOINT_POST = {"/admin/auth/login"};
+    private final String[] ADMIN_PUBLIC_ENDPOINT_GET = {};
+    private final String[] ADMIN_PRIVATE_ENDPOINT_POST = {
+
+    };
+    private final String[] ADMIN_PRIVATE_ENDPOINT_GET = {
+            "/admin/category/index",
+            "/admin/category/detail",
+            "/admin/category/create",
+            "/admin/category/edit",
+
+            "/admin/combo",
+            "/admin/combo/detail",
+            "/admin/combo/create",
+            "/admin/combo/expired",
+            "/admin/home"
+    };
+
 
     @Bean
     @Order(1) //Quy định thứ tự ưu tiên của filter chain này. Filter chain cho admin được xử lý trước (ưu tiên số 1).
     public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.securityMatcher("/admin/**") //Chỉ áp dụng filter chain này cho các URL bắt đầu với /admin/.
                 .csrf(AbstractHttpConfigurer::disable) //Tắt tính năng bảo vệ CSRF (Cross-Site Request Forgery) để tránh lỗi cho các yêu cầu POST/PUT/DELETE từ form không có CSRF token.
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/admin/**").hasRole("ADMIN") //Chỉ những người dùng có vai trò ADMIN mới có quyền truy cập.
-                        .requestMatchers("/admin/auth/**").permitAll() //Mở quyền truy cập cho tất cả (đăng nhập, đăng ký không yêu cầu bảo mật).
+                .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll() // Các tài nguyên tĩnh cũng được mở quyền truy cập cho tất cả.
+                        .requestMatchers("/admin/auth/**").permitAll()//Mở quyền truy cập cho tất cả (đăng nhập, đăng ký không yêu cầu bảo mật).
+                        .requestMatchers("/admin/**").hasRole("ADMIN")//Chỉ những người dùng có vai trò ADMIN mới có quyền truy cập.
                         //.requestMatchers("/admin/auth/**").permitAll()
+                        //.requestMatchers(HttpMethod.GET, ADMIN_PRIVATE_ENDPOINT_GET).hasRole("ADMIN")
                         .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
                 ).formLogin(form -> form.loginPage("/admin/auth/login") // Trang đăng nhập cho admin
                         .defaultSuccessUrl("/admin/home", true)  // Chuyển hướng sau khi đăng nhập thành công
@@ -55,17 +76,14 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain userFilterChain(HttpSecurity httpSecurity, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authorize -> authorize.requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll() // Tài nguyên tĩnh được phép truy cập công khai.
-
+        httpSecurity.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll() // Tài nguyên tĩnh được phép truy cập công khai.
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST).not().hasRole("ADMIN").requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET).not().hasRole("ADMIN")
                         //Mở quyền truy cập cho tất cả người dùng.
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST).permitAll().requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET).permitAll()
-
                         //Chỉ những người dùng có vai trò USER mới được truy cập.
-                        .requestMatchers(PRIVATE_ENDPOINT_GET).hasRole("USER").requestMatchers(PRIVATE_ENDPOINT_POST).hasRole("USER")
-
+                        .requestMatchers(PRIVATE_ENDPOINT_GET).hasRole("USER").requestMatchers(PRIVATE_ENDPOINT_POST).hasRole("USER") // Loại bỏ khỏi quản lý bằng cách cho phép tất cả
                         .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
-
                 ).formLogin(form -> form.loginPage("/user/auth/login") // Trang đăng nhập cho người dùng
                         .loginProcessingUrl("/user/auth/login") // URL xử lý đăng nhập.
                         .defaultSuccessUrl("/home-page", true)  // Chuyển hướng sau khi đăng nhập thành công
@@ -75,7 +93,6 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler));
         return httpSecurity.build();
     }
-
 
     /**
      * @Summary: Trong Spring Security là thành phần chính chịu trách nhiệm xác thực (authentication) các yêu cầu đăng nhập của người dùng.

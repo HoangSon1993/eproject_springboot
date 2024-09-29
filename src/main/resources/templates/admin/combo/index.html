@@ -23,7 +23,7 @@
                                id="filterDate"
                                name="filterDate"
                                class="form-control mt-3"
-                               th:value="${filterDate != null} ? ${#dates.format(filterDate, 'yyyy-MM-dd')} : ''"
+                               th:value="${(filterDate) == null ? '' : filterDate}"
                                onchange="this.form.submit()">
 <!--                        <input type="datetime-local"-->
 <!--                               id="filterDate"-->
@@ -106,7 +106,7 @@
                     </tr>
                 </tbody>
             </table>
-            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/combo?filterDate=' + ${#dates.format(filterDate, 'yyyy-MM-dd')}, ${currentPage}, ${totalPages}, ${size})"></div>
+            <div th:replace="admin/common/pagination-fragment :: pagination('/admin/combo?filterDate=' + ${(filterDate)}, ${currentPage}, ${totalPages}, ${size})"></div>
         </th:block>
 
         <a th:href="@{/admin/combo/expired}" class="btn btn-warning mt-2 mb-2">Thùng Rác</a>

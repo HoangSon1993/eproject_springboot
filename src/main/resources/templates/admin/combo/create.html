@@ -81,7 +81,7 @@
                                                 th:data-id="${item.productId}"
                                                 th:data-name="${item.productName}"
                                                 th:data-price="${item.price}">
-                                            Add
+                                            Thêm
                                         </button>
                                     </td>
                                 </tr>
@@ -124,7 +124,7 @@
 <!--            <label for="finalAmount" class="form-label" th:field="${combo.finalAmount}">Amount</label>-->
 <!--            <input type="number" name="finalAmount" class="form-control" id="finalAmount">-->
 <!--        </div>-->
-        <input type="submit" value="Submit" class="btn btn-success">
+        <input type="submit" value="Tạo" class="btn btn-success">
     </form>
 </div>
 <div th:replace="~{/admin/common/content_footer}"></div>
@@ -259,7 +259,7 @@
         });
 
         // Function to filter products based on search input
-        constsearchProductInput = document.getElementById('searchProduct');
+        const searchProductInput = document.getElementById('searchProduct');
         searchProductInput.addEventListener('input', function () {
             const searchValue = this.value.toLowerCase();
             const productRows = document.querySelectorAll('#productTable tr');
