@@ -23,19 +23,19 @@
             <label for="product_name">Tên sản phẩm</label>
             <input class="form-control" type="text" name="product_name" th:field="*{productName}" id="product_name"
                    placeholder="Nhập tên sản phẩm">
-            <div th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}"></div>
+            <div th:if="${#fields.hasErrors('productName')}" th:class="text-danger" th:errors="*{productName}"></div>
         </div>
         <div class="form-group">
             <label for="description">Mô tả</label>
             <input class="form-control" type="text" name="description" th:field="*{description}" id="description"
                    placeholder="Nhập mô tả sản phẩm">
-            <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+            <div th:if="${#fields.hasErrors('description')}" th:class="text-danger" th:errors="*{description}"></div>
         </div>
         <div class="form-group">
             <label for="price">Giá bán</label>
             <input class="form-control" type="text" name="price" th:field="*{price}" id="price"
                    placeholder="Nhập giá bán">
-            <div th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+            <div th:if="${#fields.hasErrors('price')}" th:class="text-danger" th:errors="*{price}"></div>
         </div>
 
         <div class="form-group">
@@ -60,7 +60,7 @@
                 <option th:each="category : ${categories}" th:value="${category.categoryId}"
                         th:text="${category.categoryName}"></option>
             </select>
-            <div th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+            <div th:if="${#fields.hasErrors('category')}" th:class="text-danger" th:errors="*{category}"></div>
         </div>
 
 

@@ -229,7 +229,6 @@ public class ProductController {
     public String deleteProduct(@PathVariable String id,
                                 RedirectAttributes redirectAttributes
     ) {
-        // TODO: 29/7/24 action này để xoá hẳn 1 sản phẩm và hình ảnh trong AWS 
         Optional<Product> optionalProduct = productService.findById(id);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
@@ -260,7 +259,6 @@ public class ProductController {
                                  RedirectAttributes redirectAttributes,
                                  Model model
     ) {
-        // TODO: 29/7/24 Sau khi test thành công sẽ sử dụng action này để change status chứ k xoá hẳn product 
         Optional<Product> productOptional = productService.findById(productId);
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
