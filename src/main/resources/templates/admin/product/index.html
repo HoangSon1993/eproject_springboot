@@ -112,11 +112,13 @@
                        class="btn btn-warning w-100">
                         Chỉnh sửa
                     </a>
-                    <form th:action="@{/admin/product/delete/{id}(id=${item.productId})}"
-                          onsubmit="return confirm('Are you sure you want to delete this item?')"
-                          method="post">
-                        <button class="btn btn-danger w-100">Gỡ</button>
-                    </form>
+                    <th:block th:if="${item.status == 1}" >
+                        <form th:action="@{/admin/product/delete2/{id}(id=${item.productId})}"
+                              onsubmit="return confirm('Are you sure you want to delete this item?')"
+                              method="post">
+                            <button class="btn btn-danger w-100">Ngưng bán</button>
+                        </form>
+                    </th:block>
                 </div>
             </td>
         </tr>

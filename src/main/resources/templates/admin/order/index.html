@@ -124,13 +124,13 @@
 
             <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
             <td class="text-center">
-                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}">
-                    <a href="#"
-                       class="btn btn-success"
-                       th:data-order-id="${item.orderId}"
-                       th:classappend="btnCod"  data-toggle="tooltip" data-placement="left" title="Xác nhận thanh toán.">
-                        <i class="fa-regular fa-money-bill-1"></i></a>
-                </th:block>
+<!--                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}">-->
+<!--                    <a href="#"-->
+<!--                       class="btn btn-success"-->
+<!--                       th:data-order-id="${item.orderId}"-->
+<!--                       th:classappend="btnCod"  data-toggle="tooltip" data-placement="left" title="Xác nhận thanh toán.">-->
+<!--                        <i class="fa-regular fa-money-bill-1"></i></a>-->
+<!--                </th:block>-->
                 <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID || item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}">
                     <a th:unless="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
                                th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info btnDetail"  data-toggle="tooltip" data-placement="left" title="Xem chi tiết."><i
@@ -292,7 +292,7 @@
         newForm.appendChild(filterDateForm2)
 
         const pageNoForm = document.createElement('input');
-        pageNoForm.value = /*[[${pageNo}]]*/"";
+        pageNoForm.value = "0";
         pageNoForm.type = 'hidden'
         pageNoForm.name = 'pageNo'
         newForm.appendChild(pageNoForm)
