@@ -2,6 +2,7 @@ package com.sontung.eproject_springboot.config;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -18,6 +19,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @AllArgsConstructor
 public class SecurityConfig {
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
     /**
      * @Summary: Sử dụng thuật toán Bcrypt để̉ mã hoá mật khẩu
      * @Description: Độ mạnh của mật khẩu là 10.
@@ -59,7 +63,9 @@ public class SecurityConfig {
                         .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
                 ).formLogin(form -> form.loginPage("/admin/auth/login") // Trang đăng nhập cho admin
                         .defaultSuccessUrl("/admin/home", true)  // Chuyển hướng sau khi đăng nhập thành công
-                        .permitAll()).logout(logout -> logout //Định cấu hình cho tính năng đăng xuất
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .permitAll())
+                .logout(logout -> logout //Định cấu hình cho tính năng đăng xuất
                         .logoutUrl("/admin/logout") // Xử lý logout tại URL này
                         .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout", "POST")) // Chỉ cho phép phương thức POST
                         .logoutSuccessUrl("/admin/auth/login") // Chuyển hướng sau khi logout thành công
@@ -70,8 +76,8 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINT_POST = {"/user/registerConfirm", "/user/auth/login"};
     private final String[] PUBLIC_ENDPOINT_GET = {"/home-page", "/product/**", "/combo/**", "/user/auth/login", "/user/register"};
-    private final String[] PRIVATE_ENDPOINT_POST = {"/user/edit-info-confirm"};
-    private final String[] PRIVATE_ENDPOINT_GET = {"/order/index", "/order/**", "/cart/**", "/user/my-info", "/user/edit-infor"};
+    private final String[] PRIVATE_ENDPOINT_POST = {"/user/edit-info-confirm", "/change-password-confirm"};
+    private final String[] PRIVATE_ENDPOINT_GET = {"/order/index", "/order/**", "/cart/**", "/user/my-info", "/user/edit-info", "/user/change-password"};
 
     @Bean
     @Order(2)

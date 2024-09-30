@@ -167,4 +167,9 @@ public class AccountServiceImpl implements AccountService {
         updateAccount.setAvatar(accountDTO.getAvatar());
         return accountRepository.save(updateAccount);
     }
+
+    @Override
+    public int changePassword(String password, String newPassword, String newPasswordConfirm){
+        return 1;
+    }
 }

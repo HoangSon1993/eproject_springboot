@@ -25,11 +25,11 @@
             <div class="col-md-4">
                 <dl>
                     <dt>Trạng thái</dt>
-                    <dd th:text="${combo.status==1?'Hoạt động':'Hết hạn'}"></dd>
+                    <dd th:text="${combo.status==2?'Hoạt động':'Hết hạn'}"></dd>
                     <dt>Giá gốc</dt>
-                    <dd th:text="${combo.totalAmount}"></dd>
+                    <dd th:text="${#numbers.formatDecimal(combo.totalAmount, 1, 'COMMA', 0, 'POINT')}"></dd>
                     <dt>Giá bán</dt>
-                    <dd th:text="${combo.finalAmount}"></dd>
+                    <dd th:text="${#numbers.formatDecimal(combo.finalAmount, 1, 'COMMA', 0, 'POINT')}"></dd>
                 </dl>
             </div>
             <div class="col-md-4">

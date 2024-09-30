@@ -203,11 +203,26 @@ public class ComboServiceImpl implements ComboService {
         return iComboRepository.countByStatus(2);
     }
     @Override
+//    public Page<Combo> getCombos(int page, int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//        return iComboRepository.findAll(pageable);
+//        //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+//    }
+
     public Page<Combo> getCombos(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return iComboRepository.findAll(pageable);
-        //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+        // Fetch the paginated result first
+        Page<Combo> comboPage = iComboRepository.findAll(pageable);
+
+        // Filter the results based on status
+        List<Combo> filteredCombos = comboPage.getContent().stream()
+                .filter(c -> c.getStatus() == 2)
+                .collect(Collectors.toList());
+
+        // Return a new Page object with the filtered results
+        return new PageImpl<>(filteredCombos, pageable, comboPage.getTotalElements());
     }
+
 
     /**
      * @Summary: Lấy các combo tiêu biểu.

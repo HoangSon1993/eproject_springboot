@@ -39,10 +39,13 @@ public class Account {
     @OneToMany (mappedBy = "account")
     List<Cart> carts;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "accounts_roles",
             joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "account_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id")
     )
     private Set<Role> roles;
+
+    @Column(nullable = false)
+    private boolean passwordChanged = false; // Thêm trường này
 }

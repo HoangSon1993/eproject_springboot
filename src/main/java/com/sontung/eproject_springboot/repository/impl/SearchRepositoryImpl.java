@@ -489,7 +489,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         } catch (Exception e) {
             totalElements = 0L;
         }
-
         return new PageImpl<>(orders, PageRequest.of(pageNo, pageSize), totalElements);
     }
 

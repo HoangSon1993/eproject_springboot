@@ -61,7 +61,6 @@ public class AuthenticationController {
         model.addAttribute("user", accountService.findByUserNameOrEmail(username));
         return "/user/authentication/my-info";
     }
-
     @GetMapping("/edit-info")
     public String editInfo(@RequestParam String username, Model model){
         model.addAttribute("user", accountService.findByUserNameOrEmail(username));
@@ -71,5 +70,14 @@ public class AuthenticationController {
     public String editInfoConfirm(@ModelAttribute UpdatedAccountDTO account, Model model){
         model.addAttribute("user", accountService.updateAccount(account));
         return "redirect:/user/my-info?username=" + account.getUserName();
+    }
+    @GetMapping("/change-password")
+    public String changePassword(){
+        return "/user/authentication/change-password";
+    }
+    @PostMapping("/change-password-confirm")
+    public String changePasswordConfirm(String password, String newPassword, String newPasswordConfirm){
+        accountService.changePassword(password, newPassword, newPasswordConfirm);
+        return "/user/authentication/change-password";
     }
 }

@@ -25,4 +25,7 @@ public interface AccountService extends UserDetailsService {
     String getErrorMessage(int result);
 
     Account updateAccount(UpdatedAccountDTO accountDTO);
+
+
+    int changePassword(String password, String newPassword, String newPasswordConfirm);
 }

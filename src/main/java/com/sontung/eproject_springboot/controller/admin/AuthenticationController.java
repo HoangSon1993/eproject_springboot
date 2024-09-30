@@ -11,5 +11,8 @@ public class AuthenticationController {
     public String login(){
         return "/admin/authentication/login";
     }
-
+    @GetMapping("/auth/admin-change-password")
+    public String changPassword(){
+        return "/admin/authentication/change-password";
+    }
 }
