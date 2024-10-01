@@ -100,10 +100,10 @@
                                 <label for="fruits">Sorting:</label>
                                 <select id="fruits" name="sortBy" class="border-0 form-select-sm bg-light me-3"
                                         form="searchSortForm" onchange="this.form.submit()">
-                                    <option th:value="asc" th:text="'Name asc'"
-                                            th:selected="${sortBy.equals('asc')}"></option>
-                                    <option th:value="desc" th:text="'Name desc'"
-                                            th:selected="${sortBy.equals('desc')}"></option>
+                                    <option th:value="'productName:asc'" th:text="'Name asc'"
+                                            th:selected="${sortBy.equals('productName:asc')}"></option>
+                                    <option th:value="'productName:desc'" th:text="'Name desc'"
+                                            th:selected="${sortBy.equals('productName:desc')}"></option>
                                 </select>
                             </div>
                         </div>
@@ -291,7 +291,7 @@
                 })
                 .catch(error => {
                     console.error('Đã xảy ra lỗi không mong muốn: ', error);
-                   // alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
+                    // alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
                 })
         })
     })

@@ -102,7 +102,7 @@
                 <a th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="text-center"
                    th:text="${item.code}"></a>
             </td>
-            <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy')}"></td>
+            <td class="text-center" th:text="${#temporals.format(item.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
             <td class="text-center" th:text="${item.firstName + ' ' + item.lastName}"></td>
             <td class="text-center" th:text="${item.shippingPhone}"></td>
             <!--Status-->
@@ -124,17 +124,19 @@
 
             <td class="text-center" th:text="${#numbers.formatDecimal(item.totalAmount, 1, 'COMMA', 0, 'POINT')}"></td>
             <td class="text-center">
-<!--                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}">-->
-<!--                    <a href="#"-->
-<!--                       class="btn btn-success"-->
-<!--                       th:data-order-id="${item.orderId}"-->
-<!--                       th:classappend="btnCod"  data-toggle="tooltip" data-placement="left" title="Xác nhận thanh toán.">-->
-<!--                        <i class="fa-regular fa-money-bill-1"></i></a>-->
-<!--                </th:block>-->
-                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID || item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}">
+                <!--                <th:block th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}">-->
+                <!--                    <a href="#"-->
+                <!--                       class="btn btn-success"-->
+                <!--                       th:data-order-id="${item.orderId}"-->
+                <!--                       th:classappend="btnCod"  data-toggle="tooltip" data-placement="left" title="Xác nhận thanh toán.">-->
+                <!--                        <i class="fa-regular fa-money-bill-1"></i></a>-->
+                <!--                </th:block>-->
+                <th:block
+                        th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PAID || item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).CANCELED}">
                     <a th:unless="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD}"
-                               th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info btnDetail"  data-toggle="tooltip" data-placement="left" title="Xem chi tiết."><i
-                        class="fa-solid fa-circle-info"></i></a>
+                       th:href="@{/admin/order/detail(orderId=${item.orderId})}" class="btn btn-info btnDetail"
+                       data-toggle="tooltip" data-placement="left" title="Xem chi tiết."><i
+                            class="fa-solid fa-circle-info"></i></a>
                 </th:block>
                 <th:block
                         th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).COD || item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).PENDING}">
@@ -146,7 +148,7 @@
                     <a href="#"
                        class="btn btn-danger"
                        th:data-order-id="${item.orderId}"
-                       th:classappend="btnCancel"  data-toggle="tooltip" data-placement="left" title="Hủy đơn hàng."
+                       th:classappend="btnCancel" data-toggle="tooltip" data-placement="left" title="Hủy đơn hàng."
                     ><i class="fa-solid fa-ban"></i></a>
                 </th:block>
             </td>

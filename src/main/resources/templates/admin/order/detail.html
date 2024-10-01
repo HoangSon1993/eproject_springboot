@@ -8,95 +8,103 @@
     <style th:replace="~{/admin/common/head_tag}"></style>
 </head>
 <body>
-    <div th:replace="~{/admin/common/content_first}"></div>
-    <div class="container">
-        <h1 class="text-center">Chi Tiết Đơn Hàng</h1> <hr/>
-        <div class="row">
-            <div class="col-md-6">
-                <dl>
-                    <dt>Mã đơn hàng</dt>
-                    <dd th:text="${order.code}"></dd>
-                    <dt>Ngày tạo</dt>
-                    <dd th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy')}"></dd>
-                    <dt>Trạng thái</dt>
-                    <dd th:text="${order.status}==1?'Hoàn thành':'Chưa hoàn thành'"></dd>
-                    <dt>Hóa Đơn</dt>
-                    <th:block th:if="${order.status}==1">
-                        <dd>
-                            <a th:href="@{/admin/invoice/order-invoice(orderId=${order.orderId})}" class="btn btn-info">Xem hóa đơn</a>
-                        </dd>
-                    </th:block>
-                    <th:block th:if="${order.status}==0">
-                        <dd>
-                            <p>Chưa có hóa đơn</p>
-                        </dd>
-                    </th:block>
-                </dl>
-            </div>
-            <div class="col-md-6">
-                <dl>
-                    <dt>Người nhận</dt>
-                    <dd th:text="${order.firstName + ' ' +order.lastName}"></dd>
-                    <dt>Địa chỉ giao hàng</dt>
-                    <dd th:text="${order.shippingAddress}"></dd>
-                    <dt>Số điện thoại người nhận</dt>
-                    <dd th:text="${order.shippingPhone}"></dd>
-                    <dt>Tổng tiền</dt>
-                    <dd th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT') + '(VNĐ)'}"></dd>
-                </dl>
-            </div>
-        </div>
-        <hr/>
-        <table class="table table-light">
-            <thead class="table-dark table-striped table-bordered">
-                <tr>
-                    <th class="text-center">Hình ảnh</th>
-                    <th class="text-center">Tên sản phẩm</th>
-                    <th class="text-center">Đơn giá</th>
-                    <th class="text-center">Số lượng</th>
-                    <th class="text-center">Thành tiền</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                <th:block th:each="orderItem: ${orderDetails}">
-                    <tr th:if="${orderItem.combo==null}">
-                        <td class="text-center">
-                            <img style="object-fit: cover;width: 240px; height: 185px" th:src="@{${s3BucketUrl} + ${orderItem.product.image}}" alt="">
-                        </td>
-                        <td class="text-center" th:text="${orderItem.product.productName}"></td>
-                        <td class="text-center" th:text="${#numbers.formatDecimal(orderItem.uniquePrice, 1, 'COMMA', 0, 'POINT')}"></td>
-                        <td class="text-center" th:text="${orderItem.quantity}"></td>
-                        <td class="text-center" th:text="${#numbers.formatDecimal(orderItem.uniquePrice*orderItem.quantity, 1, 'COMMA', 0, 'POINT')}"></td>
-                    </tr>
-                    <th:block th:if="${orderItem.combo!=null}" >
-                        <tr>
-                            <td class="text-center">
-                                <img style="object-fit: cover;width: 240px; height: 185px" th:src="@{${s3BucketUrl} + ${orderItem.combo.image}}" alt="">
-                            </td>
-                            <td class="text-center" th:text="${orderItem.combo.comboName}"></td>
-                            <td class="text-center" th:text="${#numbers.formatDecimal(orderItem.uniquePrice, 1, 'COMMA', 0, 'POINT')}"></td>
-                            <td class="text-center" th:text="${orderItem.quantity}"></td>
-                            <td class="text-center" th:text="${#numbers.formatDecimal(orderItem.uniquePrice*orderItem.quantity, 1, 'COMMA', 0, 'POINT')}"></td>
-                        </tr>
-                        <tr th:if="${orderItem.combo.comboDetails != null && orderItem.combo.comboDetails.size() > 0}">
-                            <td colspan="6">
-                                <table class="table" style="margin-left: 650px; width: 550px">
-                                    <tr th:each="detail : ${orderItem.combo.comboDetails}">
-                                        <td><img th:src="@{${s3BucketUrl} + ${detail.product.image}}" alt=""
-                                                 style="height: 50px"></td>
-                                        <td th:text="${detail.product.productName}"></td>
-                                        <td th:text="${detail.quantity}"></td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </th:block>
+<div th:replace="~{/admin/common/content_first}"></div>
+<div class="container">
+    <h1 class="text-center">Chi Tiết Đơn Hàng</h1>
+    <hr/>
+    <div class="row">
+        <div class="col-md-6">
+            <dl>
+                <dt>Mã đơn hàng</dt>
+                <dd th:text="${order.code}"></dd>
+                <dt>Ngày tạo</dt>
+                <dd th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></dd>
+                <dt>Trạng thái</dt>
+                <dd th:text="${order.status.getDescription()}"></dd>
+                <dt>Hóa Đơn</dt>
+                <th:block th:if="${order.status}==1">
+                    <dd>
+                        <a th:href="@{/admin/invoice/order-invoice(orderId=${order.orderId})}" class="btn btn-info">Xem
+                            hóa đơn</a>
+                    </dd>
                 </th:block>
-
-            </tbody>
-        </table>
+                <th:block th:if="${order.status}==0">
+                    <dd>
+                        <p>Chưa có hóa đơn</p>
+                    </dd>
+                </th:block>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <dl>
+                <dt>Người nhận</dt>
+                <dd th:text="${order.firstName + ' ' +order.lastName}"></dd>
+                <dt>Địa chỉ giao hàng</dt>
+                <dd th:text="${order.shippingAddress}"></dd>
+                <dt>Số điện thoại người nhận</dt>
+                <dd th:text="${order.shippingPhone}"></dd>
+                <dt>Tổng tiền</dt>
+                <dd th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT') + '(VNĐ)'}"></dd>
+            </dl>
+        </div>
     </div>
-    <div th:replace="~{/admin/common/content_footer}"></div>
+    <hr/>
+    <table class="table table-light">
+        <thead class="table-dark table-striped table-bordered">
+        <tr>
+            <th class="text-center">Hình ảnh</th>
+            <th class="text-center">Tên sản phẩm</th>
+            <th class="text-center">Đơn giá</th>
+            <th class="text-center">Số lượng</th>
+            <th class="text-center">Thành tiền</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:each="orderItem: ${orderDetails}">
+            <tr th:if="${orderItem.combo==null}">
+                <td class="text-center">
+                    <img style="object-fit: cover;width: 240px; height: 185px"
+                         th:src="@{${s3BucketUrl} + ${orderItem.product.image}}" alt="">
+                </td>
+                <td class="text-center" th:text="${orderItem.product.productName}"></td>
+                <td class="text-center"
+                    th:text="${#numbers.formatDecimal(orderItem.uniquePrice, 1, 'COMMA', 0, 'POINT')}"></td>
+                <td class="text-center" th:text="${orderItem.quantity}"></td>
+                <td class="text-center"
+                    th:text="${#numbers.formatDecimal(orderItem.uniquePrice*orderItem.quantity, 1, 'COMMA', 0, 'POINT')}"></td>
+            </tr>
+            <th:block th:if="${orderItem.combo!=null}">
+                <tr>
+                    <td class="text-center">
+                        <img style="object-fit: cover;width: 240px; height: 185px"
+                             th:src="@{${s3BucketUrl} + ${orderItem.combo.image}}" alt="">
+                    </td>
+                    <td class="text-center" th:text="${orderItem.combo.comboName}"></td>
+                    <td class="text-center"
+                        th:text="${#numbers.formatDecimal(orderItem.uniquePrice, 1, 'COMMA', 0, 'POINT')}"></td>
+                    <td class="text-center" th:text="${orderItem.quantity}"></td>
+                    <td class="text-center"
+                        th:text="${#numbers.formatDecimal(orderItem.uniquePrice*orderItem.quantity, 1, 'COMMA', 0, 'POINT')}"></td>
+                </tr>
+                <tr th:if="${orderItem.combo.comboDetails != null && orderItem.combo.comboDetails.size() > 0}">
+                    <td colspan="6">
+                        <table class="table" style="margin-left: 650px; width: 550px">
+                            <tr th:each="detail : ${orderItem.combo.comboDetails}">
+                                <td><img th:src="@{${s3BucketUrl} + ${detail.product.image}}" alt=""
+                                         style="height: 50px"></td>
+                                <td th:text="${detail.product.productName}"></td>
+                                <td th:text="${detail.quantity}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </th:block>
+        </th:block>
+
+        </tbody>
+    </table>
+</div>
+<div th:replace="~{/admin/common/content_footer}"></div>
 </body>
 </html>

@@ -1,13 +1,13 @@
 package com.sontung.eproject_springboot.repository.impl;
 
+import com.sontung.eproject_springboot.entity.Account;
 import com.sontung.eproject_springboot.entity.Order;
-import com.sontung.eproject_springboot.entity.*;
+import com.sontung.eproject_springboot.entity.Product;
 import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -154,7 +154,7 @@ public class SearchRepositoryImpl implements SearchRepository {
 
         // Thêm điều kiện tìm kiếm
         if (StringUtils.hasLength(search)) {
-            hqlQuery.append(" AND LOWER(p.productName) like lower (:productName)");
+            hqlQuery.append(" AND LOWER(p.productName) LIKE LOWER (:productName)");
             //  hqlQuery.append(" AND LOWER(p.description) like lower (:discription)");
         }
 
@@ -202,10 +202,14 @@ public class SearchRepositoryImpl implements SearchRepository {
         // Tạo truy vấn
         Query selectQuery = entityManager.createQuery(hqlQuery.toString());
 
+        // Phân trang
+        selectQuery.setFirstResult((int) pageable.getOffset());
+        selectQuery.setMaxResults(pageable.getPageSize());
+
         // Gán giá trị vào tham số tìm kiếm nếu có.
         if (StringUtils.hasLength(search)) {
             selectQuery.setParameter("productName", String.format("%%%s%%", search));
-            // selectQuery.setParameter("discription", String.format("%%%s%%", search));
+            // selectQuery.setParameter("description", String.format("%%%s%%", search));
         }
 
         // Gán gía trị vào tham số 'status' nếu có.
@@ -218,10 +222,6 @@ public class SearchRepositoryImpl implements SearchRepository {
             selectQuery.setParameter("timeStart", timeStart); // String.format("%%%s%%", timeStart)
             selectQuery.setParameter("timeEnd", timeEnd); // String.format("%%%s%%", timeEnd)
         }
-
-        // Phân trang
-        selectQuery.setFirstResult((int) pageable.getOffset());
-        selectQuery.setMaxResults(pageable.getPageSize());
 
         // Lấy kết quả.
         List orders = selectQuery.getResultList();
@@ -308,7 +308,7 @@ public class SearchRepositoryImpl implements SearchRepository {
         // Điều kiện tìm kiếm chính xác
         Predicate exactMatchPredicate = null;
         if (StringUtils.hasLength(search)) {
-            String searchPattern = "%" + search.toLowerCase() + "%";
+            String searchPattern = "%" + removeDiacritics(search).toLowerCase() + "%";
 
             // Điều kiện tìm kiếm chính xác
             exactMatchPredicate = cb.or(
@@ -390,99 +390,105 @@ public class SearchRepositoryImpl implements SearchRepository {
             LocalDateTime filterDate,
             LocalDateTime filterDate2) {
         // Khởi tạo CriteriaBuilder và CriteriaQuery
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Order> cq = cb.createQuery(Order.class);
-        Root<Order> root = cq.from(Order.class);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
+        Root<Order> root = query.from(Order.class);
 
         // Join với bảng OrderDetail
-        Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.INNER);
+        //Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.RIGHT);
 
         // Join với bảng Product từ OrderDetail
-        Join<OrderDetail, Product> productJoin = orderDetailJoin.join("product", JoinType.INNER);
+        //  Join<OrderDetail, Product> productJoin = orderDetailJoin.join("product", JoinType.RIGHT);
 
 
         // Join với bảng Combo từ OrderDetail
-        Join<OrderDetail, Combo> comboJoin = orderDetailJoin.join("combo", JoinType.LEFT);
+        //Join<OrderDetail, Combo> comboJoin = orderDetailJoin.join("combo", JoinType.RIGHT);
 
         // Join với comboDetail từt Combo
-        Join<Combo, ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.LEFT);
+        //Join<Combo, ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.RIGHT);
         // Join với bảng product từ comboDetail
-        Join<ComboDetail, Product> productJoinCombodetail = comboDetailJoin.join("product", JoinType.LEFT);
+        //Join<ComboDetail, Product> productJoinCombodetail = comboDetailJoin.join("product", JoinType.RIGHT);
 
         // Xây dựng điều kiện tìm kiếm
         List<Predicate> predicates = new ArrayList<>();
 
         // Điều kiện tìm kiếm chính xác
         if (StringUtils.hasLength(search)) {
-            String searchPattern = "%" + search.toLowerCase() + "%";
-            predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("code")), searchPattern),
-                    cb.like(cb.lower(root.get("shippingAddress")), searchPattern),
-                    cb.like(cb.lower(root.get("shippingPhone")), searchPattern),
-                    cb.like(cb.lower(root.get("email")), searchPattern),
-                    cb.like(cb.lower(root.get("firstName")), searchPattern),
-                    cb.like(cb.lower(root.get("lastName")), searchPattern),
-                    cb.like(cb.lower(productJoin.get("productName")), searchPattern),
-                    cb.like(cb.lower(productJoinCombodetail.get("productName")), searchPattern)
+            String searchPattern = "%" + removeDiacritics(search).toLowerCase() + "%";
+            predicates.add(criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("code")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("shippingAddress")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("shippingPhone")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern)
+//                    criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productName")), searchPattern),
+//                    criteriaBuilder.like(criteriaBuilder.lower(productJoinCombodetail.get("productName")), searchPattern)
             ));
         }
 
         // Điều kiện lọc theo status
         if (StringUtils.hasLength(status)) {
             int statusValue = OrderStatus.valueOf(status).ordinal();
-            predicates.add(cb.equal(root.get("status"), statusValue));
+            predicates.add(criteriaBuilder.equal(root.get("status"), statusValue));
         }
 
         // Điều kiện lọc theo ngày
         if (filterDate != null && filterDate2 != null) {
-            predicates.add(cb.between(root.get("orderDate").as(LocalDateTime.class), filterDate, filterDate2));
+            predicates.add(criteriaBuilder.between(root.get("orderDate").as(LocalDateTime.class), filterDate, filterDate2));
         }
 
         // Điều kiện lọc theo giá (giả sử amongPrice là giá lớn nhất)
         switch (amongPrice) {
             case 1:
                 // <=100.000
-                predicates.add(cb.lessThanOrEqualTo(root.get("totalAmount"), 100000));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("totalAmount"), 100000));
                 break;
             case 2:
                 // 100.000 - 200.000
-                predicates.add(cb.between(root.get("totalAmount"), 100000, 200000));
+                predicates.add(criteriaBuilder.between(root.get("totalAmount"), 100000, 200000));
                 break;
             case 3:
                 // 200.000 -300.000
-                predicates.add(cb.between(root.get("totalAmount"), 200000, 300000));
+                predicates.add(criteriaBuilder.between(root.get("totalAmount"), 200000, 300000));
 
                 break;
             case 4:
                 // 300.000 - 500.000
-                predicates.add(cb.between(root.get("totalAmount"), 300000, 500000));
+                predicates.add(criteriaBuilder.between(root.get("totalAmount"), 300000, 500000));
 
                 break;
             case 5:
                 // > 500.000
-                predicates.add(cb.greaterThanOrEqualTo(root.get("totalAmount"), 500000));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("totalAmount"), 500000));
                 break;
         }
 
 
         // Kết hợp tất cả điều kiện bằng AND
-        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 
         // Thêm sắp xếp nếu cần
-        cq.orderBy(cb.desc(root.get("orderDate")));
+        query.orderBy(criteriaBuilder.desc(root.get("orderDate")));
 
         // Áp dụng phân trang và thực hiện truy vấn
-        TypedQuery<Order> query = entityManager.createQuery(cq);
-        query.setFirstResult(pageNo * pageSize);
-        query.setMaxResults(pageSize);
+        List<Order> orders = entityManager.createQuery(query)
+                // Todo: pageNo * pageSize
+                .setFirstResult(pageNo * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
 
-        // Thực hiện truy vấn và trả về kết quả đã phân trang
-        List<Order> orders = query.getResultList();
+//        TypedQuery<Order> query = entityManager.createQuery(query);
+//        query.setFirstResult(pageNo * pageSize);
+//        query.setMaxResults(pageSize);
+//        // Thực hiện truy vấn và trả về kết quả đã phân trang
+//        List<Order> orders = query.getResultList();
+
 
         // Tính toán tổng số bản ghi
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
         Root<Order> countRoot = countQuery.from(Order.class);
-        countQuery.select(cb.count(countRoot)).where(cb.and(predicates.toArray(new Predicate[0])));
+        countQuery.select(criteriaBuilder.count(countRoot)).where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
         Long totalElements;
         try {
             totalElements = entityManager.createQuery(countQuery).getSingleResult();

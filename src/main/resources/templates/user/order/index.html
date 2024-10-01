@@ -106,7 +106,7 @@
                                     </td>
                                     <td th:text="${#numbers.formatDecimal(item.totalAmount,1,'COMMA',0,'POINT')}"></td>
                                     <td th:text="${item.shippingAddress}"></td>
-                                    <td th:text="${#temporals.format(item.orderDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td th:text="${#temporals.format(item.orderDate, 'yyyy-MM-dd HH:mm')}"></td>
 
                                     <td th:if="${item.status == T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED}"
                                         th:text="${T(com.sontung.eproject_springboot.enums.OrderStatus).ORDERED.getDescription()}"></td>
