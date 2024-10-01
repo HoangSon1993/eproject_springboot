@@ -7,6 +7,7 @@ import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
 import com.sontung.eproject_springboot.service.S3Service;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -50,14 +51,9 @@ public class ProductController {
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String sortBy,
             @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "5") int pageSize,
+            @Min(5) @RequestParam(defaultValue = "5") int pageSize,
             Model model, Sort sort) {
-        if (pageSize < 0) {
-            pageSize = 5;
-        }
-        if (pageNo < 0) {
-            pageNo = 0;
-        }
+        if (pageNo < 0) pageNo = 0;
 
         if (filterDate2 == null) {
             filterDate2 = filterDate;

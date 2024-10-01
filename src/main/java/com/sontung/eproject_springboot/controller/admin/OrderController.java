@@ -4,6 +4,7 @@ import com.sontung.eproject_springboot.entity.Order;
 import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.OrderService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,17 +31,12 @@ public class OrderController {
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate2,
                             @RequestParam(defaultValue = "0") int pageNo,
-                            @RequestParam(defaultValue = "9") int pageSize,
+                            @Min(5) @RequestParam(defaultValue = "9") int pageSize,
                             @RequestParam(defaultValue = "") String search,
                             @RequestParam(defaultValue = "") String status,
                             Model model) {
 
-        if (pageNo < 0) {
-            pageNo = 0;
-        }
-        if (pageSize < 0) {
-            pageSize = 9;
-        }
+        if (pageNo < 0) pageNo = 0;
 
         LocalDateTime timeStart = null;
         LocalDateTime timeEnd = null;

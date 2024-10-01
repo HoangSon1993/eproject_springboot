@@ -26,10 +26,12 @@ public class Order {
     BigDecimal totalAmount;
 
     /**
-     * Trong DB sẽ lưu giá trị  0,1,2
-     * PEDING:'Chờ thanh toán'
+     * Trong DB sẽ lưu giá trị  0,1,2,3
+     * ORRERED: 'Đã đặt hàng'
      * PAID: 'Đã thanh toán'
      * CANCELED: 'Huỷ bỏ'
+     * PEDING:'Chờ thanh toán'
+     * COD: 'Thanh toán khi nhận hàng'
      */
     @Enumerated(EnumType.ORDINAL)
     OrderStatus status;

@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class OrderController {
     @GetMapping("/index")
     public String index(Model model,
                         @RequestParam(defaultValue = "0") int pageNo,
-                        @RequestParam(defaultValue = "10") int pageSize,
+                        @Min(5) @RequestParam(defaultValue = "5") int pageSize,
                         @RequestParam(defaultValue = "") String search,
                         @RequestParam(defaultValue = "") String sortBy,
                         @RequestParam(defaultValue = "") String status,

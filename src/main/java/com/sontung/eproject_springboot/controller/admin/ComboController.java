@@ -8,6 +8,7 @@ import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.entity.OrderDetail;
 import com.sontung.eproject_springboot.service.ComboService;
 import com.sontung.eproject_springboot.service.S3Service;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,14 +39,11 @@ public class ComboController {
     @GetMapping
     public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
-                            @RequestParam(defaultValue = "9") int size,
+                            @Min(5) @RequestParam(defaultValue = "9") int size,
                             Model model) {
         model.addAttribute("currentPage", page);
         if (page < 1) {
             page = 1;
-        }
-        if (size < 1) {
-            size = 9;
         }
         model.addAttribute("size", size);
         if (filterDate == null) {

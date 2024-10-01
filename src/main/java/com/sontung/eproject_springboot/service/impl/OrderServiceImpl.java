@@ -623,6 +623,7 @@ public class OrderServiceImpl implements OrderService {
             if (order != null) {
                 order.setStatus(OrderStatus.CANCELED);
             }
+            orderRepository.save(order);
         }
     }
 

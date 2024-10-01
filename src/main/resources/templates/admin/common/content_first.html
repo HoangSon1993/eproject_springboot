@@ -16,18 +16,19 @@
                 <nav class="mdc-list mdc-drawer-menu">
                     <div class="mdc-list-item mdc-drawer-item">
                         <a class="mdc-drawer-link" href="../../index.html">
-                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">home</i>
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon"
+                               aria-hidden="true">home</i>
                             Trang chủ
                         </a>
                     </div>
 
 
                     <div class="mdc-list-item mdc-drawer-item">
-<!--                        <a class="mdc-expansion-panel-link" href="#" data-toggle="expansionPanel" data-target="sample-page-submenu">-->
-<!--                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">pages</i>-->
-<!--                            Sample Pages-->
-<!--                            <i class="mdc-drawer-arrow material-icons">chevron_right</i>-->
-<!--                        </a>-->
+                        <!--                        <a class="mdc-expansion-panel-link" href="#" data-toggle="expansionPanel" data-target="sample-page-submenu">-->
+                        <!--                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">pages</i>-->
+                        <!--                            Sample Pages-->
+                        <!--                            <i class="mdc-drawer-arrow material-icons">chevron_right</i>-->
+                        <!--                        </a>-->
 
                     </div>
                     <div class="mdc-expansion-panel" id="sample-page-submenu">
@@ -58,9 +59,9 @@
 
                 </nav>
             </div>
-            <div class="profile-actions">
-                <form th:action="@{/admin/logout}" method="post">
-                    <button type="submit" class="btn btn-danger">Đăng Xuất</button>
+            <div class="profile-actions px-0">
+                <form th:action="@{/admin/logout}" method="post" class="w-100">
+                    <button type="submit" class="btn btn-danger w-100">Đăng Xuất</button>
                 </form>
             </div>
 
@@ -72,7 +73,9 @@
         <header class="mdc-top-app-bar">
             <div class="mdc-top-app-bar__row">
                 <div class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-                    <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button sidebar-toggler">menu</button>
+                    <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button sidebar-toggler">
+                        menu
+                    </button>
                     <span class="mdc-top-app-bar__title" th:text="'Greetings ' + ${loggedInUser.fullName}"></span>
 
                 </div>

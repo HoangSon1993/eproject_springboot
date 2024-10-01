@@ -5,6 +5,7 @@ import com.sontung.eproject_springboot.entity.Product;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.CategoryService;
 import com.sontung.eproject_springboot.service.ProductService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,10 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller(value = "userProductController")
 
@@ -46,20 +50,34 @@ public class ProductController {
     @GetMapping("/index")
     public String index(
             @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "9") int pageSize,
+            @Min(5) @RequestParam(defaultValue = "9") int pageSize,
             @RequestParam(defaultValue = "0") int amongPrice,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) String categoryId,
-            @RequestParam(defaultValue = "asc") String sortBy,
+            @RequestParam(defaultValue = "productName:asc") String sortBy,
             Model model
     ) {
         if (pageNo < 0) pageNo = 0;
+
         List<Sort.Order> sorts = new ArrayList<>();
-        if (sortBy.equals("asc")) {
-            sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
-        } else {
-            sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
+        if (StringUtils.hasLength(sortBy)) {
+            // productName:asc|desc
+            Pattern pattern = Pattern.compile("(\\w+?)(:)(.*)");
+            Matcher matcher = pattern.matcher(sortBy);
+            if (matcher.find()) {
+                if (matcher.group(3).equalsIgnoreCase("asc")) {
+                    sorts.add(new Sort.Order(Sort.Direction.ASC, matcher.group(1)));
+                } else {
+                    sorts.add(new Sort.Order(Sort.Direction.DESC, matcher.group(1)));
+                }
+            }
         }
+
+//        if (sortBy.equals("asc")) {
+//            sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
+//        } else {
+//            sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
+//        }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sorts));
 
