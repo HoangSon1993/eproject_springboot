@@ -29,7 +29,7 @@
                             <input type="search" class="form-control p-3" placeholder="Tìm kiếm đơn hàng"
                                    aria-describedby="search-icon-1" name="search" th:value="${search}">
                             <button type="submit" id="search-icon-2" class="input-group-text p-3"
-                                    style=":hover{ background-color:#ffb524 }"><i
+                                    style=":hover{ background-color: var(--bs-secondary) }"><i
                                     class="fa fa-search"></i></button>
                         </form>
                     </div>
@@ -63,13 +63,13 @@
                                                     <span th:if="${status.getKey() == selectedStatus}"
                                                           th:classappend="'text-muted'"
                                                           th:text="${status.getValue()}"
-                                                          style="color : #ffb524 !important;">
+                                                          style="color : var(--bs-secondary) !important;">
                                                     </span>
                                                     <th:block th:unless="${status.getKey() == selectedStatus}">
                                                         <a th:if="${status.getKey() == 'ORDERED'}"
                                                            th:href="@{/order/index(status=${''}, search=${search}, sort=${sortBy}, size=${orders.size})}"
                                                            th:text="All"
-                                                           th:style="${selectedStatus== '' ? 'color : #ffb524 !important;': ''}"
+                                                           th:style="${selectedStatus== '' ? 'color : var(--bs-secondary) !important;': ''}"
                                                         ></a>
                                                         <a th:unless="${status.getKey() == 'ORDERED'}"
                                                            th:href="@{/order/index(status=${status.key}, search=${search}, sort=${sortBy}, size=${orders.size})}"

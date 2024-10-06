@@ -44,7 +44,7 @@
                         <!--<i class="fas fa-user fa-2x"></i>-->
                         <p class="my-auto" th:text="${loggedInUser.userName}"></p>
 
-                        <form th:action="@{/logout}" method="post">
+                        <form th:action="@{/logout}" method="post" style="margin-left: 10px;">
                             <button type="submit" class="btn btn-danger">Log out</button>
                         </form>
                     </th:block>

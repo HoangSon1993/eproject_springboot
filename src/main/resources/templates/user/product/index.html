@@ -8,7 +8,7 @@
     <style th:replace="~{/user/common/head_tag}"></style>
     <style>
         #search-icon-2:hover {
-            background-color: #ffb524;
+            background-color: var(--bs-secondary);
         }
 
         .form-control::placeholder {
@@ -85,7 +85,7 @@
                                 <input type="search" class="form-control p-3" placeholder="Tìm theo tên sản phẩm"
                                        aria-describedby="search-icon-1" name="search" th:value="${search}">
                                 <button type="submit" id="search-icon-2" class="input-group-text p-3"
-                                        style=":hover{ background-color:#ffb524 }"><i
+                                        style=":hover{ background-color: var(--bs-secondary) }"><i
                                         class="fa fa-search"></i></button>
                             </form>
                         </div>
@@ -127,7 +127,7 @@
                                                     <span th:if="${item.categoryId == categoryId}"
                                                           th:classappend="'text-muted'"
                                                           th:text="${item.categoryName}"
-                                                          style="color: #ffb524 !important;">
+                                                          style="color: var(--bs-secondary) !important;">
                                                         <i class="fas fa-apple-alt me-2"></i>Apples</span>
                                                     <span th:text="'('+${categoryProductCounts[item.categoryId]}+')'">(3)</span>
                                                 </div>

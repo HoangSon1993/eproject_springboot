@@ -38,7 +38,15 @@
                 </div>
                 <!--            Thông báo thành công hay lỗi -->
                 <h3>Giỏ Hàng Của Bạn</h3>
-                <table class="table">
+                <div class="d-flex justify-content-center align-items-center flex-column"
+                     th:if="${#lists.isEmpty(cartDetail)}">
+                    <img th:src="@{${s3BucketUrl} + 'gio-hang-trong.jpg'}" alt="Giỏ hàng trống"/>
+                    <a class="btn btn-outline-warning btn-lg mt-5" href="/home-page"
+                       style="border-width: 3px; color: var(--bs-secondary)"
+                       onmouseover="this.style.color = 'white';" onmouseout="this.style.color='var(--bs-secondary)'" ;
+                    >Tiếp tục mua hàng</a>
+                </div>
+                <table class="table" th:unless="${#lists.isEmpty(cartDetail)}">
                     <thead>
                     <tr>
                         <th scope="col">
@@ -137,7 +145,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="row g-4 justify-content-end">
+            <div class="row g-4 justify-content-end" th:unless="${#lists.isEmpty(cartDetail)}">
                 <div class="col-8"></div>
                 <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
                     <div class="bg-light rounded">
