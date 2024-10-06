@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -62,8 +63,9 @@ public class SecurityConfig {
                         //.requestMatchers(HttpMethod.GET, ADMIN_PRIVATE_ENDPOINT_GET).hasRole("ADMIN")
                         .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
                 ).formLogin(form -> form.loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-                        .defaultSuccessUrl("/admin/home", true)  // Chuyển hướng sau khi đăng nhập thành công
-                        .successHandler(customAuthenticationSuccessHandler)
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi đăng nhập thành công thì Redireact tới URL này.
+                        .defaultSuccessUrl("/admin/home", false)  // Chuyển hướng sau khi đăng nhập thành công
+                        //.successHandler(customAuthenticationSuccessHandler)
                         .permitAll())
                 .logout(logout -> logout //Định cấu hình cho tính năng đăng xuất
                         .logoutUrl("/admin/logout") // Xử lý logout tại URL này
@@ -92,7 +94,8 @@ public class SecurityConfig {
                         .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
                 ).formLogin(form -> form.loginPage("/user/auth/login") // Trang đăng nhập cho người dùng
                         .loginProcessingUrl("/user/auth/login") // URL xử lý đăng nhập.
-                        .defaultSuccessUrl("/home-page", true)  // Chuyển hướng sau khi đăng nhập thành công
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi đăng nhập thành công thì Redireact tới URL này.
+                        .defaultSuccessUrl("/home-page", false)  //Default: Chuyển hướng sau khi đăng nhập thành công
                         .permitAll()).logout(logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST")) //Chỉ cho phép đăng xuất bằng phương thức POST.
                         .permitAll())
                 // Xử lý ngoại lệ nếu user có ROLE_ADMIN vào những endpoint không được vào.

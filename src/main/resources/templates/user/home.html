@@ -24,8 +24,6 @@
 <body>
 <div th:replace="~{/user/common/content_first}"></div>
 <div class="container" style="margin-top: 200px">
-
-    <div th:replace="~{/user/common/content_first}"></div>
     <div class="container mt-3">
         <th:block th:if="${loggedInUser}!=null">
             <h3 th:text="'Chào mừng ' + ${loggedInUser.fullName} + ' đã đến với website của chúng tôi'"></h3>
@@ -180,7 +178,6 @@
                             <div class="row g-4">
                                 <div class="col-lg-12">
                                     <div class="row g-4">
-                                        <!--                                        Todo th:each lap qua cac combo-->
                                         <th:block th:each="item : ${combos}">
                                             <div class="col-md-6 col-lg-4 col-xl-3">
                                                 <div class="rounded position-relative fruite-item">
@@ -283,8 +280,6 @@
                         setTimeout(() => {
                             notification.style.display = 'none';
                         }, 3000)
-                        // Todo: không cập nhật trên giao diện
-
                         // Cập nhật số lượng item trong Cart
                         const cartCountElement = document.getElementById('cart-count');
                         cartCountElement.innerText = data.cartItemCount

@@ -34,8 +34,6 @@ public class ComboController {
     private final ComboService comboService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // TODO: 29/07/2024
-    // TODO: 29/07/2024
     @GetMapping
     public String getCombos(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
                             @RequestParam(defaultValue = "1") int page,
