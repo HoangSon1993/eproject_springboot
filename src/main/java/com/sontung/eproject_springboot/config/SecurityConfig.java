@@ -1,7 +1,6 @@
 package com.sontung.eproject_springboot.config;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +29,7 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
+
     private final String[] ADMIN_PUBLIC_ENDPOINT_POST = {"/admin/auth/login"};
     private final String[] ADMIN_PUBLIC_ENDPOINT_GET = {};
     private final String[] ADMIN_PRIVATE_ENDPOINT_POST = {
@@ -76,7 +76,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINT_POST = {"/user/registerConfirm", "/user/auth/login"};
     private final String[] PUBLIC_ENDPOINT_GET = {"/home-page", "/product/**", "/combo/**", "/user/auth/login", "/user/register"};
-    private final String[] PRIVATE_ENDPOINT_POST = {"/user/edit-info-confirm", "/change-password-confirm"};
+    private final String[] PRIVATE_ENDPOINT_POST = {"/user/edit-info-confirm", "/change-password-confirm", "/cart/remove"};
     private final String[] PRIVATE_ENDPOINT_GET = {"/order/index", "/order/**", "/cart/**", "/user/my-info", "/user/edit-info", "/user/change-password"};
 
     @Bean

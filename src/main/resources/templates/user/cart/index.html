@@ -237,14 +237,11 @@
         if (quantity <= 0) {
             if (confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ hàng?")) {
                 // call api
-                fetch(`/remove`, {
+                fetch(`/cart/remove?id=${cartId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: cartId
-                    })
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
                 }).then(response => {
                     if (response.redirected) {
                         // Nếu server trả về một redirect, thực hiện điều hướng tới URL đó
