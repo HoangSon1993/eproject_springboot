@@ -130,6 +130,39 @@
 <div th:replace="~{/admin/common/content_footer}"></div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Đặt min cho startDate là ngày hiện tại và cập nhật min cho endDate khi startDate thay đổi
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (startDateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.setAttribute('min', today);
+        }
+
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', function () {
+                const startDate = new Date(this.value);
+                if (!isNaN(startDate)) {
+                    const minEndDate = new Date(startDate);
+                    minEndDate.setDate(minEndDate.getDate() + 1); // Thêm 1 ngày
+                    const minEndDateStr = minEndDate.toISOString().split('T')[0];
+                    endDateInput.setAttribute('min', minEndDateStr);
+
+                    // Nếu endDate hiện tại không hợp lệ, đặt lại giá trị
+                    const currentEndDate = new Date(endDateInput.value);
+                    if (currentEndDate < minEndDate) {
+                        endDateInput.value = minEndDateStr;
+                    }
+                } else {
+                    // Nếu không chọn startDate, đặt min endDate về ngày hôm nay +1
+                    const minEndDate = new Date();
+                    minEndDate.setDate(minEndDate.getDate() + 1);
+                    const minEndDateStr = minEndDate.toISOString().split('T')[0];
+                    endDateInput.setAttribute('min', minEndDateStr);
+                }
+            });
+        }
+
         // Function to add selected product to the table
         window.addProductToTable = function (productId, productName, productPrice) {
             const tableBody = document.getElementById('selectedProductTableBody');
@@ -148,6 +181,16 @@
             updateLocalStorage();
 
             addQuantityChangeListener(newRow.querySelector('.quantity-input'));
+            // Adding event listener to quantity input
+            const quantityInput = newRow.querySelector('.quantity-input');
+            addQuantityChangeListener(quantityInput);
+            quantityInput.addEventListener('input', function() {
+                if (this.value < 1) {
+                    this.value = 1;
+                }
+                updateTotalAmount();
+                updateLocalStorage();
+            });
             newRow.querySelector('.btn-remove').addEventListener('click', removeProduct);
         }
 

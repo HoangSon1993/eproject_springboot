@@ -36,6 +36,9 @@ public class AdminInitializer {
             Account account = new Account();
             account.setUserName("admin");
             account.setPassword(passwordEncoder.encode("admin"));
+            account.setFullName("Mrs.Luyen");
+            account.setPhone("0985220947");
+            account.setEmail("admin@gmail.com");
             Set<Role> roles = new HashSet<>();
             roles.add(adminRole);
             account.setRoles(roles);
