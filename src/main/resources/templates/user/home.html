@@ -25,7 +25,7 @@
 <div th:replace="~{/user/common/content_first}"></div>
 <div class="container" style="margin-top: 200px">
 
-    <div th:replace="~{/user/common/content_first}"></div>
+<!--    <div th:replace="~{/user/common/content_first}"></div>-->
     <div class="container mt-3">
         <th:block th:if="${loggedInUser}!=null">
             <h3 th:text="'Chào mừng ' + ${loggedInUser.fullName} + ' đã đến với website của chúng tôi'"></h3>
@@ -245,10 +245,9 @@
 </div>
 <div th:replace="~{/user/common/content_footer}"></div>
 <script>
-    const notification = document.getElementById("notification");
-
     const addToCartButton = document.querySelectorAll('.btn-add-to-cart');
     addToCartButton.forEach(button => {
+        const notification = document.getElementById("notification");
         button.addEventListener('click', function (event) {
             event.preventDefault();
 
@@ -287,7 +286,10 @@
 
                         // Cập nhật số lượng item trong Cart
                         const cartCountElement = document.getElementById('cart-count');
+                        console.log(cartCountElement.innerText);
                         cartCountElement.innerText = data.cartItemCount
+                        //cartCountElement.textContent = data.cartItemCount;
+                        console.log(cartCountElement);
                     }
                 })
                 .catch(error => {
