@@ -33,7 +33,7 @@ public class Product {
     String description;
 
     @NotNull(message = "Giá không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
+    @DecimalMin(value = "10000.0", inclusive = true, message = "Giá phải lớn hơn 0 hoặc bằng 10.000d") // inclusive = true: lớn hơn hoặc bằng
     BigDecimal price;
     Integer status;
     String image;
@@ -69,7 +69,7 @@ public class Product {
     @Transient
     public String getImageUrl() {
         if (image == null || image.isEmpty()) {
-            return "";
+            return "https://images-xoi-che-co-luyen.s3.ap-southeast-1.amazonaws.com/no-image.jpg";
         }
         return "https://images-xoi-che-co-luyen.s3.ap-southeast-1.amazonaws.com/" + image;
     }

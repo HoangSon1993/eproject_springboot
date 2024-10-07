@@ -125,6 +125,9 @@ public class ProductController {
                 return "error";
             }
             // Case image is Null
+            product.setImage("no-image.jpg");
+            product.setStatus(0);
+            productService.save(product);
             return "redirect:/admin/product";
         } else {
             // Case Category Not Found
