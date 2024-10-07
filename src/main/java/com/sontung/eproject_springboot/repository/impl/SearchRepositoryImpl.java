@@ -473,7 +473,6 @@ public class SearchRepositoryImpl implements SearchRepository {
 
         // Áp dụng phân trang và thực hiện truy vấn
         List<Order> orders = entityManager.createQuery(query)
-                // Todo: pageNo * pageSize
                 .setFirstResult(pageNo * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();

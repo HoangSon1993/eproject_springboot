@@ -9,8 +9,8 @@
 </head>
 <body>
 <div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 mt-5 pt-5">
 
             <div th:if="${param.error}">
                 <div class="alert alert-danger">Invalid Email or Password</div>
@@ -19,25 +19,25 @@
                 <div class="alert alert-success"> You have been logged out.</div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-center">Login Form</h2>
+            <div class="card border border-primary shadow-lg" style="border-radius: 1rem">
+                <div class="card-header p-3">
+                    <h2 class="text-center">Đăng nhập quản trị viên</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-5">
                     <form method="post" role="form" th:action="@{/admin/auth/login}" class="form-horizontal">
                         <div class="form-group mb-3">
-                            <label class="control-label"> Email</label>
+                            <label class="control-label">Email</label>
                             <input type="text" id="username" name="username" class="form-control"
-                                   placeholder="Enter email address"/>
+                                   placeholder="Nhập địa chỉ email"/>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="control-label"> Password</label>
+                            <label class="control-label">Mật khẩu</label>
                             <input type="password" id="password" name="password" class="form-control"
-                                   placeholder="Enter password"/>
+                                   placeholder="Nhập mật khẩu"/>
                         </div>
-                        <div class="form-group mb-3">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="form-group my-5">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Đăng nhập</button>
                         </div>
                     </form>
                 </div>
