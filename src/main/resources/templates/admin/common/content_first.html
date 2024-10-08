@@ -1,10 +1,10 @@
-<script src="/assets/js/preloader.js"></script>
+<script src="assets/js/preloader.js"></script>
 <div class="body-wrapper">
     <!-- partial:../../partials/_sidebar.html -->
     <aside class="mdc-drawer mdc-drawer--dismissible mdc-drawer--open">
         <div class="mdc-drawer__header">
-            <a href="../../index.html" class="brand-logo">
-                <img src="/assets/images/logo.svg" alt="logo">
+            <a class="brand-logo" href="demo/index.html">
+                <img alt="logo" src="assets/images/logo.svg">
             </a>
         </div>
         <div class="mdc-drawer__content">
@@ -15,9 +15,9 @@
             <div class="mdc-list-group">
                 <nav class="mdc-list mdc-drawer-menu">
                     <div class="mdc-list-item mdc-drawer-item">
-                        <a class="mdc-drawer-link" href="../../index.html">
-                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon"
-                               aria-hidden="true">home</i>
+                        <a class="mdc-drawer-link" href="demo/index.html">
+                            <i aria-hidden="true"
+                               class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon">home</i>
                             Trang chủ
                         </a>
                     </div>
@@ -60,8 +60,8 @@
                 </nav>
             </div>
             <div class="profile-actions px-0">
-                <form th:action="@{/admin/logout}" method="post" class="w-100">
-                    <button type="submit" class="btn btn-danger w-100">Đăng Xuất</button>
+                <form class="w-100" method="post" th:action="@{/admin/logout}">
+                    <button class="btn btn-danger w-100" type="submit">Đăng Xuất</button>
                 </form>
             </div>
 
@@ -84,13 +84,13 @@
                         <button class="mdc-button mdc-menu-button">
                 <span class="d-flex align-items-center">
                   <span class="figure">
-                    <img src="/assets/images/faces/face1.jpg" alt="user" class="user">
+                    <img alt="user" class="user" src="assets/images/faces/face1.jpg">
                   </span>
                   <span class="user-name" th:text="${loggedInUser.fullName}"></span>
                 </span>
                         </button>
                         <div class="mdc-menu mdc-menu-surface" tabindex="-1">
-                            <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
+                            <ul aria-hidden="true" aria-orientation="vertical" class="mdc-list" role="menu">
                                 <li class="mdc-list-item" role="menuitem">
                                     <div class="item-thumbnail item-thumbnail-icon-only">
                                         <i class="mdi mdi-account-edit-outline text-primary"></i>
