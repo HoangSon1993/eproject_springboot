@@ -319,6 +319,7 @@ public class OrderServiceImpl implements OrderService {
         for (Cart cart : carts) {
             if (orderDtoRequest.getCartItems().contains(cart.getCartId())) {
                 BigDecimal price = BigDecimal.ZERO;
+                BigDecimal sumPrice = BigDecimal.ZERO;
                 OrderDetail.OrderDetailBuilder orderDetail = OrderDetail.builder()
                         .order(order)
                         .quantity(cart.getQuantity());
@@ -326,23 +327,23 @@ public class OrderServiceImpl implements OrderService {
                     // Case Product
                     //Todo: hanle product == null
                     Optional<Product> product = productRepository.findById(cart.getProductId());
-                    BigDecimal productPrice = product.get().getPrice();
-                    price = productPrice.multiply(BigDecimal.valueOf(cart.getQuantity()));
+                    price = product.get().getPrice();
+                    sumPrice = price.multiply(BigDecimal.valueOf(cart.getQuantity()));
                     orderDetail.product(product.get());
                 } else {
                     // Case Combo
                     //Todo: hanle combo == null
                     Optional<Combo> combo = comboRepository.findById(cart.getComboId());
-                    BigDecimal comboPrice = combo.get().getFinalAmount();
-                    price = comboPrice.multiply(BigDecimal.valueOf(cart.getQuantity()));
+                    price = combo.get().getFinalAmount();
+                    sumPrice = price.multiply(BigDecimal.valueOf(cart.getQuantity()));
                     orderDetail.combo(combo.get());
                 }
-                totalAmount = totalAmount.add(price);
+                totalAmount = totalAmount.add(sumPrice);
 
                 // Create Order Detail
                 orderDetail
                         .price(price)
-                        .totalPrice(price.multiply(new BigDecimal(cart.getQuantity())));
+                        .totalPrice(sumPrice);
                 // add OrderDetail to Order.
                 order.addOrderDetail(orderDetail.build());
             }

@@ -74,7 +74,7 @@
                                         </div>
                                     </th>
                                     <td class="py-5" th:text="${item.name}">Awesome Brocoli</td>
-                                    <td class="py-5" th:text="${item.price}">$69.00</td>
+                                    <td class="py-5" th:text="${#numbers.formatDecimal(item.price,'1','COMMA',0,'POINT')}">$69.00</td>
                                     <td class="py-5" th:text="${item.quantity}">2</td>
                                     <td class="py-5"
                                         th:text="${#numbers.formatDecimal(item.price*item.quantity, 1, 'COMMA', 0, 'POINT')}">

@@ -47,5 +47,6 @@ public class Account {
     private Set<Role> roles;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean passwordChanged = false; // Thêm trường này
 }
