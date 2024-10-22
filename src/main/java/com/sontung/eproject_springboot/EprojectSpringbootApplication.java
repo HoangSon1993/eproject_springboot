@@ -11,5 +11,4 @@ public class EprojectSpringbootApplication {
     public static void main(String[] args) {
         SpringApplication.run(EprojectSpringbootApplication.class, args);
     }
-
 }

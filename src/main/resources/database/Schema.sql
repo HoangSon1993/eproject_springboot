@@ -1,5 +1,6 @@
 create database xoi_che_co_luyen;
 
+
 create table account
 (
     account_id varchar(255) not null

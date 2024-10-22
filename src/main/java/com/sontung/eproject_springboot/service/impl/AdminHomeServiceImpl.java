@@ -1,8 +1,8 @@
 package com.sontung.eproject_springboot.service.impl;
 
-import com.sontung.eproject_springboot.service.AdminHomeService;
 import org.springframework.stereotype.Service;
 
+import com.sontung.eproject_springboot.service.AdminHomeService;
+
 @Service
-public class AdminHomeServiceImpl implements AdminHomeService {
-}
+public class AdminHomeServiceImpl implements AdminHomeService {}

@@ -1,8 +1,8 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.entity.Category;
-
 import java.util.List;
+
+import com.sontung.eproject_springboot.entity.Category;
 
 public interface CategoryService {
     List<Category> getCategories();

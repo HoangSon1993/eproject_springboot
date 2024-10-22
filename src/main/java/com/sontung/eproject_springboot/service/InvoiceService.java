@@ -1,8 +1,8 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.entity.Invoice;
-
 import java.util.List;
+
+import com.sontung.eproject_springboot.entity.Invoice;
 
 public interface InvoiceService {
     List<Invoice> getInvoices();

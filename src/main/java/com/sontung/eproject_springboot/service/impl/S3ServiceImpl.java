@@ -1,21 +1,5 @@
 package com.sontung.eproject_springboot.service.impl;
 
-import com.sontung.eproject_springboot.service.S3Service;
-import lombok.RequiredArgsConstructor;
-import net.coobird.thumbnailator.Thumbnails;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +8,26 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.UUID;
+import javax.imageio.ImageIO;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.sontung.eproject_springboot.service.S3Service;
+
+import lombok.RequiredArgsConstructor;
+import net.coobird.thumbnailator.Thumbnails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:aws-credentials.properties")
 public class S3ServiceImpl implements S3Service {
     @Value("${aws.s3.bucket}")
     private String buketName;
@@ -35,10 +35,8 @@ public class S3ServiceImpl implements S3Service {
     private final S3Client s3Client;
 
     @Override
-    public void uploadFile(MultipartFile file, String uniqueFilename) throws IOException,
-            AwsServiceException,
-            SdkClientException,
-            S3Exception {
+    public void uploadFile(MultipartFile file, String uniqueFilename)
+            throws IOException, AwsServiceException, SdkClientException, S3Exception {
 
         // Resize Image before uploadting.
         Path tempFile = Files.createTempFile("resized-", "." + getFileExtension(file)); // create file tmp.
@@ -50,23 +48,17 @@ public class S3ServiceImpl implements S3Service {
                             .bucket(buketName)
                             .key(uniqueFilename)
                             .contentType("image/jpg")
-                            .build()
-                    , tempFile
-            );
+                            .build(),
+                    tempFile);
         } finally {
             Files.deleteIfExists(tempFile); // Delete file tmp
         }
-
     }
 
     @Override
-    public void deleteFile(String image) throws AwsServiceException,
-            SdkClientException,
-            S3Exception {
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(buketName)
-                .key(image)
-                .build();
+    public void deleteFile(String image) throws AwsServiceException, SdkClientException, S3Exception {
+        DeleteObjectRequest deleteObjectRequest =
+                DeleteObjectRequest.builder().bucket(buketName).key(image).build();
         s3Client.deleteObject(deleteObjectRequest);
     }
 
@@ -74,11 +66,10 @@ public class S3ServiceImpl implements S3Service {
     public void updateFile(String fileName, InputStream newFileContent) throws Exception {
         try {
             // Tải lên hình ảnh mới (ghi đè nếu tồn tại)
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(buketName)
-                    .key(fileName)
-                    .build();
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(newFileContent, newFileContent.available()));
+            PutObjectRequest putObjectRequest =
+                    PutObjectRequest.builder().bucket(buketName).key(fileName).build();
+            s3Client.putObject(
+                    putObjectRequest, RequestBody.fromInputStream(newFileContent, newFileContent.available()));
         } catch (SdkClientException e) {
             throw new Exception("SDK Client Exception: " + e.getMessage(), e);
         } catch (IOException e) {

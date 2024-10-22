@@ -1,5 +1,13 @@
 package com.sontung.eproject_springboot.service.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.sontung.eproject_springboot.dto.CartDetailDTO;
 import com.sontung.eproject_springboot.entity.*;
 import com.sontung.eproject_springboot.exception.PriceChangedException;
@@ -7,14 +15,8 @@ import com.sontung.eproject_springboot.exception.ProductNotFoundException;
 import com.sontung.eproject_springboot.exception.UserNotFoundException;
 import com.sontung.eproject_springboot.repository.*;
 import com.sontung.eproject_springboot.service.CartService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,9 +36,12 @@ public class CartServiceImpl implements CartService {
      **/
     @Override
     public Cart addProductToCart(String userId, String productId, int quantity) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
-        Account account = accountRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Người dùng không tồn tại"));
+        Account account = accountRepository
+                .findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Người dùng không tồn tại"));
         Cart cartItem = cartRepository.findByAccountIdAndProductIdOrComboId(userId, productId, null);
         if (cartItem != null) {
             // Update quantity and amount
@@ -58,10 +63,9 @@ public class CartServiceImpl implements CartService {
     @Override
     public Cart addComboToCart(String userId, String comboId, int quantity) {
 
-        Combo combo = comboRepository.findById(comboId)
-                .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
-        Account account = accountRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        Combo combo = comboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
+        Account account =
+                accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
         Cart cart = cartRepository.findByAccountIdAndProductIdOrComboId(userId, null, comboId);
         if (cart == null) {
             cart = new Cart();
@@ -76,7 +80,6 @@ public class CartServiceImpl implements CartService {
             cartRepository.save(cart);
         }
         return cart;
-
     }
 
     /**
@@ -105,36 +108,40 @@ public class CartServiceImpl implements CartService {
 
         List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
         for (Cart cart : carts) {
-            CartDetailDTO.CartDetailDTOBuilder CartDetailDTOBuilder = CartDetailDTO.builder();
+            CartDetailDTO.CartDetailDTOBuilder cartDetailDTOBuilder = CartDetailDTO.builder();
 
-            CartDetailDTOBuilder.id(cart.getCartId());
-            CartDetailDTOBuilder.quantity(cart.getQuantity());
-            CartDetailDTOBuilder.price(cart.getPrice()); // Lưu giá cũ từ Cart.
+            cartDetailDTOBuilder.id(cart.getCartId());
+            cartDetailDTOBuilder.quantity(cart.getQuantity());
+            cartDetailDTOBuilder.price(cart.getPrice()); // Lưu giá cũ từ Cart.
 
             BigDecimal currentPrice;
 
             if (cart.getComboId() != null && cart.getProductId() == null) {
                 // Case CartDetail is Combo
-                Combo combo = comboRepository.findById(cart.getComboId())
+                Combo combo = comboRepository
+                        .findById(cart.getComboId())
                         .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
                 currentPrice = combo.getFinalAmount(); // Lấy giá hiện tại từ bảng combo.
-                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo() == combo).toList();
+                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream()
+                        .filter(cd -> cd.getCombo() == combo)
+                        .toList();
 
-                CartDetailDTOBuilder.name(combo.getComboName());
-                CartDetailDTOBuilder.image(combo.getImage());
-                CartDetailDTOBuilder.comboDetails(comboDetailList);
+                cartDetailDTOBuilder.name(combo.getComboName());
+                cartDetailDTOBuilder.image(combo.getImage());
+                cartDetailDTOBuilder.comboDetails(comboDetailList);
             } else {
                 // Case CartDetail is Product
-                Product product = productRepository.findById(cart.getProductId())
+                Product product = productRepository
+                        .findById(cart.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
                 currentPrice = product.getPrice();
-                CartDetailDTOBuilder.name(product.getProductName());
-                CartDetailDTOBuilder.image(product.getImage());
+                cartDetailDTOBuilder.name(product.getProductName());
+                cartDetailDTOBuilder.image(product.getImage());
             }
 
             // Cập nhật giá hiện tại vào DTO
-            CartDetailDTOBuilder.currentPrice(currentPrice);
-            cartDetailDTOList.add(CartDetailDTOBuilder.build());
+            cartDetailDTOBuilder.currentPrice(currentPrice);
+            cartDetailDTOList.add(cartDetailDTOBuilder.build());
         }
         return cartDetailDTOList;
     }
@@ -169,7 +176,8 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findById(cartDetailDTO.getId()).orElse(null);
         if (cart != null) {
             if (cart.getProductId() != null) {
-                Product product = productRepository.findById(cart.getProductId()).orElse(null);
+                Product product =
+                        productRepository.findById(cart.getProductId()).orElse(null);
                 cart.setPrice(product.getPrice());
             } else {
                 Combo combo = comboRepository.findById(cart.getComboId()).orElse(null);
@@ -225,17 +233,19 @@ public class CartServiceImpl implements CartService {
         if (newQuantity == null) {
             throw new RuntimeException("Số lượng không hợp lệ.");
         }
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại."));
         if (cart.getComboId() == null) {
             cart.setQuantity(newQuantity);
-            Product product = productRepository.findById(cart.getProductId())
+            Product product = productRepository
+                    .findById(cart.getProductId())
                     .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
             cart.setPrice(product.getPrice());
         } else {
             // Case Combo
             cart.setQuantity(newQuantity);
-            Combo combo = comboRepository.findById(cart.getComboId()).orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
+            Combo combo = comboRepository
+                    .findById(cart.getComboId())
+                    .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
             cart.setPrice(combo.getFinalAmount());
         }
         cartRepository.save(cart);
@@ -257,36 +267,41 @@ public class CartServiceImpl implements CartService {
         }
         List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
         for (Cart cart : carts) {
-            CartDetailDTO.CartDetailDTOBuilder CartDetailDTOBuilder = CartDetailDTO.builder();
+            CartDetailDTO.CartDetailDTOBuilder cartDetailDTOBuilder = CartDetailDTO.builder();
 
-            CartDetailDTOBuilder.id(cart.getCartId());
-            CartDetailDTOBuilder.quantity(cart.getQuantity());
-            CartDetailDTOBuilder.price(cart.getPrice()); // Lưu giá cũ từ Cart.
+            cartDetailDTOBuilder.id(cart.getCartId());
+            cartDetailDTOBuilder.quantity(cart.getQuantity());
+            cartDetailDTOBuilder.price(cart.getPrice()); // Lưu giá cũ từ Cart.
 
             BigDecimal currentPrice;
 
             if (cart.getComboId() != null && cart.getProductId() == null) {
                 // Case CartDetail is Combo
-                Combo combo = comboRepository.findById(cart.getComboId())
+                Combo combo = comboRepository
+                        .findById(cart.getComboId())
                         .orElseThrow(() -> new RuntimeException("Combo không tồn tại"));
                 currentPrice = combo.getFinalAmount();
-                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream().filter(cd -> cd.getCombo() == combo).toList();
+                List<ComboDetail> comboDetailList = iComboDetailRepository.findAll().stream()
+                        .filter(cd -> cd.getCombo() == combo)
+                        .toList();
 
-                CartDetailDTOBuilder.name(combo.getComboName());
-//                CartDetailDTOBuilder.price(combo.getFinalAmount());
-                CartDetailDTOBuilder.image(combo.getImage());
-                CartDetailDTOBuilder.comboDetails(comboDetailList);
+                cartDetailDTOBuilder.name(combo.getComboName());
+                //                cartDetailDTOBuilder.price(combo.getFinalAmount());
+                cartDetailDTOBuilder.image(combo.getImage());
+                cartDetailDTOBuilder.comboDetails(comboDetailList);
             } else {
                 // Case CartDetail is Product
-                Product product = productRepository.findById(cart.getProductId()).orElseThrow(() -> new RuntimeException("Product không tồn tại"));
+                Product product = productRepository
+                        .findById(cart.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
                 currentPrice = product.getPrice();
-                CartDetailDTOBuilder.name(product.getProductName());
-//                CartDetailDTOBuilder.price(product.getPrice());
-                CartDetailDTOBuilder.image(product.getImage());
+                cartDetailDTOBuilder.name(product.getProductName());
+                //                cartDetailDTOBuilder.price(product.getPrice());
+                cartDetailDTOBuilder.image(product.getImage());
             }
             // Cập nhật giá hiện tại vào DTO.
-            CartDetailDTOBuilder.currentPrice(currentPrice);
-            cartDetailDTOList.add(CartDetailDTOBuilder.build());
+            cartDetailDTOBuilder.currentPrice(currentPrice);
+            cartDetailDTOList.add(cartDetailDTOBuilder.build());
         }
         return cartDetailDTOList;
     }
@@ -304,18 +319,21 @@ public class CartServiceImpl implements CartService {
      **/
     @Override
     public Cart addItemToCart(String accountId, String comboId, String productId, int quantity) {
-        Account currentAccount = accountRepository.findById(accountId)
+        Account currentAccount = accountRepository
+                .findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
         Product currentProduct = null;
         Cart cart = null;
         if (productId != null) {
-            currentProduct = productRepository.findById(productId)
+            currentProduct = productRepository
+                    .findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException("Sản phẩm không tồn tại"));
             cart = cartRepository.findByProductIdAndAccount_AccountId(productId, accountId);
         }
         Combo currentCombo = null;
         if (comboId != null) {
-            currentCombo = comboRepository.findById(comboId)
+            currentCombo = comboRepository
+                    .findById(comboId)
                     .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
             cart = cartRepository.findByAccountAndComboId(currentAccount, comboId);
         }

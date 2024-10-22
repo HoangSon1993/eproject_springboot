@@ -1,10 +1,11 @@
 package com.sontung.eproject_springboot.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -17,6 +18,7 @@ public class InvoiceDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceDetailId;
+
     Integer quantity; // Số lượng
     BigDecimal price; // Giá của 1 sản phẩm
     String productId; // Product

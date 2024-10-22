@@ -1,4 +1,3 @@
 package com.sontung.eproject_springboot.service;
 
-public interface InvoiceDetailService {
-}
+public interface InvoiceDetailService {}

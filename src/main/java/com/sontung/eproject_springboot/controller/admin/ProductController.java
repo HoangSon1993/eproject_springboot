@@ -1,14 +1,13 @@
 package com.sontung.eproject_springboot.controller.admin;
 
-import com.sontung.eproject_springboot.entity.Category;
-import com.sontung.eproject_springboot.entity.Product;
-import com.sontung.eproject_springboot.repository.SearchRepository;
-import com.sontung.eproject_springboot.service.CategoryService;
-import com.sontung.eproject_springboot.service.ProductService;
-import com.sontung.eproject_springboot.service.S3Service;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,13 +17,17 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.sontung.eproject_springboot.entity.Category;
+import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.repository.SearchRepository;
+import com.sontung.eproject_springboot.service.CategoryService;
+import com.sontung.eproject_springboot.service.ProductService;
+import com.sontung.eproject_springboot.service.S3Service;
+
+import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/product")
@@ -52,22 +55,15 @@ public class ProductController {
             @RequestParam(defaultValue = "") String sortBy,
             @RequestParam(defaultValue = "0") int pageNo,
             @Min(5) @RequestParam(defaultValue = "5") int pageSize,
-            Model model, Sort sort) {
+            Model model,
+            Sort sort) {
         if (pageNo < 0) pageNo = 0;
 
         if (filterDate2 == null) {
             filterDate2 = filterDate;
         }
         Page<Product> products = searchRepository.getAllProductWithSortByColumAndSearch(
-                pageNo,
-                pageSize,
-                search,
-                amongPrice,
-                status,
-                sortBy,
-                filterDate,
-                filterDate2
-        );
+                pageNo, pageSize, search, amongPrice, status, sortBy, filterDate, filterDate2);
 
         model.addAttribute("products", products);
         model.addAttribute("amongPrice", amongPrice);
@@ -90,18 +86,20 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public String createProduct(@Valid @ModelAttribute Product product,
-                                Errors errors,
-                                @RequestParam("category.categoryId") String categoryId,
-                                @RequestParam("file") MultipartFile image,
-                                @ModelAttribute("categories") List<Category> categories,
-                                RedirectAttributes redirectAttributes) {
+    public String createProduct(
+            @Valid @ModelAttribute Product product,
+            Errors errors,
+            @RequestParam("category.categoryId") String categoryId,
+            @RequestParam("file") MultipartFile image,
+            @ModelAttribute("categories") List<Category> categories,
+            RedirectAttributes redirectAttributes) {
         if (errors.hasErrors()) {
             return "admin/product/create";
         }
 
         Optional<Category> categoryOptional = categories.stream()
-                .filter(category -> category.getCategoryId().equals(categoryId)).findFirst();
+                .filter(category -> category.getCategoryId().equals(categoryId))
+                .findFirst();
         if (categoryOptional.isPresent()) {
             product.setCategory(categoryOptional.get());
             // Xử lý upload file lên S3
@@ -137,8 +135,8 @@ public class ProductController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editProductForm(@PathVariable("id") String product_id, Model model) {
-        Optional<Product> product = productService.findById(product_id);
+    public String editProductForm(@PathVariable("id") String productId, Model model) {
+        Optional<Product> product = productService.findById(productId);
         if (product.isPresent()) {
             model.addAttribute("product", product.get());
             return "admin/product/edit";
@@ -148,15 +146,15 @@ public class ProductController {
     }
 
     @PostMapping("/edit/{id}")
-    public String updateProduct(@PathVariable String id,
-                                @Valid @ModelAttribute Product productDetails,
-                                Errors errors,
-                                @RequestParam("file") MultipartFile image,
-                                @ModelAttribute("categories") List<Category> categories,
-                                @RequestParam("category.categoryId") String categoryId,
-                                RedirectAttributes redirectAttributes,
-                                Model model
-    ) {
+    public String updateProduct(
+            @PathVariable String id,
+            @Valid @ModelAttribute Product productDetails,
+            Errors errors,
+            @RequestParam("file") MultipartFile image,
+            @ModelAttribute("categories") List<Category> categories,
+            @RequestParam("category.categoryId") String categoryId,
+            RedirectAttributes redirectAttributes,
+            Model model) {
         if (errors.hasErrors()) {
             model.addAttribute("product", productDetails);
             return "admin/product/edit";
@@ -166,9 +164,9 @@ public class ProductController {
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
 
-            Optional<Category> categoryOptional = categories.stream().filter(
-                    category -> category.getCategoryId().equals(categoryId)
-            ).findFirst();
+            Optional<Category> categoryOptional = categories.stream()
+                    .filter(category -> category.getCategoryId().equals(categoryId))
+                    .findFirst();
             categoryOptional.ifPresent(product::setCategory);
 
             product.setProductName(productDetails.getProductName());
@@ -178,9 +176,9 @@ public class ProductController {
             product.setCreatedDate(productDetails.getCreatedDate());
             product.setUpdatedDate(productDetails.getUpdatedDate());
             product.setCategory(productDetails.getCategory());
-            //product.setCart(productDetails.getCart());
+            // product.setCart(productDetails.getCart());
             product.setComboDetails(productDetails.getComboDetails());
-//            product.setInvoiceDetails(productDetails.getInvoiceDetails());
+            //            product.setInvoiceDetails(productDetails.getInvoiceDetails());
 
             // Xử lý ảnh mới nếu có
             if (!image.isEmpty()) {
@@ -210,7 +208,6 @@ public class ProductController {
         } else {
             return "error";
         }
-
     }
 
     @GetMapping("detail/{id}")
@@ -225,9 +222,7 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable String id,
-                                RedirectAttributes redirectAttributes
-    ) {
+    public String deleteProduct(@PathVariable String id, RedirectAttributes redirectAttributes) {
         Optional<Product> optionalProduct = productService.findById(id);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
@@ -254,10 +249,8 @@ public class ProductController {
     }
 
     @PostMapping("/delete2/{id}")
-    public String deleteProduct2(@PathVariable("id") String productId,
-                                 RedirectAttributes redirectAttributes,
-                                 Model model
-    ) {
+    public String deleteProduct2(
+            @PathVariable("id") String productId, RedirectAttributes redirectAttributes, Model model) {
         Optional<Product> productOptional = productService.findById(productId);
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
@@ -270,5 +263,4 @@ public class ProductController {
         }
         return "redirect:/admin/product";
     }
-
 }

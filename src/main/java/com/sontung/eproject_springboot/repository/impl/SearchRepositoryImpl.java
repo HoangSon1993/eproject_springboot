@@ -1,18 +1,5 @@
 package com.sontung.eproject_springboot.repository.impl;
 
-import com.sontung.eproject_springboot.entity.Account;
-import com.sontung.eproject_springboot.entity.Order;
-import com.sontung.eproject_springboot.entity.Product;
-import com.sontung.eproject_springboot.enums.OrderStatus;
-import com.sontung.eproject_springboot.repository.SearchRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +7,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.*;
+
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
+import com.sontung.eproject_springboot.entity.Account;
+import com.sontung.eproject_springboot.entity.Order;
+import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.enums.OrderStatus;
+import com.sontung.eproject_springboot.repository.SearchRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class SearchRepositoryImpl implements SearchRepository {
 
@@ -43,12 +48,15 @@ public class SearchRepositoryImpl implements SearchRepository {
         selectQuery.setFirstResult(pageNo);
         selectQuery.setMaxResults(pageSize);
         if (StringUtils.hasLength(search)) {
-            selectQuery.setParameter("name", String.format("%%%s%%", search)); //"%" + search + "%" thay the bang String.format("%%%s%%", search)
+            selectQuery.setParameter(
+                    "name",
+                    String.format(
+                            "%%%s%%", search)); // "%" + search + "%" thay the bang String.format("%%%s%%", search)
         }
 
         List products = selectQuery.getResultList();
 
-        System.out.println(products);
+        log.info(String.valueOf(products));
 
         // query so record
         StringBuilder sqlCountQuery = new StringBuilder("select count(*) from Product p where p.status=1 ");
@@ -60,20 +68,18 @@ public class SearchRepositoryImpl implements SearchRepository {
             selectCountQuery.setParameter(1, String.format("%%%s%%", search)); // truyền tham số vào vị trí 1
         }
         Long totalElement = (Long) selectCountQuery.getSingleResult();
-
-
     }
-
 
     /**
      * @Summary:
      * @Description: Func này được thực hiện bằng cách dùng HQL, đa chưa phải là cách tôí ưu.
-     * Nhưng để phục v muc đích hoc tap, can thuc hiẹn cho biết
+     * Nhưng để phục vụ mục đích học tập, cần thực hiện cho biết
      * @Param:
      * @Return:
      **/
     @Override
-    public Page<Order> getAllOrderWithSortByColoumAndSearch(int pageNo, int pageSize, String search, String sortBy, String status, String accountId) {
+    public Page<Order> getAllOrderWithSortByColoumAndSearch(
+            int pageNo, int pageSize, String search, String sortBy, String status, String accountId) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         // Query chính để lấy danh sách Order
@@ -146,7 +152,15 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     @Override
-    public Page<Product> getAllProductWithSortByColumAndSearch(int pageNo, int pageSize, String search, int amongPrice, String status, String sortBy, LocalDate timeStart, LocalDate timeEnd) {
+    public Page<Product> getAllProductWithSortByColumAndSearch(
+            int pageNo,
+            int pageSize,
+            String search,
+            int amongPrice,
+            String status,
+            String sortBy,
+            LocalDate timeStart,
+            LocalDate timeEnd) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         // Query chính để lấy danh sách Product
@@ -263,7 +277,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 break;
         }
 
-        //Tạo truy vấn.
+        // Tạo truy vấn.
         Query selectCountQuery = entityManager.createQuery(sqlCountQuery.toString());
 
         // Gán giá trị vào tham số tìm kiếm nếu có.
@@ -277,7 +291,7 @@ public class SearchRepositoryImpl implements SearchRepository {
 
         if (timeEnd != null && timeStart != null) {
             selectCountQuery.setParameter("timeStart", timeStart); // String.format("%%%s%%", timeStart)
-            selectCountQuery.setParameter("timeEnd", timeEnd); //String.format("%%%s%%", timeEnd)
+            selectCountQuery.setParameter("timeEnd", timeEnd); // String.format("%%%s%%", timeEnd)
         }
 
         Long totalElement = (Long) selectCountQuery.getSingleResult();
@@ -292,7 +306,8 @@ public class SearchRepositoryImpl implements SearchRepository {
      * @Return:
      **/
     @Override
-    public Page<Order> getAllOrderWithSortByColoumAndSearchCriteriaBuider(int pageNo, int pageSize, String search, String status, String sortBy, String accountId) {
+    public Page<Order> getAllOrderWithSortByColoumAndSearchCriteriaBuider(
+            int pageNo, int pageSize, String search, String status, String sortBy, String accountId) {
         // Khởi tạo CriteriaBuilder và CriteriaQuery
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
@@ -316,10 +331,8 @@ public class SearchRepositoryImpl implements SearchRepository {
                     cb.like(cb.lower(root.get("shippingAddress")), searchPattern),
                     cb.like(cb.lower(root.get("email")), searchPattern),
                     cb.like(cb.lower(root.get("firstName")), searchPattern),
-                    cb.like(cb.lower(root.get("lastName")), searchPattern)
-            );
+                    cb.like(cb.lower(root.get("lastName")), searchPattern));
             predicates.add(cb.or(exactMatchPredicate));
-
         }
 
         // Dieu kien loc status
@@ -328,39 +341,39 @@ public class SearchRepositoryImpl implements SearchRepository {
             predicates.add(cb.equal(root.get("status"), statusValue));
         }
 
-//            // Điều kiện tìm kiếm không chính xác
-//            char[] searchChars = search.toLowerCase().toCharArray();
-//            List<Predicate> fuzzyPredicates = new ArrayList<>();
-//            for (char searchChar : searchChars) {
-//                String charPattern = "%" + searchChar + "%";
-//                fuzzyPredicates.add(cb.like(cb.lower(root.get("code")), charPattern));
-//                fuzzyPredicates.add(cb.like(cb.lower(root.get("shippingAddress")), charPattern));
-//                fuzzyPredicates.add(cb.like(cb.lower(root.get("email")), charPattern));
-//                fuzzyPredicates.add(cb.like(cb.lower(root.get("firstName")), charPattern));
-//                fuzzyPredicates.add(cb.like(cb.lower(root.get("lastName")), charPattern));
-//            }
-//
-//            // Kết hợp cả hai điều kiện
-//            predicates.add(cb.or(exactMatchPredicate, cb.or(fuzzyPredicates.toArray(new Predicate[0]))));
+        //            // Điều kiện tìm kiếm không chính xác
+        //            char[] searchChars = search.toLowerCase().toCharArray();
+        //            List<Predicate> fuzzyPredicates = new ArrayList<>();
+        //            for (char searchChar : searchChars) {
+        //                String charPattern = "%" + searchChar + "%";
+        //                fuzzyPredicates.add(cb.like(cb.lower(root.get("code")), charPattern));
+        //                fuzzyPredicates.add(cb.like(cb.lower(root.get("shippingAddress")), charPattern));
+        //                fuzzyPredicates.add(cb.like(cb.lower(root.get("email")), charPattern));
+        //                fuzzyPredicates.add(cb.like(cb.lower(root.get("firstName")), charPattern));
+        //                fuzzyPredicates.add(cb.like(cb.lower(root.get("lastName")), charPattern));
+        //            }
+        //
+        //            // Kết hợp cả hai điều kiện
+        //            predicates.add(cb.or(exactMatchPredicate, cb.or(fuzzyPredicates.toArray(new Predicate[0]))));
 
         // Kết hợp tất cả điều kiện bằng AND
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
         // Sắp xếp kết quả, ưu tiên những kết quả khớp chính xác trước
-//        if (StringUtils.hasLength(sortBy)) {
-//            Expression<Object> exactMatchOrder = cb.selectCase()
-//                    .when(cb.or(
-//                            cb.like(cb.lower(root.get("code")), search.toLowerCase()),
-//                            cb.like(cb.lower(root.get("shippingAddress")), search.toLowerCase()),
-//                            cb.like(cb.lower(root.get("email")), search.toLowerCase()),
-//                            cb.like(cb.lower(root.get("firstName")), search.toLowerCase()),
-//                            cb.like(cb.lower(root.get("lastName")), search.toLowerCase())
-//                    ), 1)
-//                    .otherwise(0);
-//
-//            // Thêm vào điều kiện sắp xếp
-//            cq.orderBy(cb.desc(exactMatchOrder), cb.asc(root.get(sortBy)));
-//        }
+        //        if (StringUtils.hasLength(sortBy)) {
+        //            Expression<Object> exactMatchOrder = cb.selectCase()
+        //                    .when(cb.or(
+        //                            cb.like(cb.lower(root.get("code")), search.toLowerCase()),
+        //                            cb.like(cb.lower(root.get("shippingAddress")), search.toLowerCase()),
+        //                            cb.like(cb.lower(root.get("email")), search.toLowerCase()),
+        //                            cb.like(cb.lower(root.get("firstName")), search.toLowerCase()),
+        //                            cb.like(cb.lower(root.get("lastName")), search.toLowerCase())
+        //                    ), 1)
+        //                    .otherwise(0);
+        //
+        //            // Thêm vào điều kiện sắp xếp
+        //            cq.orderBy(cb.desc(exactMatchOrder), cb.asc(root.get(sortBy)));
+        //        }
 
         // Thực hiện truy vấn trước để lấy toàn bộ dữ liệu
         List<Order> orders = entityManager.createQuery(cq).getResultList();
@@ -395,19 +408,18 @@ public class SearchRepositoryImpl implements SearchRepository {
         Root<Order> root = query.from(Order.class);
 
         // Join với bảng OrderDetail
-        //Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.RIGHT);
+        // Join<Order, OrderDetail> orderDetailJoin = root.join("orderDetails", JoinType.RIGHT);
 
         // Join với bảng Product từ OrderDetail
         //  Join<OrderDetail, Product> productJoin = orderDetailJoin.join("product", JoinType.RIGHT);
 
-
         // Join với bảng Combo từ OrderDetail
-        //Join<OrderDetail, Combo> comboJoin = orderDetailJoin.join("combo", JoinType.RIGHT);
+        // Join<OrderDetail, Combo> comboJoin = orderDetailJoin.join("combo", JoinType.RIGHT);
 
         // Join với comboDetail từt Combo
-        //Join<Combo, ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.RIGHT);
+        // Join<Combo, ComboDetail> comboDetailJoin = comboJoin.join("comboDetails", JoinType.RIGHT);
         // Join với bảng product từ comboDetail
-        //Join<ComboDetail, Product> productJoinCombodetail = comboDetailJoin.join("product", JoinType.RIGHT);
+        // Join<ComboDetail, Product> productJoinCombodetail = comboDetailJoin.join("product", JoinType.RIGHT);
 
         // Xây dựng điều kiện tìm kiếm
         List<Predicate> predicates = new ArrayList<>();
@@ -422,9 +434,12 @@ public class SearchRepositoryImpl implements SearchRepository {
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern)
-//                    criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productName")), searchPattern),
-//                    criteriaBuilder.like(criteriaBuilder.lower(productJoinCombodetail.get("productName")), searchPattern)
-            ));
+                    //                    criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productName")),
+                    // searchPattern),
+                    //
+                    // criteriaBuilder.like(criteriaBuilder.lower(productJoinCombodetail.get("productName")),
+                    // searchPattern)
+                    ));
         }
 
         // Điều kiện lọc theo status
@@ -435,7 +450,8 @@ public class SearchRepositoryImpl implements SearchRepository {
 
         // Điều kiện lọc theo ngày
         if (filterDate != null && filterDate2 != null) {
-            predicates.add(criteriaBuilder.between(root.get("orderDate").as(LocalDateTime.class), filterDate, filterDate2));
+            predicates.add(
+                    criteriaBuilder.between(root.get("orderDate").as(LocalDateTime.class), filterDate, filterDate2));
         }
 
         // Điều kiện lọc theo giá (giả sử amongPrice là giá lớn nhất)
@@ -464,7 +480,6 @@ public class SearchRepositoryImpl implements SearchRepository {
                 break;
         }
 
-
         // Kết hợp tất cả điều kiện bằng AND
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 
@@ -472,22 +487,24 @@ public class SearchRepositoryImpl implements SearchRepository {
         query.orderBy(criteriaBuilder.desc(root.get("orderDate")));
 
         // Áp dụng phân trang và thực hiện truy vấn
-        List<Order> orders = entityManager.createQuery(query)
+        List<Order> orders = entityManager
+                .createQuery(query)
                 .setFirstResult(pageNo * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
 
-//        TypedQuery<Order> query = entityManager.createQuery(query);
-//        query.setFirstResult(pageNo * pageSize);
-//        query.setMaxResults(pageSize);
-//        // Thực hiện truy vấn và trả về kết quả đã phân trang
-//        List<Order> orders = query.getResultList();
-
+        //        TypedQuery<Order> query = entityManager.createQuery(query);
+        //        query.setFirstResult(pageNo * pageSize);
+        //        query.setMaxResults(pageSize);
+        //        // Thực hiện truy vấn và trả về kết quả đã phân trang
+        //        List<Order> orders = query.getResultList();
 
         // Tính toán tổng số bản ghi
         CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
         Root<Order> countRoot = countQuery.from(Order.class);
-        countQuery.select(criteriaBuilder.count(countRoot)).where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+        countQuery
+                .select(criteriaBuilder.count(countRoot))
+                .where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
         Long totalElements;
         try {
             totalElements = entityManager.createQuery(countQuery).getSingleResult();
@@ -496,7 +513,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         }
         return new PageImpl<>(orders, PageRequest.of(pageNo, pageSize), totalElements);
     }
-
 
     @Override
     public Page<Product> findByStatusAndProductNameContainingAndPriceFilter(

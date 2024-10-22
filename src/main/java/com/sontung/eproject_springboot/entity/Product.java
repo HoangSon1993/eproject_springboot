@@ -1,16 +1,16 @@
 package com.sontung.eproject_springboot.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -33,8 +33,12 @@ public class Product {
     String description;
 
     @NotNull(message = "Giá không được để trống")
-    @DecimalMin(value = "10000.0", inclusive = true, message = "Giá phải lớn hơn 0 hoặc bằng 10.000d") // inclusive = true: lớn hơn hoặc bằng
+    @DecimalMin(
+            value = "10000.0",
+            inclusive = true,
+            message = "Giá phải lớn hơn 0 hoặc bằng 10.000d") // inclusive = true: lớn hơn hoặc bằng
     BigDecimal price;
+
     Integer status;
     String image;
     LocalDate createdDate;
@@ -73,5 +77,4 @@ public class Product {
         }
         return "https://images-xoi-che-co-luyen.s3.ap-southeast-1.amazonaws.com/" + image;
     }
-
 }

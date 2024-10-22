@@ -12,5 +12,5 @@ import lombok.Setter;
 public class CartUpdateRequest {
     private String id;
     private Integer quantity;
-//    private boolean checked;
+    //    private boolean checked;
 }

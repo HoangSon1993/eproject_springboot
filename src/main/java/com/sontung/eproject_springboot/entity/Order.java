@@ -1,14 +1,16 @@
 package com.sontung.eproject_springboot.entity;
 
-import com.sontung.eproject_springboot.enums.OrderStatus;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import com.sontung.eproject_springboot.enums.OrderStatus;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "orders")
@@ -22,6 +24,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderId;
+
     LocalDateTime orderDate;
     BigDecimal totalAmount;
 
@@ -35,17 +38,21 @@ public class Order {
      */
     @Enumerated(EnumType.ORDINAL)
     OrderStatus status;
+
     @Column(length = 100)
     String firstName;
+
     @Column(length = 100)
-
-
     String lastName;
+
     @Column(length = 150)
     String email;
+
     String shippingAddress;
+
     @Column(length = 20)
     String shippingPhone;
+
     @Column(length = 8)
     String code;
 
