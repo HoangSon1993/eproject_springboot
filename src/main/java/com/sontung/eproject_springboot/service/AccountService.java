@@ -1,12 +1,13 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.dto.RegisterDTO;
-import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
-import com.sontung.eproject_springboot.entity.Account;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+
+import com.sontung.eproject_springboot.dto.RegisterDTO;
+import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
+import com.sontung.eproject_springboot.entity.Account;
 
 @Service
 public interface AccountService extends UserDetailsService {
@@ -25,7 +26,6 @@ public interface AccountService extends UserDetailsService {
     String getErrorMessage(int result);
 
     Account updateAccount(UpdatedAccountDTO accountDTO);
-
 
     int changePassword(String password, String newPassword, String newPasswordConfirm);
 }

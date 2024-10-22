@@ -1,10 +1,11 @@
 package com.sontung.eproject_springboot.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -17,6 +18,7 @@ public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderDetailId;
+
     Integer quantity;
     BigDecimal price;
     BigDecimal totalPrice;

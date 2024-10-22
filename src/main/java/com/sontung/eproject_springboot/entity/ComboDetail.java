@@ -1,10 +1,11 @@
 package com.sontung.eproject_springboot.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 public class ComboDetail {
     @EmbeddedId
     ComboDetailId comboDetailId;
+
     Integer quantity;
     BigDecimal uniquePrice;
 

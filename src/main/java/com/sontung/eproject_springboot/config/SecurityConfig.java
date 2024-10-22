@@ -1,7 +1,5 @@
 package com.sontung.eproject_springboot.config;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -16,11 +14,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
-    @Autowired
-    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     /**
      * @Summary: Sử dụng thuật toán Bcrypt để̉ mã hoá mật khẩu
@@ -33,70 +33,109 @@ public class SecurityConfig {
 
     private final String[] ADMIN_PUBLIC_ENDPOINT_POST = {"/admin/auth/login"};
     private final String[] ADMIN_PUBLIC_ENDPOINT_GET = {};
-    private final String[] ADMIN_PRIVATE_ENDPOINT_POST = {
+    private final String[] ADMIN_PRIVATE_ENDPOINT_POST = {};
 
-    };
     private final String[] ADMIN_PRIVATE_ENDPOINT_GET = {
-            "/admin/category/index",
-            "/admin/category/detail",
-            "/admin/category/create",
-            "/admin/category/edit",
-
-            "/admin/combo",
-            "/admin/combo/detail",
-            "/admin/combo/create",
-            "/admin/combo/expired",
-            "/admin/home"
+        "/admin/category/index",
+        "/admin/category/detail",
+        "/admin/category/create",
+        "/admin/category/edit",
+        "/admin/combo",
+        "/admin/combo/detail",
+        "/admin/combo/create",
+        "/admin/combo/expired",
+        "/admin/home"
     };
-
 
     @Bean
-    @Order(1) //Quy định thứ tự ưu tiên của filter chain này. Filter chain cho admin được xử lý trước (ưu tiên số 1).
+    @Order(1) // Quy định thứ tự ưu tiên của filter chain này. Filter chain cho admin được xử lý trước (ưu tiên số 1).
     public SecurityFilterChain adminFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.securityMatcher("/admin/**") //Chỉ áp dụng filter chain này cho các URL bắt đầu với /admin/.
-                .csrf(AbstractHttpConfigurer::disable) //Tắt tính năng bảo vệ CSRF (Cross-Site Request Forgery) để tránh lỗi cho các yêu cầu POST/PUT/DELETE từ form không có CSRF token.
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll() // Các tài nguyên tĩnh cũng được mở quyền truy cập cho tất cả.
-                        .requestMatchers("/admin/auth/**").permitAll()//Mở quyền truy cập cho tất cả (đăng nhập, đăng ký không yêu cầu bảo mật).
-                        .requestMatchers("/admin/**").hasRole("ADMIN")//Chỉ những người dùng có vai trò ADMIN mới có quyền truy cập.
-                        //.requestMatchers("/admin/auth/**").permitAll()
-                        //.requestMatchers(HttpMethod.GET, ADMIN_PRIVATE_ENDPOINT_GET).hasRole("ADMIN")
-                        .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
-                ).formLogin(form -> form.loginPage("/admin/auth/login") // Trang đăng nhập cho admin
-                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi đăng nhập thành công thì Redireact tới URL này.
-                        .defaultSuccessUrl("/admin/home", false)  // Chuyển hướng sau khi đăng nhập thành công
-                        //.successHandler(customAuthenticationSuccessHandler)
+        httpSecurity
+                .securityMatcher("/admin/**") // Chỉ áp dụng filter chain này cho các URL bắt đầu với /admin/.
+                .csrf(
+                        AbstractHttpConfigurer
+                                ::disable) // Tắt tính năng bảo vệ CSRF (Cross-Site Request Forgery) để tránh lỗi cho
+                // các yêu cầu POST/PUT/DELETE từ form không có CSRF token.
+                .authorizeHttpRequests(
+                        authorize -> authorize
+                                .requestMatchers("/assets/**", "/user_assets/**", "/demo/**")
+                                .permitAll() // Các tài nguyên tĩnh cũng được mở quyền truy cập cho tất cả.
+                                .requestMatchers("/admin/auth/**")
+                                .permitAll() // Mở quyền truy cập cho tất cả (đăng nhập, đăng ký không yêu cầu bảo mật).
+                                .requestMatchers("/admin/**")
+                                .hasRole("ADMIN") // Chỉ những người dùng có vai trò ADMIN mới có quyền truy cập.
+                                // .requestMatchers("/admin/auth/**").permitAll()
+                                // .requestMatchers(HttpMethod.GET, ADMIN_PRIVATE_ENDPOINT_GET).hasRole("ADMIN")
+                                .anyRequest()
+                                .denyAll() // Mọi yêu cầu khác đều bị từ chối.
+                        )
+                .formLogin(form -> form.loginPage("/admin/auth/login") // Trang đăng nhập cho admin
+                        .successHandler(
+                                new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi
+                        // đăng nhập thành công thì
+                        // Redireact tới URL này.
+                        .defaultSuccessUrl("/admin/home", false) // Chuyển hướng sau khi đăng nhập thành công
+                        // .successHandler(customAuthenticationSuccessHandler)
                         .permitAll())
-                .logout(logout -> logout //Định cấu hình cho tính năng đăng xuất
+                .logout(logout -> logout // Định cấu hình cho tính năng đăng xuất
                         .logoutUrl("/admin/logout") // Xử lý logout tại URL này
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/admin/logout", "POST")) // Chỉ cho phép phương thức POST
+                        .logoutRequestMatcher(
+                                new AntPathRequestMatcher("/admin/logout", "POST")) // Chỉ cho phép phương thức POST
                         .logoutSuccessUrl("/admin/auth/login") // Chuyển hướng sau khi logout thành công
                         .permitAll());
         return httpSecurity.build();
     }
 
-
     private final String[] PUBLIC_ENDPOINT_POST = {"/user/registerConfirm", "/user/auth/login"};
-    private final String[] PUBLIC_ENDPOINT_GET = {"/home-page", "/product/**", "/combo/**", "/user/auth/login", "/user/register"};
-    private final String[] PRIVATE_ENDPOINT_POST = {"/user/edit-info-confirm", "/change-password-confirm", "/cart/remove"};
-    private final String[] PRIVATE_ENDPOINT_GET = {"/order/index", "/order/**", "/cart/**", "/user/my-info", "/user/edit-info", "/user/change-password"};
+    private final String[] PUBLIC_ENDPOINT_GET = {
+        "/home-page", "/product/**", "/combo/**", "/user/auth/login", "/user/register"
+    };
+    private final String[] PRIVATE_ENDPOINT_POST = {
+        "/user/edit-info-confirm", "/change-password-confirm", "/cart/remove"
+    };
+    private final String[] PRIVATE_ENDPOINT_GET = {
+        "/order/index", "/order/**", "/cart/**", "/user/my-info", "/user/edit-info", "/user/change-password"
+    };
 
     @Bean
     @Order(2)
-    public SecurityFilterChain userFilterChain(HttpSecurity httpSecurity, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/assets/**", "/user_assets/**", "/demo/**").permitAll() // Tài nguyên tĩnh được phép truy cập công khai.
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST).not().hasRole("ADMIN").requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET).not().hasRole("ADMIN")
-                        //Mở quyền truy cập cho tất cả người dùng.
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST).permitAll().requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET).permitAll()
-                        //Chỉ những người dùng có vai trò USER mới được truy cập.
-                        .requestMatchers(PRIVATE_ENDPOINT_GET).hasRole("USER").requestMatchers(PRIVATE_ENDPOINT_POST).hasRole("USER") // Loại bỏ khỏi quản lý bằng cách cho phép tất cả
-                        .anyRequest().denyAll() //Mọi yêu cầu khác đều bị từ chối.
-                ).formLogin(form -> form.loginPage("/user/auth/login") // Trang đăng nhập cho người dùng
+    public SecurityFilterChain userFilterChain(HttpSecurity httpSecurity, CustomAccessDeniedHandler accessDeniedHandler)
+            throws Exception {
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        authorize -> authorize
+                                .requestMatchers("/assets/**", "/user_assets/**", "/demo/**")
+                                .permitAll() // Tài nguyên tĩnh được phép truy cập công khai.
+                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST)
+                                .not()
+                                .hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET)
+                                .not()
+                                .hasRole("ADMIN")
+                                // Mở quyền truy cập cho tất cả người dùng.
+                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POST)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GET)
+                                .permitAll()
+                                // Chỉ những người dùng có vai trò USER mới được truy cập.
+                                .requestMatchers(PRIVATE_ENDPOINT_GET)
+                                .hasRole("USER")
+                                .requestMatchers(PRIVATE_ENDPOINT_POST)
+                                .hasRole("USER") // Loại bỏ khỏi quản lý bằng cách cho phép tất cả
+                                .anyRequest()
+                                .denyAll() // Mọi yêu cầu khác đều bị từ chối.
+                        )
+                .formLogin(form -> form.loginPage("/user/auth/login") // Trang đăng nhập cho người dùng
                         .loginProcessingUrl("/user/auth/login") // URL xử lý đăng nhập.
-                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi đăng nhập thành công thì Redireact tới URL này.
-                        .defaultSuccessUrl("/home-page", false)  //Default: Chuyển hướng sau khi đăng nhập thành công
-                        .permitAll()).logout(logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST")) //Chỉ cho phép đăng xuất bằng phương thức POST.
+                        .successHandler(
+                                new SavedRequestAwareAuthenticationSuccessHandler()) // Ghi nhớ URL trước đó, sau khi
+                        // đăng nhập thành công thì
+                        // Redireact tới URL này.
+                        .defaultSuccessUrl("/home-page", false) // Default: Chuyển hướng sau khi đăng nhập thành công
+                        .permitAll())
+                .logout(logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher(
+                                "/logout", "POST")) // Chỉ cho phép đăng xuất bằng phương thức POST.
                         .permitAll())
                 // Xử lý ngoại lệ nếu user có ROLE_ADMIN vào những endpoint không được vào.
                 .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler));

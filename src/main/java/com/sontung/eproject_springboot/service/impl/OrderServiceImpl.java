@@ -1,25 +1,5 @@
 package com.sontung.eproject_springboot.service.impl;
 
-import com.sontung.eproject_springboot.dto.OrderDTO;
-import com.sontung.eproject_springboot.dto.OrderDetailDTO;
-import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
-import com.sontung.eproject_springboot.entity.*;
-import com.sontung.eproject_springboot.enums.InvoiceStatus;
-import com.sontung.eproject_springboot.enums.OrderStatus;
-import com.sontung.eproject_springboot.repository.*;
-import com.sontung.eproject_springboot.service.OrderDetailService;
-import com.sontung.eproject_springboot.service.OrderService;
-import com.sontung.eproject_springboot.util.VnPayUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -32,8 +12,31 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.lang.System.out;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import com.sontung.eproject_springboot.dto.OrderDTO;
+import com.sontung.eproject_springboot.dto.OrderDetailDTO;
+import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
+import com.sontung.eproject_springboot.entity.*;
+import com.sontung.eproject_springboot.enums.InvoiceStatus;
+import com.sontung.eproject_springboot.enums.OrderStatus;
+import com.sontung.eproject_springboot.repository.*;
+import com.sontung.eproject_springboot.service.OrderDetailService;
+import com.sontung.eproject_springboot.service.OrderService;
+import com.sontung.eproject_springboot.util.VnPayUtil;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -69,15 +72,18 @@ public class OrderServiceImpl implements OrderService {
             if ((item.getCombo()) == null) {
                 orderDetailDTOList.add(orderDetailDTO);
             } else {
-                orderDetailDTO.setCombo(comboRepository.findById((item.getCombo()).getComboId()).orElse(null));
+                orderDetailDTO.setCombo(
+                        comboRepository.findById((item.getCombo()).getComboId()).orElse(null));
                 orderDetailDTOList.add(orderDetailDTO);
             }
         }
         return orderDetailDTOList;
     }
-//    public List<ComboOrderDTO> getCombosOrder(String orderId){
-//        return orderDetailService.getCombos(orderId);
-//    }
+    /*
+    	public List<ComboOrderDTO> getCombosOrder(String orderId){
+    		return orderDetailService.getCombos(orderId);
+    	}
+    */
 
     @Override
     public Page<Order> getOrders(int page, int size) {
@@ -92,13 +98,11 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.countOrder();
     }
 
-
     // Filter Order by date in OrderManagement
     @Override
-    public Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                                                  int page,
-                                                  int size) {
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    public Page<Order> getOrdersByFilterDateOrder(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate, int page, int size) {
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         Pageable pageable = PageRequest.of(page - 1, size);
         return orderRepository.findByOrderDateOrder(filterDate, pageable);
     }
@@ -106,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     // Count order by filterDate
     public long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return orderRepository.countOrderByFilterDate(filterDate);
     }
 
@@ -137,7 +141,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrdersByPrice(int priceValue) {
-        List<Order> orders = new ArrayList<>();
+        List<Order> orders;
 
         switch (priceValue) {
             case 1: // Dưới 100k
@@ -147,20 +151,20 @@ public class OrderServiceImpl implements OrderService {
                 break;
             case 2: // 100k -> 200k
                 orders = orderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("100000")) >= 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("200000")) <= 0)
+                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("100000")) >= 0
+                                && i.getTotalAmount().compareTo(new BigDecimal("200000")) <= 0)
                         .collect(Collectors.toList());
                 break;
             case 3: // 200k -> 300k
                 orders = orderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("200000")) > 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("300000")) <= 0)
+                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("200000")) > 0
+                                && i.getTotalAmount().compareTo(new BigDecimal("300000")) <= 0)
                         .collect(Collectors.toList());
                 break;
             case 4: // 300k -> 500k
                 orders = orderRepository.findAll().stream()
-                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("300000")) > 0 &&
-                                i.getTotalAmount().compareTo(new BigDecimal("500000")) <= 0)
+                        .filter(i -> i.getTotalAmount().compareTo(new BigDecimal("300000")) > 0
+                                && i.getTotalAmount().compareTo(new BigDecimal("500000")) <= 0)
                         .collect(Collectors.toList());
                 break;
             case 5: // 500k Trở Lên
@@ -176,56 +180,61 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrdersByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.findAll().stream().filter(i -> i.getOrderDate().equals(filterDate)).collect(Collectors.toList());
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.findAll().stream()
+                .filter(i -> i.getOrderDate().equals(filterDate))
+                .collect(Collectors.toList());
     }
 
     @Override
     // Filter Order by date in ComboManagement
     public List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        List<Order> orders = orderRepository.findByOrderDateCombo(filterDate);
-        return orders;
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.findByOrderDateCombo(filterDate);
     }
 
     @Override
-    public List<Order> getOrdersByPriceAndDate(int priceValue,
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
-        LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return orderRepository.findAll().stream().filter(i -> {
-            BigDecimal totalAmount = i.getTotalAmount();
-            boolean priceMatches = false;
-            switch (priceValue) {
-                case 1: // Dưới 100k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) < 0;
-                    break;
-                case 2: // 100k -> 200k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("100000")) >= 0 &&
-                            totalAmount.compareTo(new BigDecimal("200000")) <= 0;
-                    break;
-                case 3: // 200k -> 300k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("200000")) > 0 &&
-                            totalAmount.compareTo(new BigDecimal("300000")) <= 0;
-                    break;
-                case 4: // 300k -> 500k
-                    priceMatches = totalAmount.compareTo(new BigDecimal("300000")) > 0 &&
-                            totalAmount.compareTo(new BigDecimal("500000")) <= 0;
-                    break;
-                case 5: // 500k Trở Lên
-                    priceMatches = totalAmount.compareTo(new BigDecimal("500000")) > 0;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid price range");
-            }
-            return priceMatches && i.getOrderDate().equals(filterLocalDate);
-        }).collect(Collectors.toList());
+    public List<Order> getOrdersByPriceAndDate(
+            int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate) {
+        LocalDate filterLocalDate =
+                filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return orderRepository.findAll().stream()
+                .filter(i -> {
+                    BigDecimal totalAmount = i.getTotalAmount();
+                    boolean priceMatches = false;
+                    switch (priceValue) {
+                        case 1: // Dưới 100k
+                            priceMatches = totalAmount.compareTo(new BigDecimal("100000")) < 0;
+                            break;
+                        case 2: // 100k -> 200k
+                            priceMatches = totalAmount.compareTo(new BigDecimal("100000")) >= 0
+                                    && totalAmount.compareTo(new BigDecimal("200000")) <= 0;
+                            break;
+                        case 3: // 200k -> 300k
+                            priceMatches = totalAmount.compareTo(new BigDecimal("200000")) > 0
+                                    && totalAmount.compareTo(new BigDecimal("300000")) <= 0;
+                            break;
+                        case 4: // 300k -> 500k
+                            priceMatches = totalAmount.compareTo(new BigDecimal("300000")) > 0
+                                    && totalAmount.compareTo(new BigDecimal("500000")) <= 0;
+                            break;
+                        case 5: // 500k Trở Lên
+                            priceMatches = totalAmount.compareTo(new BigDecimal("500000")) > 0;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Invalid price range");
+                    }
+                    return priceMatches && i.getOrderDate().equals(filterLocalDate);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
+    public long countOrderByPriceAndFilterDate(
+            int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
         BigDecimal minAmount;
         BigDecimal maxAmount;
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         switch (priceValue) {
             case 1 -> {
                 minAmount = BigDecimal.ZERO;
@@ -254,11 +263,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<Order> getOrdersByPriceAndDate(int priceValue,
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                                               int page,
-                                               int size) {
-        //LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    public Page<Order> getOrdersByPriceAndDate(
+            int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate, int page, int size) {
+        // LocalDate filterLocalDate = filterDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         Pageable pageable = PageRequest.of(page - 1, size);
 
         BigDecimal minPrice;
@@ -300,7 +307,6 @@ public class OrderServiceImpl implements OrderService {
      **/
     @Override
     public Order createOrder(OrderDtoRequest orderDtoRequest, String userId) {
-        // Todo: Bằng cách nào đó carts == empty thì k cho tạo Order
         List<Cart> carts = cartRepository.getCartsByAccount_AccountId(userId);
         // 1 Tính tổng tiền dơn hàng, giá lấy trong bảng product.
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -318,21 +324,18 @@ public class OrderServiceImpl implements OrderService {
 
         for (Cart cart : carts) {
             if (orderDtoRequest.getCartItems().contains(cart.getCartId())) {
-                BigDecimal price = BigDecimal.ZERO;
-                BigDecimal sumPrice = BigDecimal.ZERO;
-                OrderDetail.OrderDetailBuilder orderDetail = OrderDetail.builder()
-                        .order(order)
-                        .quantity(cart.getQuantity());
+                BigDecimal price;
+                BigDecimal sumPrice;
+                OrderDetail.OrderDetailBuilder orderDetail =
+                        OrderDetail.builder().order(order).quantity(cart.getQuantity());
                 if (cart.getProductId() != null && cart.getComboId() == null) {
                     // Case Product
-                    //Todo: hanle product == null
                     Optional<Product> product = productRepository.findById(cart.getProductId());
                     price = product.get().getPrice();
                     sumPrice = price.multiply(BigDecimal.valueOf(cart.getQuantity()));
                     orderDetail.product(product.get());
                 } else {
                     // Case Combo
-                    //Todo: hanle combo == null
                     Optional<Combo> combo = comboRepository.findById(cart.getComboId());
                     price = combo.get().getFinalAmount();
                     sumPrice = price.multiply(BigDecimal.valueOf(cart.getQuantity()));
@@ -341,9 +344,7 @@ public class OrderServiceImpl implements OrderService {
                 totalAmount = totalAmount.add(sumPrice);
 
                 // Create Order Detail
-                orderDetail
-                        .price(price)
-                        .totalPrice(sumPrice);
+                orderDetail.price(price).totalPrice(sumPrice);
                 // add OrderDetail to Order.
                 order.addOrderDetail(orderDetail.build());
             }
@@ -367,19 +368,20 @@ public class OrderServiceImpl implements OrderService {
      * @Exception UnsupportedEncodingException If an error occurs while encoding the URI.
      **/
     @Override
-    public String getVnpay(Order order, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
+    public String getVnpay(Order order, HttpServletRequest req, HttpServletResponse resp)
+            throws UnsupportedEncodingException {
 
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
         long amount = order.getTotalAmount().longValue();
         amount *= 100;
-        //String bankCode = req.getParameter("bankCode");
+        // String bankCode = req.getParameter("bankCode");
         String bankCode = "NCB"; // Test với ngân hàng NCB vì thẻ cuả vnpay cung cấp là NCB
         String vnp_TxnRef = order.getCode(); // VnPayUtil.getRandomNumber da duoc goi ra luc tao order
         String vnp_IpAddr = VnPayUtil.getIpAddress(req);
 
-        String vnp_TmnCode = VnPayUtil.vnp_TmnCode;
+        String vnp_TmnCode = VnPayUtil.vnpTmnCode;
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -390,23 +392,25 @@ public class OrderServiceImpl implements OrderService {
 
         if (bankCode != null && !bankCode.isEmpty()) {
             vnp_Params.put("vnp_BankCode", bankCode);
-//            Các mã loại hình thức thanh toán lựa chọn tại website-ứng dụng của merchant
-//            vnp_BankCode=VNPAYQRThanh toán quét mã QR
-//            vnp_BankCode=VNBANKThẻ ATM - Tài khoản ngân hàng nội địa
-//            vnp_BankCode=INTCARDThẻ thanh toán quốc tế
+            //            Các mã loại hình thức thanh toán lựa chọn tại website-ứng dụng của merchant
+            //            vnp_BankCode=VNPAYQRThanh toán quét mã QR
+            //            vnp_BankCode=VNBANKThẻ ATM - Tài khoản ngân hàng nội địa
+            //            vnp_BankCode=INTCARDThẻ thanh toán quốc tế
         }
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef); // co the su dung vnp_TxnRef de tao code cho Order
+        vnp_Params.put(
+                "vnp_OrderInfo",
+                "Thanh toan don hang:" + vnp_TxnRef); // co the su dung vnp_TxnRef de tao code cho Order
         vnp_Params.put("vnp_OrderType", orderType);
 
-//        String locate = req.getParameter("language");
-//        if (locate != null && !locate.isEmpty()) {
-//            vnp_Params.put("vnp_Locale", locate);
-//        } else {
+        //        String locate = req.getParameter("language");
+        //        if (locate != null && !locate.isEmpty()) {
+        //            vnp_Params.put("vnp_Locale", locate);
+        //        } else {
         vnp_Params.put("vnp_Locale", "vn");
-//        }
+        //        }
 
-        vnp_Params.put("vnp_ReturnUrl", VnPayUtil.vnp_ReturnUrl);
+        vnp_Params.put("vnp_ReturnUrl", VnPayUtil.vnpReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -425,13 +429,13 @@ public class OrderServiceImpl implements OrderService {
         Iterator itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = (String) itr.next();
-            String fieldValue = (String) vnp_Params.get(fieldName);
+            String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                //Build hash data
+                // Build hash data
                 hashData.append(fieldName);
                 hashData.append('=');
                 hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                //Build query
+                // Build query
                 query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                 query.append('=');
                 query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
@@ -444,7 +448,7 @@ public class OrderServiceImpl implements OrderService {
         String queryUrl = query.toString();
         String vnp_SecureHash = VnPayUtil.hmacSHA512(VnPayUtil.secretKey, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-        String paymentUrl = VnPayUtil.vnp_PayUrl + "?" + queryUrl;
+        String paymentUrl = VnPayUtil.vnpPayUrl + "?" + queryUrl;
 
         return paymentUrl;
     }
@@ -466,11 +470,11 @@ public class OrderServiceImpl implements OrderService {
         String code = vnpOrderInfo.substring(vnpOrderInfo.length() - 8);
         Order order = orderRepository.findByCodeAndAccount_AccountId(code, userId);
 
-
         Map fields = new HashMap();
         for (Enumeration params = request.getParameterNames(); params.hasMoreElements(); ) {
             String fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
-            String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
+            String fieldValue =
+                    URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 fields.put(fieldName, fieldValue);
             }
@@ -493,9 +497,11 @@ public class OrderServiceImpl implements OrderService {
             double totalAmount = order.getTotalAmount().doubleValue() * 100;
             final double EPSILON = 0.01;
             boolean checkAmount = Math.abs(amoutParam - totalAmount) < EPSILON;
-            // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in the Your database).
+            // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the amount of the code (vnp_TxnRef) in
+            // the Your database).
 
-            boolean checkOrderStatus = (order.getStatus() == OrderStatus.ORDERED || order.getStatus() == OrderStatus.PENDING);
+            boolean checkOrderStatus =
+                    (order.getStatus() == OrderStatus.ORDERED || order.getStatus() == OrderStatus.PENDING);
             // PaymnentStatus = 0 (pending)
 
             if (checkOrderId) {
@@ -503,7 +509,7 @@ public class OrderServiceImpl implements OrderService {
                     if (checkOrderStatus) {
                         if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
 
-                            //Here Code update PaymnentStatus = 1 into your Database
+                            // Here Code update PaymnentStatus = 1 into your Database
                             order.setStatus(OrderStatus.PAID);
                             orderRepository.save(order);
 
@@ -512,7 +518,9 @@ public class OrderServiceImpl implements OrderService {
                             Invoice invoice = Invoice.builder()
                                     .order(order)
                                     .totalAmount(order.getTotalAmount())
-                                    .paymentDate(LocalDateTime.parse(request.getParameter("vnp_PayDate"), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                                    .paymentDate(LocalDateTime.parse(
+                                            request.getParameter("vnp_PayDate"),
+                                            DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
                                     .invoiceDate(LocalDateTime.now())
                                     .paymentStatus(InvoiceStatus.PAID)
                                     .paymentMethod("VNPay")
@@ -521,7 +529,8 @@ public class OrderServiceImpl implements OrderService {
                                     .cardType(request.getParameter("vnp_CardType"))
                                     .transactionStatus(request.getParameter("vnp_TransactionStatus"))
                                     .bankTransactionNo(request.getParameter("vnp_TransactionNo"))
-                                    //  .invoiceDetails(new ArrayList<>()) // không cần phải có dòng này vì trong Invoice đã có @Buider.Default
+                                    //  .invoiceDetails(new ArrayList<>()) // không cần phải có dòng này vì trong
+                                    // Invoice đã có @Buider.Default
                                     .build();
 
                             // Create OrderDetail
@@ -534,7 +543,8 @@ public class OrderServiceImpl implements OrderService {
                                         .totalPrice(orderDetail.getTotalPrice());
 
                                 if (orderDetail.getProduct() != null && orderDetail.getCombo() == null) {
-                                    invoiceDetail.productId(orderDetail.getProduct().getProductId());
+                                    invoiceDetail.productId(
+                                            orderDetail.getProduct().getProductId());
                                 } else {
                                     invoiceDetail.comboId(orderDetail.getCombo().getComboId());
                                 }
@@ -554,22 +564,22 @@ public class OrderServiceImpl implements OrderService {
                             // Here Code update PaymnentStatus = 2 into your Database
                         }
                         // Thanh cong thi show thong bao nay.
-                        out.print("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
+                        log.info("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
                         return "Xác nhận thành công.";
                     } else {
-                        out.print("{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}");
+                        log.info("{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}");
                         return "Đơn hàng đã được xác nhận.";
                     }
                 } else {
-                    out.print("{\"RspCode\":\"04\",\"Message\":\"Invalid Amount\"}");
+                    log.info("{\"RspCode\":\"04\",\"Message\":\"Invalid Amount\"}");
                     return "Số tiền không hợp lệ.";
                 }
             } else {
-                out.print("{\"RspCode\":\"01\",\"Message\":\"Order not Found\"}");
+                log.info("{\"RspCode\":\"01\",\"Message\":\"Order not Found\"}");
                 return "Đơn hàng không được tìm thấy.";
             }
         } else {
-            out.print("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
+            log.info("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
             return "Tổng kiểm tra không hợp lệ.";
         }
     }
@@ -597,9 +607,8 @@ public class OrderServiceImpl implements OrderService {
         //////////////////////////////////////////////////////////////////////////////////////
         // Cập nhật trạng thái đơn hàng từ 'Chờ thanh toán' sang 'Thanh toán khi nhận hàng'.//
         //////////////////////////////////////////////////////////////////////////////////////
-        List<OrderDTO> pendingOrders = orderRepository.findByStatusAndOrderDateBefore(
-                OrderStatus.PENDING,
-                threeHoursAgo);
+        List<OrderDTO> pendingOrders =
+                orderRepository.findByStatusAndOrderDateBefore(OrderStatus.PENDING, threeHoursAgo);
         for (OrderDTO orderDTO : pendingOrders) {
             Order order = orderRepository.findById(orderDTO.getOrderId()).orElse(null);
             if (order != null) {
@@ -613,12 +622,9 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         /////////////////////////////////////////////////////////////////////////////
-        //Cập nhật trạng thái đơn hàng từ 'Thanh toán khi nhận hàng' sang 'Hủy bỏ'.//
+        // Cập nhật trạng thái đơn hàng từ 'Thanh toán khi nhận hàng' sang 'Hủy bỏ'.//
         /////////////////////////////////////////////////////////////////////////////
-        List<OrderDTO> codOrders = orderRepository.findByStatusAndOrderDateBefore(
-                OrderStatus.COD,
-                twelveHoursAgo
-        );
+        List<OrderDTO> codOrders = orderRepository.findByStatusAndOrderDateBefore(OrderStatus.COD, twelveHoursAgo);
         for (OrderDTO orderDTO : codOrders) {
             Order order = orderRepository.findById(orderDTO.getOrderId()).orElse(null);
             if (order != null) {
@@ -634,8 +640,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void confirmPaymentCOD(String orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() ->
-                new RuntimeException("Order không tôn tai."));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order không tôn tai."));
         if (order.getStatus() == OrderStatus.COD || order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.PAID);
             orderRepository.save(order);
@@ -648,8 +653,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void cancelOrderCodOrPendding(String orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() ->
-                new RuntimeException("Order không tôn tai."));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order không tôn tai."));
         if (order.getStatus() == OrderStatus.COD || order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.CANCELED);
             orderRepository.save(order);

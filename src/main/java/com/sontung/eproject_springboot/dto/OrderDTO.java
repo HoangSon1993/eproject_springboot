@@ -1,10 +1,11 @@
 package com.sontung.eproject_springboot.dto;
 
+import java.time.LocalDateTime;
+
 import com.sontung.eproject_springboot.enums.OrderStatus;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Setter
 @Getter

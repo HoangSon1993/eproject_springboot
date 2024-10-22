@@ -1,10 +1,9 @@
 package com.sontung.eproject_springboot.dto;
 
-import jakarta.persistence.Column;
+import java.time.LocalDate;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter

@@ -1,19 +1,20 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.dto.OrderDetailDTO;
-import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
-import com.sontung.eproject_springboot.entity.Order;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+import com.sontung.eproject_springboot.dto.OrderDetailDTO;
+import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
+import com.sontung.eproject_springboot.entity.Order;
 
 public interface OrderService {
     List<Order> getOrders();
@@ -29,9 +30,8 @@ public interface OrderService {
     long countOrder();
 
     // Filter Order by date in OrderManagement
-    Page<Order> getOrdersByFilterDateOrder(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                                           int page,
-                                           int size);
+    Page<Order> getOrdersByFilterDateOrder(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate, int page, int size);
 
     // Count order by filterDate
     long countOrderByFilterDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
@@ -47,15 +47,12 @@ public interface OrderService {
     // Filter Order by date in ComboManagement
     List<Order> getOrdersByFilterDateCombo(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
-    List<Order> getOrdersByPriceAndDate(int priceValue,
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
+    List<Order> getOrdersByPriceAndDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate);
 
     long countOrderByPriceAndFilterDate(int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate);
 
-    Page<Order> getOrdersByPriceAndDate(int priceValue,
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                                        int page,
-                                        int size);
+    Page<Order> getOrdersByPriceAndDate(
+            int priceValue, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate, int page, int size);
 
     Order createOrder(OrderDtoRequest orderDtoRequest, String userId);
 

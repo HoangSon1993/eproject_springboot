@@ -1,5 +1,21 @@
 package com.sontung.eproject_springboot.controller.user;
 
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
 import com.sontung.eproject_springboot.dto.request.OrderDtoRequest;
 import com.sontung.eproject_springboot.dto.request.PaymentResultDto;
 import com.sontung.eproject_springboot.entity.Account;
@@ -9,24 +25,11 @@ import com.sontung.eproject_springboot.enums.OrderStatus;
 import com.sontung.eproject_springboot.repository.SearchRepository;
 import com.sontung.eproject_springboot.service.CartService;
 import com.sontung.eproject_springboot.service.OrderService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-
-import static java.lang.System.out;
-
+@Slf4j
 @RequestMapping("/order")
 @Controller("userOrderController")
 @SessionAttributes("order")
@@ -43,16 +46,18 @@ public class OrderController {
      * @Return:
      **/
     @GetMapping("/index")
-    public String index(Model model,
-                        @RequestParam(defaultValue = "0") int pageNo,
-                        @Min(5) @RequestParam(defaultValue = "5") int pageSize,
-                        @RequestParam(defaultValue = "") String search,
-                        @RequestParam(defaultValue = "") String sortBy,
-                        @RequestParam(defaultValue = "") String status,
-                        @ModelAttribute("loggedInUser") Account account) {
+    public String index(
+            Model model,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @Min(5) @RequestParam(defaultValue = "5") int pageSize,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String sortBy,
+            @RequestParam(defaultValue = "") String status,
+            @ModelAttribute("loggedInUser") Account account) {
         if (pageNo < 0) pageNo = 0;
 
-        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(pageNo, pageSize, search, status, sortBy, account.getAccountId());
+        Page<Order> orders = searchRepository.getAllOrderWithSortByColoumAndSearchCriteriaBuider(
+                pageNo, pageSize, search, status, sortBy, account.getAccountId());
         model.addAttribute("orders", orders);
         // Thêm đường dẫn URL cho phân trang
         model.addAttribute("pageUrl", "/order/index");
@@ -64,10 +69,9 @@ public class OrderController {
 
         /**
          * Có thể xử lý ở server thay vì thymeleaf
-         statuses.remove(OrderStatus.ORDERED.name());
-         statuses.put("All","");
+         * statuses.remove(OrderStatus.ORDERED.name());
+         * statuses.put("All","");
          **/
-
         model.addAttribute("statuses", statuses);
         model.addAttribute("selectedStatus", status);
         return "user/order/index";
@@ -80,9 +84,8 @@ public class OrderController {
      * @Return:
      **/
     @GetMapping("/detail")
-    public String detail(@RequestParam("code") String code,
-                         Model model,
-                         @ModelAttribute("loggedInUser") Account account) {
+    public String detail(
+            @RequestParam("code") String code, Model model, @ModelAttribute("loggedInUser") Account account) {
         Order order = orderService.findByCodeAndAccountId(account.getAccountId(), code);
         if (order == null) {
             model.addAttribute("error", "Không tìm thấy đơn hàng.");
@@ -103,11 +106,14 @@ public class OrderController {
      * và người dùng bấm nút thanh toán.
      **/
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody OrderDtoRequest orderDtoRequest,
-                                                      BindingResult bindingResult,
-                                                      HttpServletRequest req, HttpServletResponse resp,
-                                                      HttpSession session,
-                                                      @ModelAttribute("loggedInUser") Account account) throws UnsupportedEncodingException {
+    public ResponseEntity<Map<String, Object>> create(
+            @Valid @RequestBody OrderDtoRequest orderDtoRequest,
+            BindingResult bindingResult,
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            HttpSession session,
+            @ModelAttribute("loggedInUser") Account account)
+            throws UnsupportedEncodingException {
         Map<String, Object> response = new HashMap<>();
 
         // Valid dữ liệu đầu vào.
@@ -144,10 +150,11 @@ public class OrderController {
      * @Description: Tại Page Order_Index, hoặc Order_Detail mà đơn hàng status = PEDDING mà người dùng muốn thanh toán lại.
      **/
     @PostMapping("/re-create")
-    public String reCreate(@RequestParam String code,
-                           HttpServletRequest req,
-                           HttpServletResponse resp,
-                           @ModelAttribute("loggedInUser") Account account) {
+    public String reCreate(
+            @RequestParam String code,
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            @ModelAttribute("loggedInUser") Account account) {
         Order order = orderService.findByCodeAndAccountId(account.getAccountId(), code);
         if (order == null) {
             // Gui kem thong bao.
@@ -168,11 +175,13 @@ public class OrderController {
      * Note: Sau khi test thành công thì chuyển thành method POST
      **/
     @GetMapping("/payment-result")
-    public String paymentResult(Model model,
-                                HttpServletRequest request,
-                                @ModelAttribute PaymentResultDto paymentResultDto,
-                                @ModelAttribute("loggedInUser") Account account) {
-        // Merchant/website TMĐT thực hiện kiểm tra sự toàn vẹn của dữ liệu (checksum) trước khi thực hiện các thao tác khác
+    public String paymentResult(
+            Model model,
+            HttpServletRequest request,
+            @ModelAttribute PaymentResultDto paymentResultDto,
+            @ModelAttribute("loggedInUser") Account account) {
+        // Merchant/website TMĐT thực hiện kiểm tra sự toàn vẹn của dữ liệu (checksum) trước khi thực hiện các thao tác
+        // khác
         String result = "";
         try {
             String orderInfo = request.getParameter("vnp_OrderInfo");
@@ -182,7 +191,7 @@ public class OrderController {
             model.addAttribute("code", code);
 
         } catch (Exception e) {
-            out.print("{\"RspCode\":\"99\",\"Message\":\"Unknow error\"}");
+            log.info("{\"RspCode\":\"99\",\"Message\":\"Unknow error\"}");
             model.addAttribute("message", result);
         }
         return "/user/invoice/payment-result";

@@ -1,8 +1,8 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.entity.OrderDetail;
-
 import java.util.List;
+
+import com.sontung.eproject_springboot.entity.OrderDetail;
 
 public interface OrderDetailService {
     List<OrderDetail> getOrderDetails(String orderId);

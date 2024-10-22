@@ -1,11 +1,13 @@
 package com.sontung.eproject_springboot.controller.admin;
 
-import com.sontung.eproject_springboot.entity.Category;
-import com.sontung.eproject_springboot.service.CategoryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import com.sontung.eproject_springboot.entity.Category;
+import com.sontung.eproject_springboot.service.CategoryService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/admin/category")
@@ -43,8 +45,6 @@ public class CategoryController {
         return "/admin/category/edit";
     }
 
-    ;
-
     @PostMapping("/edit")
     public String editCategory(@RequestParam String id, @ModelAttribute Category category) {
         categoryService.editCategory(id, category);
@@ -56,5 +56,4 @@ public class CategoryController {
         categoryService.deleteCategory(id);
         return "redirect:/admin/category";
     }
-
 }

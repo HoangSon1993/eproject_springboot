@@ -1,11 +1,12 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.entity.Product;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
+import com.sontung.eproject_springboot.entity.Product;
 
 public interface ProductService {
     Page<Product> findAll(Pageable pageable);
@@ -22,7 +23,8 @@ public interface ProductService {
 
     Page<Product> findByStatusAndProductNameContaining(int status, String productName, Pageable pageable);
 
-    Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(int status, String categoryId, String search, Pageable pageable);
+    Page<Product> findByStatusAndCategory_CategoryIdAndProductNameContaining(
+            int status, String categoryId, String search, Pageable pageable);
 
     Page<Product> getProductsTypical(int pageNumber, int pageSize, String categoryId);
 

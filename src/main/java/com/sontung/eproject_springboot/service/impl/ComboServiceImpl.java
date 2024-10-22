@@ -1,21 +1,23 @@
 package com.sontung.eproject_springboot.service.impl;
 
-import com.sontung.eproject_springboot.dto.ComboDTO;
-import com.sontung.eproject_springboot.dto.ComboDetailDTO;
-import com.sontung.eproject_springboot.entity.*;
-import com.sontung.eproject_springboot.repository.IComboRepository;
-import com.sontung.eproject_springboot.service.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Service;
+
+import com.sontung.eproject_springboot.dto.ComboDTO;
+import com.sontung.eproject_springboot.dto.ComboDetailDTO;
+import com.sontung.eproject_springboot.entity.*;
+import com.sontung.eproject_springboot.repository.IComboRepository;
+import com.sontung.eproject_springboot.service.*;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class ComboServiceImpl implements ComboService {
     private final ComboDetailService comboDetailService;
     private final ProductService productService;
 
-    //EntityManager entityManager;
+    // EntityManager entityManager;
     @Override
     public List<Product> getProducts() {
         return productService.findAll();
@@ -35,12 +37,16 @@ public class ComboServiceImpl implements ComboService {
 
     @Override
     public List<Combo> getCombos() {
-        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+        return iComboRepository.findAll().stream()
+                .filter(c -> c.getStatus() == 2)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Combo> getExpiringCombos() {
-        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 1).collect(Collectors.toList());
+        return iComboRepository.findAll().stream()
+                .filter(c -> c.getStatus() == 1)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -80,7 +86,7 @@ public class ComboServiceImpl implements ComboService {
 
     @Override
     public void removeCombo(String comboId) {
-        //StoredProcedure query =  entityManager.createStoredProcedureQuery()
+        // StoredProcedure query =  entityManager.createStoredProcedureQuery()
         Combo combo = iComboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Not Found"));
         combo.setStatus(1);
         iComboRepository.save(combo);
@@ -88,7 +94,10 @@ public class ComboServiceImpl implements ComboService {
 
     @Override
     public long countComBos() {
-        return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).toList().size();
+        return iComboRepository.findAll().stream()
+                .filter(c -> c.getStatus() == 2)
+                .toList()
+                .size();
     }
 
     @Override
@@ -96,16 +105,15 @@ public class ComboServiceImpl implements ComboService {
         return comboDetailService.createComboDetail(comboDetailDTO);
     }
 
-    //=====================================================================//
-    //=========================User Combo Service==========================//
-    //=====================================================================//
+    // =====================================================================//
+    // =========================User Combo Service==========================//
+    // =====================================================================//
     @Override
     public Page<Combo> listCombos(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         return iComboRepository.findByStatus(2, pageable);
     }
 
-    // TODO: 07/08/2024  Lấy ra combo  nổi bật, nhưng tạm thời lấy tạm
     @Override
     public List<Combo> getFeaturedCombo() {
         return iComboRepository.findAll().stream().limit(3).collect(Collectors.toList());
@@ -113,7 +121,9 @@ public class ComboServiceImpl implements ComboService {
 
     @Override
     public List<Category> listCategories() {
-        return categoryService.getCategories().stream().filter(c -> c.getStatus() == 1).collect(Collectors.toList());
+        return categoryService.getCategories().stream()
+                .filter(c -> c.getStatus() == 1)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -128,8 +138,7 @@ public class ComboServiceImpl implements ComboService {
 
     @Override
     public Combo getComboById(String comboId) {
-        return iComboRepository.findById(comboId)
-                .orElse(null);
+        return iComboRepository.findById(comboId).orElse(null);
     }
 
     // Count combo for admin
@@ -139,25 +148,25 @@ public class ComboServiceImpl implements ComboService {
     }
 
     @Override
-    public Page<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate,
-                                             int page,
-                                             int size) {
+    public Page<OrderDetail> getOrdersByDate(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate, int page, int size) {
         List<Order> orders = orderService.getOrdersByFilterDateCombo(filterDate);
         // Extract order IDs
         List<String> orderIdList = orders.stream().map(Order::getOrderId).toList();
-        //Create a list to hold OrderDetail
+        // Create a list to hold OrderDetail
         List<OrderDetail> allOrderDetails = new ArrayList<>();
 
-        //Fetch and process OrderDetails for each order
+        // Fetch and process OrderDetails for each order
         for (String orderId : orderIdList) {
             List<OrderDetail> orderDetails = orderDetailService.getOrderDetails(orderId);
-            //Remove items with null combo
+            // Remove items with null combo
             orderDetails.removeIf(item -> item.getCombo() == null);
             // Add to the list
             allOrderDetails.addAll(orderDetails);
         }
         // Sắp xếp danh sách OrderDetail theo comboId
-        allOrderDetails.sort(Comparator.comparing(orderDetail -> orderDetail.getCombo().getComboId()));
+        allOrderDetails.sort(
+                Comparator.comparing(orderDetail -> orderDetail.getCombo().getComboId()));
         // Create a paginated response
         int start = (page - 1) * size;
         int end = Math.min(start + size, allOrderDetails.size());
@@ -177,11 +186,11 @@ public class ComboServiceImpl implements ComboService {
         }
         return allOrderDetails.size();
     }
-    //====Tìm kiếm các sản phầm được bán trong ngày được chọn
-//    public List<Order> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
-//
-//        return orderService.getOrdersByFilterDate(filterDate);
-//    }
+    // ====Tìm kiếm các sản phầm được bán trong ngày được chọn
+    //    public List<Order> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date filterDate){
+    //
+    //        return orderService.getOrdersByFilterDate(filterDate);
+    //    }
 
     @Override
     public List<OrderDetail> getOrdersByDate(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate filterDate) {
@@ -202,12 +211,13 @@ public class ComboServiceImpl implements ComboService {
     public long countUserComBos() {
         return iComboRepository.countByStatus(2);
     }
+
     @Override
-//    public Page<Combo> getCombos(int page, int size) {
-//        Pageable pageable = PageRequest.of(page - 1, size);
-//        return iComboRepository.findAll(pageable);
-//        //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
-//    }
+    //    public Page<Combo> getCombos(int page, int size) {
+    //        Pageable pageable = PageRequest.of(page - 1, size);
+    //        return iComboRepository.findAll(pageable);
+    //        //return iComboRepository.findAll().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
+    //    }
 
     public Page<Combo> getCombos(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
@@ -215,14 +225,12 @@ public class ComboServiceImpl implements ComboService {
         Page<Combo> comboPage = iComboRepository.findAll(pageable);
 
         // Filter the results based on status
-        List<Combo> filteredCombos = comboPage.getContent().stream()
-                .filter(c -> c.getStatus() == 2)
-                .collect(Collectors.toList());
+        List<Combo> filteredCombos =
+                comboPage.getContent().stream().filter(c -> c.getStatus() == 2).collect(Collectors.toList());
 
         // Return a new Page object with the filtered results
         return new PageImpl<>(filteredCombos, pageable, comboPage.getTotalElements());
     }
-
 
     /**
      * @Summary: Lấy các combo tiêu biểu.
@@ -235,8 +243,6 @@ public class ComboServiceImpl implements ComboService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
         int status = 2;
-        Page<Combo> combos = iComboRepository.findByStatus(pageable, status);
-        return combos;
+        return iComboRepository.findByStatus(pageable, status);
     }
-
 }

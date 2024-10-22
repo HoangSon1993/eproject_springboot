@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum OrderStatus {
-
     ORDERED("Đã đặt hàng"),
-    PAID("Đã thanh toán"),    // Đã thanh toán
+    PAID("Đã thanh toán"), // Đã thanh toán
     CANCELED("Hủy bỏ"), // Hủy bỏ
     PENDING("Chờ thanh toán"), // Chờ thanh toán
     COD("Thanh toán khi nhân hàng");
@@ -22,7 +21,7 @@ public enum OrderStatus {
     }
 
     public static Map<String, String> toMap() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (OrderStatus orderStatus : OrderStatus.values()) {
             map.put(orderStatus.name(), orderStatus.getDescription());
         }

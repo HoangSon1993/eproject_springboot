@@ -1,22 +1,33 @@
 package com.sontung.eproject_springboot.util;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
 
 public class VnPayUtil {
 
-    public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8080/order/payment-result"; // set url return
-    public static String vnp_TmnCode = "V8BSC3KY"; // Check Email
-    public static String secretKey = "6GS5O602LDZ04QR7RRNFI11HCRWLH0YZ"; // Check Email
-    public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+    @Value("${vnpay.pay-url}")
+    public static String vnpPayUrl;
+
+    @Value("${vnpay.return-url}")
+    public static String vnpReturnUrl; // set url return
+
+    @Value("${vnpay.tmnCode}")
+    public static String vnpTmnCode; // Check Email
+
+    @Value("${vnpay.secretKey}")
+    public static String secretKey; // Check Email
+
+    @Value("${vnpay.api-url}")
+    public String vnpApiUrl;
 
     public static String md5(String message) {
         String digest = null;

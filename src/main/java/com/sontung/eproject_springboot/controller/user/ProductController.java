@@ -1,12 +1,11 @@
 package com.sontung.eproject_springboot.controller.user;
 
-import com.sontung.eproject_springboot.entity.Category;
-import com.sontung.eproject_springboot.entity.Product;
-import com.sontung.eproject_springboot.repository.SearchRepository;
-import com.sontung.eproject_springboot.service.CategoryService;
-import com.sontung.eproject_springboot.service.ProductService;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import jakarta.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +16,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.sontung.eproject_springboot.entity.Category;
+import com.sontung.eproject_springboot.entity.Product;
+import com.sontung.eproject_springboot.repository.SearchRepository;
+import com.sontung.eproject_springboot.service.CategoryService;
+import com.sontung.eproject_springboot.service.ProductService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller(value = "userProductController")
-
 @RequestMapping("product")
 @RequiredArgsConstructor
 public class ProductController {
@@ -55,8 +57,7 @@ public class ProductController {
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) String categoryId,
             @RequestParam(defaultValue = "productName:asc") String sortBy,
-            Model model
-    ) {
+            Model model) {
         if (pageNo < 0) pageNo = 0;
 
         List<Sort.Order> sorts = new ArrayList<>();
@@ -73,18 +74,19 @@ public class ProductController {
             }
         }
 
-//        if (sortBy.equals("asc")) {
-//            sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
-//        } else {
-//            sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
-//        }
+        //        if (sortBy.equals("asc")) {
+        //            sorts.add(new Sort.Order(Sort.Direction.ASC, "productName"));
+        //        } else {
+        //            sorts.add(new Sort.Order(Sort.Direction.DESC, "productName"));
+        //        }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sorts));
 
         int status = 1;
         Page<Product> products;
 
-        products = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(status, categoryId, search, amongPrice, pageable);
+        products = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(
+                status, categoryId, search, amongPrice, pageable);
 
         model.addAttribute("pageNumber", pageNo); // Trang hiện tại, bắt đầu từ 0
         model.addAttribute("itemsPerpage", pageSize); // Số mục trên mỗi trang
@@ -106,7 +108,8 @@ public class ProductController {
 
             // Lấy danh sách sản phẩm tương tự dựa vào categoryId.
             Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "productName"));
-            Page<Product> productsSimilar = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(1, product.getCategory().getCategoryId(), "", 500, pageable);
+            Page<Product> productsSimilar = searchRepository.findByStatusAndProductNameContainingAndPriceFilter(
+                    1, product.getCategory().getCategoryId(), "", 500, pageable);
             model.addAttribute("productsSimilar", productsSimilar);
             return "user/product/detail";
         } else {

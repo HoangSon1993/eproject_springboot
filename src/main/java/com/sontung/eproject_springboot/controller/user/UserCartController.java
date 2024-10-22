@@ -1,5 +1,20 @@
 package com.sontung.eproject_springboot.controller.user;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.servlet.http.HttpSession;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.sontung.eproject_springboot.dto.CartDetailDTO;
 import com.sontung.eproject_springboot.dto.request.CartUpdateRequest;
 import com.sontung.eproject_springboot.entity.Account;
@@ -8,21 +23,9 @@ import com.sontung.eproject_springboot.exception.PriceChangedException;
 import com.sontung.eproject_springboot.exception.ProductNotFoundException;
 import com.sontung.eproject_springboot.exception.UserNotFoundException;
 import com.sontung.eproject_springboot.service.CartService;
-import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Controller
@@ -32,7 +35,7 @@ import java.util.Map;
 public class UserCartController {
     private final CartService cartService;
 
-//    private final Account loggedAccount;
+    //    private final Account loggedAccount;
 
     /**
      * @Summary:
@@ -54,10 +57,11 @@ public class UserCartController {
      * @Exception:
      **/
     @GetMapping("/index")
-    public String getCarts(Model model,
-                           @ModelAttribute("checkedItems") List<String> checkedItems,
-                           HttpSession session,
-                           @ModelAttribute("loggedInUser") Account account) {
+    public String getCarts(
+            Model model,
+            @ModelAttribute("checkedItems") List<String> checkedItems,
+            HttpSession session,
+            @ModelAttribute("loggedInUser") Account account) {
         List<CartDetailDTO> cartDetailDTOS = (List<CartDetailDTO>) session.getAttribute("cartItems");
         if (cartDetailDTOS != null) {
             session.removeAttribute("cartItems");
@@ -197,8 +201,7 @@ public class UserCartController {
             @RequestParam(value = "quantity", defaultValue = "1") int quantity,
             @ModelAttribute("checkedItems") List<String> checkedItems,
             @ModelAttribute("loggedInUser") Account account,
-            HttpSession session
-    ) {
+            HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         if (comboId == null && productId == null) {
             response.put("success", false);
@@ -235,8 +238,7 @@ public class UserCartController {
      **/
     @PostMapping("/updateQuantity")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateQuantity(
-            @RequestBody CartUpdateRequest request) {
+    public ResponseEntity<Map<String, Object>> updateQuantity(@RequestBody CartUpdateRequest request) {
         Map<String, Object> response = new HashMap<>();
         try {
             boolean success = cartService.updateQuantity(request.getId(), request.getQuantity());
@@ -279,7 +281,7 @@ public class UserCartController {
                 // ....
             }
         } else {
-            //Case old: check or unCheck one item
+            // Case old: check or unCheck one item
 
             // Cap nhat ds checkedItems
             if (checked) {
@@ -326,10 +328,11 @@ public class UserCartController {
      * @Param
      **/
     @GetMapping("/checkout")
-    public String checkout_form(Model model,
-                                HttpSession session,
-                                @RequestParam(required = false) List<String> cartItems,
-                                @ModelAttribute("loggedInUser") Account account) {
+    public String checkoutForm(
+            Model model,
+            HttpSession session,
+            @RequestParam(required = false) List<String> cartItems,
+            @ModelAttribute("loggedInUser") Account account) {
 
         // Nếu không có sản phẩm nào được chọn, điều hướng về trang giỏ hàng
         if (cartItems == null || cartItems.isEmpty()) {
@@ -359,9 +362,7 @@ public class UserCartController {
      **/
     @PostMapping("/checkout")
     public ResponseEntity<Map<String, Object>> checkout(
-            @RequestBody List<String> cartItems,
-            @ModelAttribute("loggedInUser") Account account,
-            HttpSession session) {
+            @RequestBody List<String> cartItems, @ModelAttribute("loggedInUser") Account account, HttpSession session) {
         // Chuyển hướng sang GET để hiển thị trang checkout với các sản phẩm được chọn
         Map<String, Object> response = new HashMap<>();
         if (cartItems == null || cartItems.isEmpty()) {
@@ -384,7 +385,7 @@ public class UserCartController {
             } catch (PriceChangedException e) {
                 // Trường hợp giá đã thay đổi.
                 response.put("success", true);
-                String url = "/cart/index";  // Điều hướng về trang giỏ hàng
+                String url = "/cart/index"; // Điều hướng về trang giỏ hàng
                 response.put("url", url);
                 session.setAttribute("cartItems", cartDetailDTOS);
                 session.setAttribute("warning", e.getMessage());

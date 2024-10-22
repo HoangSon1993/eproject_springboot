@@ -1,11 +1,12 @@
 package com.sontung.eproject_springboot.entity;
 
+import java.io.Serializable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.io.Serializable;
 
 @Embeddable
 @Getter
@@ -14,8 +15,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetailId implements Serializable {
-    @Column(name="product_id")
+    @Column(name = "product_id")
     String productId;
-    @Column(name="order_id")
+
+    @Column(name = "order_id")
     String orderId;
 }

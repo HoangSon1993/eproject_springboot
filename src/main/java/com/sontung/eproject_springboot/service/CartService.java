@@ -1,10 +1,10 @@
 package com.sontung.eproject_springboot.service;
 
-import com.sontung.eproject_springboot.dto.CartDetailDTO;
-import com.sontung.eproject_springboot.entity.Cart;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.sontung.eproject_springboot.dto.CartDetailDTO;
+import com.sontung.eproject_springboot.entity.Cart;
 
 public interface CartService {
     Cart addProductToCart(String userId, String productId, int quantity);

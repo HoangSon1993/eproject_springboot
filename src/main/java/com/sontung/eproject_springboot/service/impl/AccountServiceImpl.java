@@ -1,13 +1,9 @@
 package com.sontung.eproject_springboot.service.impl;
 
-import com.sontung.eproject_springboot.dto.RegisterDTO;
-import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
-import com.sontung.eproject_springboot.entity.Account;
-import com.sontung.eproject_springboot.entity.Role;
-import com.sontung.eproject_springboot.repository.IAccountRepository;
-import com.sontung.eproject_springboot.repository.IRoleRepository;
-import com.sontung.eproject_springboot.service.AccountService;
-import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,9 +15,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.sontung.eproject_springboot.dto.RegisterDTO;
+import com.sontung.eproject_springboot.dto.UpdatedAccountDTO;
+import com.sontung.eproject_springboot.entity.Account;
+import com.sontung.eproject_springboot.entity.Role;
+import com.sontung.eproject_springboot.repository.IAccountRepository;
+import com.sontung.eproject_springboot.repository.IRoleRepository;
+import com.sontung.eproject_springboot.service.AccountService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -38,17 +40,15 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        Account account = accountRepository.findByUserNameOrEmail(usernameOrEmail, usernameOrEmail)
+        Account account = accountRepository
+                .findByUserNameOrEmail(usernameOrEmail, usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not exits by Username or Email"));
         Set<GrantedAuthority> authorities = account.getRoles().stream()
                 .map((role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName())))
                 .collect(Collectors.toSet());
 
         return new org.springframework.security.core.userdetails.User(
-                usernameOrEmail,
-                account.getPassword(),
-                authorities
-        );
+                usernameOrEmail, account.getPassword(), authorities);
     }
 
     /**
@@ -58,10 +58,10 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public Account findByUserNameOrEmail(String username) throws UsernameNotFoundException {
-        return accountRepository.findByUserNameOrEmail(username, username)
+        return accountRepository
+                .findByUserNameOrEmail(username, username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not exits"));
     }
-
 
     /**
      * @Summary: Tạo một tài khoản mới
@@ -74,7 +74,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public int createAccount(RegisterDTO registerDTO) {
         if (!registerDTO.getPassword().equals(registerDTO.getPasswordConfirm())) {
-            ;
             return 0;
         } else {
             if (accountRepository.existsByUserName(registerDTO.getUserName())) {
@@ -119,7 +118,6 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.existsByUserName(username);
     }
 
-
     /**
      * @Summary: Đăng nhập tự động bằng cách xác thực thông tin đăng nhập:
      * @Description: Tạo đối tượng UsernamePasswordAuthenticationToken từ tên người dùng và mật khẩu.
@@ -128,7 +126,8 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public void autoLogin(String username, String password, AuthenticationManager authenticationManager) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(username, password);
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -158,7 +157,9 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public Account updateAccount(UpdatedAccountDTO accountDTO) {
-        Account updateAccount = accountRepository.findByUserNameOrEmail(accountDTO.getUserName(), accountDTO.getEmail()).orElseThrow();
+        Account updateAccount = accountRepository
+                .findByUserNameOrEmail(accountDTO.getUserName(), accountDTO.getEmail())
+                .orElseThrow();
         updateAccount.setEmail(accountDTO.getEmail());
         updateAccount.setPhone(accountDTO.getPhone());
         updateAccount.setAddress(accountDTO.getAddress());
@@ -169,7 +170,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int changePassword(String password, String newPassword, String newPasswordConfirm){
+    public int changePassword(String password, String newPassword, String newPasswordConfirm) {
         return 1;
     }
 }

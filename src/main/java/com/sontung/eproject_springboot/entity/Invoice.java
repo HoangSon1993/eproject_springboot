@@ -1,15 +1,18 @@
 package com.sontung.eproject_springboot.entity;
 
-import com.sontung.eproject_springboot.enums.InvoiceStatus;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.sontung.eproject_springboot.enums.InvoiceStatus;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
@@ -22,8 +25,10 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String invoiceId; // invoiceNumber
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime invoiceDate; // Ngày hóa đơn dược lạp
+
     BigDecimal totalAmount; // Tổng tiền
 
     /**
@@ -35,6 +40,7 @@ public class Invoice {
      **/
     @Enumerated(EnumType.ORDINAL)
     InvoiceStatus paymentStatus; // Trạng thái thanh toán  (đã thanh toán, chưa thanh toán, hủy bỏ)
+
     String paymentMethod; // Phương thức thanh toán (chuyển khoản, tín dụng, tiền mặt)
     LocalDateTime paymentDate; // Ngày thanh toán
 

@@ -1,5 +1,9 @@
 package com.sontung.eproject_springboot.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.sontung.eproject_springboot.dto.ComboDetailDTO;
 import com.sontung.eproject_springboot.entity.Combo;
 import com.sontung.eproject_springboot.entity.ComboDetail;
@@ -10,10 +14,8 @@ import com.sontung.eproject_springboot.repository.IComboDetailRepository;
 import com.sontung.eproject_springboot.repository.IComboRepository;
 import com.sontung.eproject_springboot.repository.IProductRepository;
 import com.sontung.eproject_springboot.service.ComboDetailService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +28,11 @@ public class ComboDetailServiceImpl implements ComboDetailService {
     @Override
     public ComboDetail createComboDetail(ComboDetailDTO comboDetailDTO) {
         ComboDetail comboDetail = icomboDetailMapper.toComboDetail(comboDetailDTO);
-        Product product = iProductRepository.findById(comboDetailDTO.getProductId()).orElseThrow(() -> new RuntimeException("Error"));
-        Combo combo = iComboRepository.findById(comboDetailDTO.getComboId()).orElseThrow(() -> new RuntimeException("Error"));
+        Product product = iProductRepository
+                .findById(comboDetailDTO.getProductId())
+                .orElseThrow(() -> new RuntimeException("Error"));
+        Combo combo =
+                iComboRepository.findById(comboDetailDTO.getComboId()).orElseThrow(() -> new RuntimeException("Error"));
         ComboDetailId comboDetailId = new ComboDetailId(comboDetailDTO.getComboId(), comboDetailDTO.getProductId());
         comboDetail.setComboDetailId(comboDetailId);
         comboDetail.setCombo(combo);
