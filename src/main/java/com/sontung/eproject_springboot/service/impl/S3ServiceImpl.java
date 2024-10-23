@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:aws-credentials.properties")
+//@PropertySource("classpath:aws-credentials.properties")
 public class S3ServiceImpl implements S3Service {
     @Value("${aws.s3.bucket}")
     private String buketName;
